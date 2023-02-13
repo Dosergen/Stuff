@@ -1,0 +1,153 @@
+"Phrases"
+{
+	"Vetoed"
+	{
+		"#format"	"{1:N}"
+		"en"		"{1} has vetoed current vote!"
+	}
+	
+	"Passed"
+	{
+		"#format"	"{1:N}"
+		"en"		"{1} has passed current vote!"
+	}
+	
+	"Cant Pass"
+	{
+		"en"		"Not enough undecided players to pass this vote!"
+	}
+	
+	"Cant Veto"
+	{
+		"en"		"Not enough undecided players to veto this vote!"
+	}	
+	
+	"No Vote"
+	{
+		"en"		"No vote is currently in progress!"
+	}
+	
+	"Log Error"
+	{
+		"en"		"Vote Manager 3 failed to log an action to its own file!"
+	}
+	
+	"Conflict"
+	{
+		"en"		"A vote is active right now! Wait until that vote is over!"
+	}
+	
+	"Wait"
+	{
+		"#format"	"{1:d}"
+		"en"		"You must wait {1} seconds before calling a vote!"
+	}
+	
+	"No Access"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"{1} was prevented from starting a {2} vote!"
+	}	
+	
+	"Vote Called"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"{1} started a {2} vote!"
+	}
+	
+	"Custom Vote"
+	{
+		"#format"	"{1:N},{2:s},{3:s},{4:s}"
+		"en"		"{1} started custom vote: '{3}' for team {2}, with command: '{4}'!"
+	}
+	
+	"Custom Vote Passed"
+	{
+		"en"		"Custom vote has passed..."
+	}
+	
+	"Use sm_customvote"
+	{
+		"en"		"Please use sm_customvote to call custom votes!"
+	}
+	
+	"Custom Passed"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"Custom vote called by, {1}, has passed! Issue was: '{2}'"
+	}
+	
+	"Custom Failed"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"Custom vote called by, {1}, has failed! Issue was: '{2}'"
+	}	
+	
+	"Vote Failed"
+	{
+		"en"		"Called vote has failed!"
+	}
+	
+	"Vote Called 2 Arguments"
+	{
+		"#format"	"{1:s},{2:s},{3:s}"
+		"en"		"{1} started a {2} vote with option {3}!"
+	}
+	
+	"Vote Passed"
+	{
+		"en"		"Called vote has passed!"
+	}
+
+	"Kick Vote"
+	{
+		"#format"	"{1:N},{2:N}"
+		"en"		"{1} has started a Kick vote against {2}!"
+	}
+
+	"Kick Vote Call Failed"
+	{
+		"#format"	"{1:N},{2:N}"
+		"en"		"{1} was prevented from starting a Kick vote against {2}!"
+	}
+	
+	"Kick Immunity"
+	{
+		"#format"	"{1:N},{2:N}"
+		"en"		"{1} was prevented from starting a Kick vote against {2}!"
+	}	
+	
+	"Invalid Kick Userid"
+	{
+		"#format"	"{1:N},{2:s}"
+		"en"		"{1} was prevented from starting a Kick vote against userid {2}!"
+	}
+	
+	"Tank Immune Response"
+	{
+		"#format"	"{1:N},{2:N}"
+		"en"		"{1} was prevented from starting a Kick vote against {2}!"
+	}
+	
+	"Spectator Response"
+	{
+		"#format"	"{1:N},{2:N}"
+		"en"		"{1} was prevented from starting a Kick vote against {2}!"
+	}
+	
+	"Client Exploit Attempt"
+	{
+		"#format"	"{1:N}"
+		"en"		"{1} tried to start a fake vote type to block further votes!"
+	}
+	
+	"Usage"
+	{
+		"en"		"Usage: sm_customvote: <string: text to display> <string: command to run if passed>!"
+	}
+	
+	"Invalid Handle"
+	{
+		"en"		"Failed to create custom vote, consult developer!"
+	}	
+}	

@@ -1,0 +1,1 @@
+This repository contains various scripts for the game left 4 dead edited by me and the gaming community . Enjoy :)
