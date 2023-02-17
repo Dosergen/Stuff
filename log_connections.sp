@@ -19,8 +19,7 @@
 #include <sourcemod>
 #include <geoip>
 
-#define PLUGIN_VERSION "1.2b"
-#define PLUGIN_NAME "Log Connections"
+#define PLUGIN_VERSION "1.4"
 
 #define PLAYER_LOG_PATH "logs/connections/player"
 #define ADMIN_LOG_PATH "logs/connections/admin"
@@ -41,35 +40,37 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	CreateConVar("sm_log_connections_version", PLUGIN_VERSION, "Log Connections version.", FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	// PLAYER
 	BuildPath(Path_SM, player_filepath, sizeof(player_filepath), PLAYER_LOG_PATH);
 	if (!DirExists(player_filepath))
 	{
 		CreateDirectory(player_filepath, 511);
-		
 		if (!DirExists(player_filepath))
+		{
 			LogMessage("Failed to create directory at %s - Please manually create that path and reload this plugin.", PLAYER_LOG_PATH);
+		}
 	}
 	// ADMIN
 	BuildPath(Path_SM, admin_filepath, sizeof(admin_filepath), ADMIN_LOG_PATH);
 	if (!DirExists(admin_filepath))
 	{
 		CreateDirectory(admin_filepath, 511);
-		
 		if (!DirExists(admin_filepath))
+		{
 			LogMessage("Failed to create directory at %s - Please manually create that path and reload this plugin.", ADMIN_LOG_PATH);
+		}
 	}
-
-	CreateConVar("sm_log_connections_version", PLUGIN_VERSION, PLUGIN_NAME, FCVAR_NOTIFY);
-	
 	HookEvent("player_disconnect", Event_PlayerDisconnect, EventHookMode_Pre);
 	for(int client = 1; client <= MaxClients; client++)
 	{
 		if(IsClientInGame(client))
 		{
 			clientConnected[client] = true;
-			if(IsPlayerAdmin(client)) 
+			if(IsPlayerAdmin(client))
+			{
 				clientIsAdmin[client] = true;
+			}
 		}
 	}
 }
@@ -78,18 +79,13 @@ public void OnMapStart()
 {
 	char FormatedTime[100];
 	char MapName[100];
-		
 	int CurrentTime = GetTime();
-	
 	GetCurrentMap(MapName, sizeof(MapName));
 	FormatTime(FormatedTime, sizeof(FormatedTime), "%d_%b_%Y", CurrentTime); //name the file 'day month year'
-	
 	BuildPath(Path_SM, player_filepath, sizeof(player_filepath), "%s/%s_player.txt", PLAYER_LOG_PATH, FormatedTime);
 	BuildPath(Path_SM, admin_filepath, sizeof(admin_filepath), "%s/%s_admin.txt", ADMIN_LOG_PATH, FormatedTime);
-	
 	File playerHandle = OpenFile(player_filepath, "a+");
 	File adminHandle = OpenFile(admin_filepath, "a+");
-	
 	FormatTime(FormatedTime, sizeof(FormatedTime), "%X", CurrentTime);
 	// PLAYER
 	playerHandle.WriteLine("");
@@ -137,17 +133,14 @@ public void OnClientPostAdminCheck(int client)
 		char IPAddress[64];
 		char Country[64];
 		char FormatedTime[64];
-		
 		GetClientName(client, PlayerName, sizeof(PlayerName));
 		GetClientAuthId(client, AuthId_Steam2, Authid, sizeof(Authid), false);
 		GetClientIP(client, IPAddress, sizeof(IPAddress));
 		FormatTime(FormatedTime, sizeof(FormatedTime), "%X", GetTime());
-		
-		if(!GeoipCountry(IPAddress, Country, sizeof(Country)))
+		if (!GeoipCountry(IPAddress, Country, sizeof(Country)))
 		{
 			Format(Country, sizeof(Country), "Unknown");
 		}
-		
 		File adminHandle = OpenFile(admin_filepath, "a+");
 		adminHandle.WriteLine("%s - <%s> <%s> <%s> CONNECTED from <%s>",
 								FormatedTime,
@@ -155,7 +148,6 @@ public void OnClientPostAdminCheck(int client)
 								Authid,
 								IPAddress,
 								Country);
-
 		delete adminHandle;
 	}	
 	else // PLAYER
@@ -167,17 +159,14 @@ public void OnClientPostAdminCheck(int client)
 		char IPAddress[64];
 		char Country[64];
 		char FormatedTime[64];
-		
 		GetClientName(client, PlayerName, sizeof(PlayerName));
 		GetClientAuthId(client, AuthId_Steam2, Authid, sizeof(Authid), false);
 		GetClientIP(client, IPAddress, sizeof(IPAddress));
 		FormatTime(FormatedTime, sizeof(FormatedTime), "%X", GetTime());
-		
-		if(!GeoipCountry(IPAddress, Country, sizeof(Country)))
+		if (!GeoipCountry(IPAddress, Country, sizeof(Country)))
 		{
 			Format(Country, sizeof(Country), "Unknown");
 		}
-		
 		File playerHandle = OpenFile(player_filepath, "a+");
 		playerHandle.WriteLine("%s - <%s> <%s> <%s> CONNECTED from <%s>",
 								FormatedTime,
@@ -185,7 +174,6 @@ public void OnClientPostAdminCheck(int client)
 								Authid,
 								IPAddress,
 								Country);
-
 		delete playerHandle;
 	}
 }
@@ -210,28 +198,23 @@ public void Event_PlayerDisconnect(Event event, char[] name, bool dontBroadcast)
 	{	// ADMIN
 		int ConnectionTime = -1;
 		File adminHandle = OpenFile(admin_filepath, "a+");
-		
 		char PlayerName[64];
 		char Authid[64];
 		char IPAddress[64];
 		char FormatedTime[64];
 		char Reason[128];
-		
 		GetClientName(client, PlayerName, sizeof(PlayerName));
 		GetClientIP(client, IPAddress, sizeof(IPAddress));
 		FormatTime(FormatedTime, sizeof(FormatedTime), "%X", GetTime());
 		event.GetString("reason", Reason, sizeof(Reason));
-
 		if (!GetClientAuthId(client, AuthId_Steam2, Authid, sizeof(Authid), false))
 		{
 			Format(Authid, sizeof(Authid), "Unknown SteamID");
 		}
-		
 		if (IsClientInGame(client))
 		{
 			ConnectionTime = RoundToCeil(GetClientTime(client) / 60);
 		}
-		
 		adminHandle.WriteLine("%s - <%s> <%s> <%s> DISCONNECTED after %d minutes. <%s>",
 								FormatedTime,
 								PlayerName,
@@ -239,35 +222,29 @@ public void Event_PlayerDisconnect(Event event, char[] name, bool dontBroadcast)
 								IPAddress,
 								ConnectionTime,
 								Reason);
-		
 		delete adminHandle;
 	}	
 	else
 	{	// PLAYER
 		int ConnectionTime = -1;
 		File playerHandle = OpenFile(admin_filepath, "a+");
-		
 		char PlayerName[64];
 		char Authid[64];
 		char IPAddress[64];
 		char FormatedTime[64];
 		char Reason[128];
-		
 		GetClientName(client, PlayerName, sizeof(PlayerName));
 		GetClientIP(client, IPAddress, sizeof(IPAddress));
 		FormatTime(FormatedTime, sizeof(FormatedTime), "%X", GetTime());
 		event.GetString("reason", Reason, sizeof(Reason));
-
 		if (!GetClientAuthId(client, AuthId_Steam2, Authid, sizeof(Authid), false))
 		{
 			Format(Authid, sizeof(Authid), "Unknown SteamID");
 		}
-		
 		if (IsClientInGame(client))
 		{
 			ConnectionTime = RoundToCeil(GetClientTime(client) / 60);
 		}
-		
 		playerHandle.WriteLine("%s - <%s> <%s> <%s> DISCONNECTED after %d minutes. <%s>",
 								FormatedTime,
 								PlayerName,
@@ -275,7 +252,6 @@ public void Event_PlayerDisconnect(Event event, char[] name, bool dontBroadcast)
 								IPAddress,
 								ConnectionTime,
 								Reason);
-		
 		delete playerHandle;
 	}
 	clientIsAdmin[client] = false;
