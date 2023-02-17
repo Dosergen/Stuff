@@ -81,8 +81,8 @@ public void OnMapStart()
 		
 	int CurrentTime = GetTime();
 	
-	GetCurrentMap(MapName, 100);
-	FormatTime(FormatedTime, 100, "%d_%b_%Y", CurrentTime); //name the file 'day month year'
+	GetCurrentMap(MapName, sizeof(MapName));
+	FormatTime(FormatedTime, sizeof(FormatedTime), "%d_%b_%Y", CurrentTime); //name the file 'day month year'
 	
 	BuildPath(Path_SM, player_filepath, sizeof(player_filepath), "%s/%s_player.txt", PLAYER_LOG_PATH, FormatedTime);
 	BuildPath(Path_SM, admin_filepath, sizeof(admin_filepath), "%s/%s_admin.txt", ADMIN_LOG_PATH, FormatedTime);
@@ -90,7 +90,7 @@ public void OnMapStart()
 	File playerHandle = OpenFile(player_filepath, "a+");
 	File adminHandle = OpenFile(admin_filepath, "a+");
 	
-	FormatTime(FormatedTime, 100, "%X", CurrentTime);
+	FormatTime(FormatedTime, sizeof(FormatedTime), "%X", CurrentTime);
 	// PLAYER
 	playerHandle.WriteLine("");
 	playerHandle.WriteLine("%s - ===== Map change to %s =====", FormatedTime, MapName);
@@ -138,14 +138,14 @@ public void OnClientPostAdminCheck(int client)
 		char Country[64];
 		char FormatedTime[64];
 		
-		GetClientName(client, PlayerName, 64);
+		GetClientName(client, PlayerName, sizeof(PlayerName));
 		GetClientAuthId(client, AuthId_Steam2, Authid, sizeof(Authid), false);
-		GetClientIP(client, IPAddress, 64);
-		FormatTime(FormatedTime, 64, "%X", GetTime());
+		GetClientIP(client, IPAddress, sizeof(IPAddress));
+		FormatTime(FormatedTime, sizeof(FormatedTime), "%X", GetTime());
 		
-		if(!GeoipCountry(IPAddress, Country, 64))
+		if(!GeoipCountry(IPAddress, Country, sizeof(Country)))
 		{
-			Format(Country, 64, "Unknown");
+			Format(Country, sizeof(Country), "Unknown");
 		}
 		
 		File adminHandle = OpenFile(admin_filepath, "a+");
@@ -168,14 +168,14 @@ public void OnClientPostAdminCheck(int client)
 		char Country[64];
 		char FormatedTime[64];
 		
-		GetClientName(client, PlayerName, 64);
+		GetClientName(client, PlayerName, sizeof(PlayerName));
 		GetClientAuthId(client, AuthId_Steam2, Authid, sizeof(Authid), false);
-		GetClientIP(client, IPAddress, 64);
-		FormatTime(FormatedTime, 64, "%X", GetTime());
+		GetClientIP(client, IPAddress, sizeof(IPAddress));
+		FormatTime(FormatedTime, sizeof(FormatedTime), "%X", GetTime());
 		
-		if(!GeoipCountry(IPAddress, Country, 64))
+		if(!GeoipCountry(IPAddress, Country, sizeof(Country)))
 		{
-			Format(Country, 64, "Unknown");
+			Format(Country, sizeof(Country), "Unknown");
 		}
 		
 		File playerHandle = OpenFile(player_filepath, "a+");
@@ -217,14 +217,14 @@ public void Event_PlayerDisconnect(Event event, char[] name, bool dontBroadcast)
 		char FormatedTime[64];
 		char Reason[128];
 		
-		GetClientName(client, PlayerName, 64);
-		GetClientIP(client, IPAddress, 64);
-		FormatTime(FormatedTime, 64, "%X", GetTime());
-		event.GetString("reason", Reason, 128);
+		GetClientName(client, PlayerName, sizeof(PlayerName));
+		GetClientIP(client, IPAddress, sizeof(IPAddress));
+		FormatTime(FormatedTime, sizeof(FormatedTime), "%X", GetTime());
+		event.GetString("reason", Reason, sizeof(Reason));
 
 		if (!GetClientAuthId(client, AuthId_Steam2, Authid, sizeof(Authid), false))
 		{
-			Format(Authid, 64, "Unknown SteamID");
+			Format(Authid, sizeof(Authid), "Unknown SteamID");
 		}
 		
 		if (IsClientInGame(client))
@@ -253,14 +253,14 @@ public void Event_PlayerDisconnect(Event event, char[] name, bool dontBroadcast)
 		char FormatedTime[64];
 		char Reason[128];
 		
-		GetClientName(client, PlayerName, 64);
-		GetClientIP(client, IPAddress, 64);
-		FormatTime(FormatedTime, 64, "%X", GetTime());
-		event.GetString("reason", Reason, 128);
+		GetClientName(client, PlayerName, sizeof(PlayerName));
+		GetClientIP(client, IPAddress, sizeof(IPAddress));
+		FormatTime(FormatedTime, sizeof(FormatedTime), "%X", GetTime());
+		event.GetString("reason", Reason, sizeof(Reason));
 
 		if (!GetClientAuthId(client, AuthId_Steam2, Authid, sizeof(Authid), false))
 		{
-			Format(Authid, 64, "Unknown SteamID");
+			Format(Authid, sizeof(Authid), "Unknown SteamID");
 		}
 		
 		if (IsClientInGame(client))
