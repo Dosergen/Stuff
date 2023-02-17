@@ -19,6 +19,9 @@
 #include <sourcemod>
 #include <geoip>
 
+#define PLUGIN_VERSION "1.2b"
+#define PLUGIN_NAME "Log Connections"
+
 #define PLAYER_LOG_PATH "logs/connections/player"
 #define ADMIN_LOG_PATH "logs/connections/admin"
 
@@ -32,7 +35,7 @@ public Plugin myinfo =
 	name = "Log Connections",
 	author = "Xander and IT-KiLLER",
 	description = "This plugin logs players' connect and disconnect times along with their Name, SteamID, and IP Address to a text file at /sourcemod/logs/connections/ seperate from the server logs.",
-	version = "1.2b",
+	version = PLUGIN_VERSION,
 	url = "https://forums.alliedmods.net/showthread.php?t=201967"
 }
 
@@ -57,6 +60,8 @@ public void OnPluginStart()
 			LogMessage("Failed to create directory at %s - Please manually create that path and reload this plugin.", ADMIN_LOG_PATH);
 	}
 
+	CreateConVar("sm_log_connections_version", PLUGIN_VERSION, PLUGIN_NAME, FCVAR_NOTIFY);
+	
 	HookEvent("player_disconnect", Event_PlayerDisconnect, EventHookMode_Pre);
 	for(int client = 1; client <= MaxClients; client++)
 	{
