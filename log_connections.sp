@@ -62,12 +62,12 @@ public void OnPluginStart()
 		}
 	}
 	HookEvent("player_disconnect", Event_PlayerDisconnect, EventHookMode_Pre);
-	for(int client = 1; client <= MaxClients; client++)
+	for (int client = 1; client <= MaxClients; client++)
 	{
-		if(IsClientInGame(client))
+		if (IsClientInGame(client))
 		{
 			clientConnected[client] = true;
-			if(IsPlayerAdmin(client))
+			if (IsPlayerAdmin(client))
 			{
 				clientIsAdmin[client] = true;
 			}
@@ -101,9 +101,9 @@ public void OnMapStart()
 
 public void OnRebuildAdminCache(AdminCachePart part)
 {
-	for(int client = 1; client <= MaxClients; client++)
+	for (int client = 1; client <= MaxClients; client++)
 	{
-		if(IsClientInGame(client) && IsPlayerAdmin(client))
+		if (IsClientInGame(client) && IsPlayerAdmin(client))
 		{
 			clientIsAdmin[client] = true;
 		}
@@ -116,7 +116,7 @@ public void OnClientPostAdminCheck(int client)
 	{
 		// console or unknown client
 	} 
-	else if(IsFakeClient(client))
+	else if (IsFakeClient(client))
 	{
 		// bot
 	}	
@@ -124,7 +124,7 @@ public void OnClientPostAdminCheck(int client)
 	{
 		// Already connected
 	}
-	else if(IsPlayerAdmin(client)) 
+	else if (IsPlayerAdmin(client))
 	{ 	// ADMIN
 		clientConnected[client] = true;
 		clientIsAdmin[client] = true;
