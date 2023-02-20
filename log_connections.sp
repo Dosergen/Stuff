@@ -1,4 +1,3 @@
-
 /*	Copyright (C) 2017 IT-KiLLER
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -26,8 +25,8 @@
 
 char player_filepath[PLATFORM_MAX_PATH];
 char admin_filepath[PLATFORM_MAX_PATH];
-bool clientConnected[MAXPLAYERS+1] = {false,...};
-bool clientIsAdmin[MAXPLAYERS+1] = {false,...};
+bool clientConnected[MAXPLAYERS+1] = { false , ... };
+bool clientIsAdmin[MAXPLAYERS+1] = { false , ... };
 
 public Plugin myinfo =
 {
@@ -41,16 +40,6 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	CreateConVar("sm_log_connections_version", PLUGIN_VERSION, "Log Connections version.", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	// PLAYER
-	BuildPath(Path_SM, player_filepath, sizeof(player_filepath), PLAYER_LOG_PATH);
-	if (!DirExists(player_filepath))
-	{
-		CreateDirectory(player_filepath, 511);
-		if (!DirExists(player_filepath))
-		{
-			LogMessage("Failed to create directory at %s - Please manually create that path and reload this plugin.", PLAYER_LOG_PATH);
-		}
-	}
 	// ADMIN
 	BuildPath(Path_SM, admin_filepath, sizeof(admin_filepath), ADMIN_LOG_PATH);
 	if (!DirExists(admin_filepath))
@@ -59,6 +48,16 @@ public void OnPluginStart()
 		if (!DirExists(admin_filepath))
 		{
 			LogMessage("Failed to create directory at %s - Please manually create that path and reload this plugin.", ADMIN_LOG_PATH);
+		}
+	}
+	// PLAYER
+	BuildPath(Path_SM, player_filepath, sizeof(player_filepath), PLAYER_LOG_PATH);
+	if (!DirExists(player_filepath))
+	{
+		CreateDirectory(player_filepath, 511);
+		if (!DirExists(player_filepath))
+		{
+			LogMessage("Failed to create directory at %s - Please manually create that path and reload this plugin.", PLAYER_LOG_PATH);
 		}
 	}
 	HookEvent("player_disconnect", Event_PlayerDisconnect, EventHookMode_Pre);
@@ -84,19 +83,21 @@ public void OnMapStart()
 	FormatTime(FormatedTime, sizeof(FormatedTime), "%d_%b_%Y", CurrentTime); //name the file 'day month year'
 	BuildPath(Path_SM, player_filepath, sizeof(player_filepath), "%s/%s_player.txt", PLAYER_LOG_PATH, FormatedTime);
 	BuildPath(Path_SM, admin_filepath, sizeof(admin_filepath), "%s/%s_admin.txt", ADMIN_LOG_PATH, FormatedTime);
-	File playerHandle = OpenFile(player_filepath, "a+");
-	File adminHandle = OpenFile(admin_filepath, "a+");
+	File admin = OpenFile(admin_filepath, "a+");
+	File player = OpenFile(player_filepath, "a+");
 	FormatTime(FormatedTime, sizeof(FormatedTime), "%X", CurrentTime);
-	// PLAYER
-	playerHandle.WriteLine("");
-	playerHandle.WriteLine("%s - ===== Map change to %s =====", FormatedTime, MapName);
-	playerHandle.WriteLine("");
-	delete playerHandle;
 	// ADMIN
-	adminHandle.WriteLine("");
-	adminHandle.WriteLine("%s - ===== Map change to %s =====", FormatedTime, MapName);
-	adminHandle.WriteLine("");
-	delete adminHandle;
+	admin.WriteLine("");
+	admin.WriteLine("%s - ===== Map change to %s =====", FormatedTime, MapName);
+	admin.WriteLine("");
+	admin.Flush();
+	delete admin;
+	// PLAYER
+	player.WriteLine("");
+	player.WriteLine("%s - ===== Map change to %s =====", FormatedTime, MapName);
+	player.WriteLine("");
+	player.Flush();
+	delete player;
 }
 
 public void OnRebuildAdminCache(AdminCachePart part)
@@ -141,15 +142,16 @@ public void OnClientPostAdminCheck(int client)
 		{
 			Format(Country, sizeof(Country), "Unknown");
 		}
-		File adminHandle = OpenFile(admin_filepath, "a+");
-		adminHandle.WriteLine("%s - <%s> <%s> <%s> CONNECTED from <%s>",
+		File admin = OpenFile(admin_filepath, "a+");
+		admin.WriteLine("%s - <%s> <%s> <%s> CONNECTED from <%s>",
 								FormatedTime,
 								PlayerName,
 								Authid,
 								IPAddress,
 								Country);
-		delete adminHandle;
-	}	
+		admin.Flush();
+		delete admin;
+	}
 	else // PLAYER
 	{
 		clientConnected[client] = true;
@@ -167,14 +169,15 @@ public void OnClientPostAdminCheck(int client)
 		{
 			Format(Country, sizeof(Country), "Unknown");
 		}
-		File playerHandle = OpenFile(player_filepath, "a+");
-		playerHandle.WriteLine("%s - <%s> <%s> <%s> CONNECTED from <%s>",
+		File player = OpenFile(player_filepath, "a+");
+		player.WriteLine("%s - <%s> <%s> <%s> CONNECTED from <%s>",
 								FormatedTime,
 								PlayerName,
 								Authid,
 								IPAddress,
 								Country);
-		delete playerHandle;
+		player.Flush();
+		delete player;
 	}
 }
 
@@ -197,7 +200,7 @@ public void Event_PlayerDisconnect(Event event, char[] name, bool dontBroadcast)
 	else if (clientIsAdmin[client]) 
 	{	// ADMIN
 		int ConnectionTime = -1;
-		File adminHandle = OpenFile(admin_filepath, "a+");
+		File admin = OpenFile(admin_filepath, "a+");
 		char PlayerName[64];
 		char Authid[64];
 		char IPAddress[64];
@@ -215,19 +218,20 @@ public void Event_PlayerDisconnect(Event event, char[] name, bool dontBroadcast)
 		{
 			ConnectionTime = RoundToCeil(GetClientTime(client) / 60);
 		}
-		adminHandle.WriteLine("%s - <%s> <%s> <%s> DISCONNECTED after %d minutes. <%s>",
+		admin.WriteLine("%s - <%s> <%s> <%s> DISCONNECTED after %d minutes. <%s>",
 								FormatedTime,
 								PlayerName,
 								Authid,
 								IPAddress,
 								ConnectionTime,
 								Reason);
-		delete adminHandle;
+		admin.Flush();
+		delete admin;
 	}	
 	else
 	{	// PLAYER
 		int ConnectionTime = -1;
-		File playerHandle = OpenFile(admin_filepath, "a+");
+		File player = OpenFile(admin_filepath, "a+");
 		char PlayerName[64];
 		char Authid[64];
 		char IPAddress[64];
@@ -245,14 +249,15 @@ public void Event_PlayerDisconnect(Event event, char[] name, bool dontBroadcast)
 		{
 			ConnectionTime = RoundToCeil(GetClientTime(client) / 60);
 		}
-		playerHandle.WriteLine("%s - <%s> <%s> <%s> DISCONNECTED after %d minutes. <%s>",
+		player.WriteLine("%s - <%s> <%s> <%s> DISCONNECTED after %d minutes. <%s>",
 								FormatedTime,
 								PlayerName,
 								Authid,
 								IPAddress,
 								ConnectionTime,
 								Reason);
-		delete playerHandle;
+		player.Flush();
+		delete player;
 	}
 	clientIsAdmin[client] = false;
 }
