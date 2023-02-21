@@ -81,8 +81,8 @@ public void OnMapStart()
 	int CurrentTime = GetTime();
 	GetCurrentMap(MapName, sizeof(MapName));
 	FormatTime(FormatedTime, sizeof(FormatedTime), "%d_%b_%Y", CurrentTime); //name the file 'day month year'
-	BuildPath(Path_SM, admin_filepath, sizeof(admin_filepath), "%s/%s_admin.txt", ADMIN_LOG_PATH, FormatedTime);
-	BuildPath(Path_SM, player_filepath, sizeof(player_filepath), "%s/%s_player.txt", PLAYER_LOG_PATH, FormatedTime);
+	BuildPath(Path_SM, admin_filepath, sizeof(admin_filepath), "%s/%s_admin.log", ADMIN_LOG_PATH, FormatedTime);
+	BuildPath(Path_SM, player_filepath, sizeof(player_filepath), "%s/%s_player.log", PLAYER_LOG_PATH, FormatedTime);
 	File admin = OpenFile(admin_filepath, "a+");
 	File player = OpenFile(player_filepath, "a+");
 	FormatTime(FormatedTime, sizeof(FormatedTime), "%X", CurrentTime);
