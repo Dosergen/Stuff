@@ -1,4 +1,4 @@
-/*	Copyright (C) 2017 IT-KiLLER
+/*	Copyright (C) 2017 IT-KiLLER | Copyright (C) 2023 Dosergen
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -32,7 +32,7 @@ public Plugin myinfo =
 {
 	name = "Log Connections",
 	author = "Xander, IT-KiLLER, Dosergen",
-	description = "This plugin log to a file when players connect and disconnect, as well as their name, SteamID and IP address.",
+	description = "This plugin logs players' connect and disconnect times along with their Name, SteamID, and IP Address.",
 	version = PLUGIN_VERSION,
 	url = "https://forums.alliedmods.net/showthread.php?t=201967"
 }
