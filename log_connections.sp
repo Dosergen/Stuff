@@ -25,8 +25,8 @@
 
 char admin_filepath[PLATFORM_MAX_PATH];
 char player_filepath[PLATFORM_MAX_PATH];
-bool clientConnected[MAXPLAYERS+1] = { false , ... };
 bool clientIsAdmin[MAXPLAYERS+1] = { false , ... };
+bool clientConnected[MAXPLAYERS+1] = { false , ... };
 
 public Plugin myinfo =
 {
@@ -44,7 +44,7 @@ public void OnPluginStart()
 	BuildPath(Path_SM, admin_filepath, sizeof(admin_filepath), ADMIN_LOG_PATH);
 	if (!DirExists(admin_filepath))
 	{
-		CreateDirectory(admin_filepath, 511);
+		CreateDirectory(admin_filepath, 511, true);
 		if (!DirExists(admin_filepath))
 		{
 			LogMessage("Failed to create directory at %s - Please manually create that path and reload this plugin.", ADMIN_LOG_PATH);
@@ -54,7 +54,7 @@ public void OnPluginStart()
 	BuildPath(Path_SM, player_filepath, sizeof(player_filepath), PLAYER_LOG_PATH);
 	if (!DirExists(player_filepath))
 	{
-		CreateDirectory(player_filepath, 511);
+		CreateDirectory(player_filepath, 511, true);
 		if (!DirExists(player_filepath))
 		{
 			LogMessage("Failed to create directory at %s - Please manually create that path and reload this plugin.", PLAYER_LOG_PATH);
