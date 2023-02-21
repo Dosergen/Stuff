@@ -31,8 +31,8 @@ bool clientConnected[MAXPLAYERS+1] = { false , ... };
 public Plugin myinfo =
 {
 	name = "Log Connections",
-	author = "Xander and IT-KiLLER",
-	description = "This plugin logs players' connect and disconnect times along with their Name, SteamID, and IP Address to a text file at /sourcemod/logs/connections/ seperate from the server logs.",
+	author = "Xander, IT-KiLLER, Dosergen",
+	description = "This plugin log to a file when players connect and disconnect, as well as their name, SteamID and IP address.",
 	version = PLUGIN_VERSION,
 	url = "https://forums.alliedmods.net/showthread.php?t=201967"
 }
