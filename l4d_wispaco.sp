@@ -1,0 +1,450 @@
+/*
+*	Plugin	: [L4D/2] Witchy Spawn Controller
+*	Version	: 2.0
+*	Game	: Left4Dead & Left4Dead 2
+*	Coder	: Sheleu
+*	Testers	: Myself and Dosergen (Ja-Forces)
+*
+*
+*	Version 1.0 (05.09.10)
+*		- Initial release
+*
+*	Version 1.1 (08.09.10)
+*		- Fixed encountered error 23: Native detected error
+*		- Fixed bug with counting alive witches
+*		- Added removal of the witch when she far away from the survivors
+*
+*	Version 1.2 (09.09.10)
+*		- Added precache for witch (L4D2)
+*
+*	Version 1.3 (16.09.10)
+*		- Added removal director's witch
+*		- Stopped spawn witches after finale start
+*
+*	Version 1.4 (24.09.10)
+*		- Code optimization
+*
+*	Version 1.5 (17.05.11)
+*		- Fixed error "Entity is not valid" (sapphire989's message)
+*
+*	Version 1.6 (23.01.20)
+*		- Converted plugin source to the latest syntax utilizing methodmaps
+*		- Added "z_spawn_old" method for L4D2
+*
+*	Version 1.7 (07.03.20)
+*		- Added cvar "l4d_wispaco_enable" to enable or disable plugin
+*
+*	Version 1.8 (27.05.21)
+*		- Added DEBUG log to file
+*
+*	Version 1.9 (3.08.22)
+*		- Fixed SourceMod 1.11 warnings
+*		- Fixed counter if director's witch spawns at the beginning of the map
+*		- Various changes to clean up the code
+*
+*	Version 2.0 (1.05.23)
+*		- Added support for "Left 4 DHooks Direct" natives
+*		- Code optimization
+*/
+
+#pragma semicolon 1
+#pragma newdecls required
+
+#include <sourcemod>
+#include <sdktools>
+#include <left4dhooks>
+
+#define PLUGIN_VERSION "2.0"
+#define CVAR_FLAGS     FCVAR_NOTIFY
+
+float  g_fWitchTimeMin, g_fWitchTimeMax, g_fWitchDistance;
+
+int    g_iCountWitch, g_iCountWitchInRound, g_iCountWitchAlive;
+
+bool   g_bPluginEnable, g_bDirectorWitch, g_bFinaleStart, g_bDebugLog;
+
+ConVar g_hCvarEnable, g_hCvarCountWitchInRound, g_hCvarCountAliveWitch, g_hCvarWitchTimeMin, 
+       g_hCvarWitchTimeMax, g_hCvarWitchDistance, g_hCvarDirectorWitch, g_hCvarFinaleStart, g_hCvarLog;
+		
+bool   g_bRunTimer = false, g_bLeftSafeArea = false, g_bWitchExec = false, g_bHookedEvents = false;
+
+Handle g_hSpawnTimer;
+
+public Plugin myinfo =
+{
+	name = "[L4D/2] WiSpaCo",
+	author = "Sheleu, Dosergen",
+	description = "This plugin spawns more witches on map.",
+	version = PLUGIN_VERSION,
+	url = "https://forums.alliedmods.net/showthread.php?t=137431"
+}
+
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+	EngineVersion test = GetEngineVersion();
+	if( test != Engine_Left4Dead && test != Engine_Left4Dead2 )
+	{
+		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
+		return APLRes_SilentFailure;
+	}
+	return APLRes_Success;
+}
+
+public void OnPluginStart()
+{
+	CreateConVar("l4d_wispaco_version", PLUGIN_VERSION, "WiSpaCo plugin version.", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	
+	g_hCvarEnable = CreateConVar("l4d_wispaco_enable", "1", "Enable or Disable plugin.", CVAR_FLAGS, true, 0.0, true, 1.0);
+	g_hCvarCountWitchInRound = CreateConVar("l4d_wispaco_limit", "0", "Sets limit for witches spawned. If 0, plugin will not check count witches.", CVAR_FLAGS);
+	g_hCvarCountAliveWitch = CreateConVar("l4d_wispaco_limit_alive", "2", "Sets limit alive witches. If 0, plugin will not check count alive witches.", CVAR_FLAGS);
+	g_hCvarWitchTimeMin = CreateConVar("l4d_wispaco_spawn_time_min", "90", "Sets minimum spawn time for witches spawned by plugin in seconds.", CVAR_FLAGS);
+	g_hCvarWitchTimeMax = CreateConVar("l4d_wispaco_spawn_time_max", "180", "Sets maximum spawn time for witches spawned by plugin in seconds.", CVAR_FLAGS);
+	g_hCvarWitchDistance = CreateConVar("l4d_wispaco_distance", "1500", "Distance from survivors that witch should be removed. If 0, plugin will not remove witches.", CVAR_FLAGS);
+	g_hCvarDirectorWitch = CreateConVar("l4d_wispaco_director_witch", "0", "If 1, enable director's witch. If 0, disable director's witch.", CVAR_FLAGS, true, 0.0, true, 1.0);
+	g_hCvarFinaleStart = CreateConVar("l4d_wispaco_finale_start", "1", "If 1, enable spawn witches after finale start. If 0, disable spawn witches after finale start.", CVAR_FLAGS, true, 0.0, true, 1.0);
+	g_hCvarLog = CreateConVar("l4d_wispaco_log", "0", "Enable or Disable DEBUG log.", CVAR_FLAGS, true, 0.0, true, 1.0);
+	
+	AutoExecConfig(true, "l4d_wispaco");
+	
+	g_hCvarEnable.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarCountWitchInRound.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarCountAliveWitch.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarWitchTimeMin.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarWitchTimeMax.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarWitchDistance.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarDirectorWitch.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarFinaleStart.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarLog.AddChangeHook(ConVarChanged_Cvars);
+}
+
+public void OnPluginEnd()
+{
+	LogCommand("#DEBUG: On plugin end");
+	End_Timer(false);
+}
+
+public void OnConfigsExecuted()
+{
+	LogCommand("#DEBUG: On configs executed");
+	IsAllowed();
+}
+
+void ConVarChanged_Cvars(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	GetCvars();
+}
+
+void GetCvars()
+{
+	g_bPluginEnable = g_hCvarEnable.BoolValue;
+	g_iCountWitchInRound = g_hCvarCountWitchInRound.IntValue;
+	g_iCountWitchAlive = g_hCvarCountAliveWitch.IntValue;
+	g_fWitchTimeMin = g_hCvarWitchTimeMin.FloatValue;
+	g_fWitchTimeMax = g_hCvarWitchTimeMax.FloatValue;
+	g_fWitchDistance = g_hCvarWitchDistance.FloatValue;
+	g_bDirectorWitch = g_hCvarDirectorWitch.BoolValue;
+	g_bFinaleStart = g_hCvarFinaleStart.BoolValue;
+	g_bDebugLog = g_hCvarLog.BoolValue;
+}
+
+void IsAllowed()
+{	
+	GetCvars();
+
+	if (g_bPluginEnable)
+	{
+		if (!g_bHookedEvents)
+		{
+			HookEvent("witch_spawn", evtWitchSpawn, EventHookMode_PostNoCopy);
+			HookEvent("player_left_checkpoint", evtLeftSafeArea, EventHookMode_Post);
+			HookEvent("round_start", evtRoundStart, EventHookMode_Post);
+			HookEvent("round_end", evtRoundEnd, EventHookMode_Post);
+			HookEvent("finale_start", evtFinaleStart, EventHookMode_PostNoCopy);
+
+			g_bHookedEvents = true;
+		}
+	}
+	else if (!g_bPluginEnable)
+	{
+		if (g_bHookedEvents)
+		{
+			UnhookEvent("witch_spawn", evtWitchSpawn, EventHookMode_PostNoCopy);
+			UnhookEvent("player_left_checkpoint", evtLeftSafeArea, EventHookMode_Post);
+			UnhookEvent("round_start", evtRoundStart, EventHookMode_Post);
+			UnhookEvent("round_end", evtRoundEnd, EventHookMode_Post);
+			UnhookEvent("finale_start", evtFinaleStart, EventHookMode_PostNoCopy);
+
+			g_bHookedEvents = false;
+		}
+	}
+}
+
+public void OnMapStart()
+{
+	LogCommand("#DEBUG: Model precaching");
+
+	if (!IsModelPrecached("models/infected/witch.mdl"))
+	{
+		PrecacheModel("models/infected/witch.mdl", true);
+	}
+	if (!IsModelPrecached("models/infected/witch_bride.mdl"))
+	{
+		PrecacheModel("models/infected/witch_bride.mdl", true);
+	}
+}
+
+public void OnMapEnd()
+{
+	LogCommand("#DEBUG: On map end");
+	End_Timer(false);
+}
+
+void evtWitchSpawn(Event event, const char[] name , bool dontBroadcast)
+{
+	if (!g_bWitchExec && !g_bDirectorWitch)
+	{
+		int WitchID = event.GetInt("witchid");
+		if (IsValidEdict(WitchID)) 
+		{
+			AcceptEntityInput(WitchID, "Kill");
+			LogCommand("#DEBUG: Removing Director's Witch ID = %i; Witch = %d, Max count witch = %d", WitchID, g_iCountWitch, g_iCountWitchInRound);
+		}
+		else
+		{
+			LogCommand("#DEBUG: Failed to remove Director's Witch ID = %i because not an edict index (witch ID) is valid", WitchID);
+		}
+	}
+	else
+	{
+		g_iCountWitch++;
+		LogCommand("#DEBUG: Witch spawned; Witch = %d, Max count witch = %d", g_iCountWitch, g_iCountWitchInRound);
+	}
+}
+
+void evtLeftSafeArea(Event event, const char[] name, bool dontBroadcast)
+{
+	if (!g_bRunTimer && !g_bLeftSafeArea)
+	{	
+		if (L4D_HasAnySurvivorLeftSafeArea())
+		{
+			LogCommand("#DEBUG: Player has left the starting area");
+			g_bLeftSafeArea = true;
+			First_Start_Timer();
+		}	
+	}
+}
+
+void evtRoundStart(Event event, const char[] name, bool dontBroadcast)
+{
+	LogCommand("#DEBUG: Round started");	
+	g_iCountWitch = 0;
+	g_bLeftSafeArea = false;
+}
+
+void evtRoundEnd(Event event, const char[] name, bool dontBroadcast)
+{
+	LogCommand("#DEBUG: Round ended");
+	End_Timer(false);
+}
+
+void evtFinaleStart(Event event, const char[] name, bool dontBroadcast)
+{
+	if (!g_bFinaleStart)
+	{
+		LogCommand("#DEBUG: Spawn ended [FINALE START]");
+		End_Timer(false);
+	}
+}
+
+void First_Start_Timer()
+{
+	g_bRunTimer = true;
+	LogCommand("#DEBUG: First_Start_Timer; Safety zone leaved; RunTimer = %d", g_bRunTimer);
+	Start_Timer();
+}
+
+void Start_Timer()
+{
+	float WitchSpawnTime = GetRandomFloat(g_fWitchTimeMin, g_fWitchTimeMax);
+	LogCommand("#DEBUG: Start_Timer; Witch spawn time = %f", WitchSpawnTime);
+	g_hSpawnTimer = CreateTimer(WitchSpawnTime, SpawnAWitch, _);
+}
+
+void End_Timer(const bool isClosedHandle)
+{
+	if (g_bRunTimer)
+	{
+		if (!isClosedHandle) 
+		{
+			delete g_hSpawnTimer;
+		}
+		g_bRunTimer = false;
+		g_bWitchExec = false;
+		LogCommand("#DEBUG: End_Timer; Handle closed; RunTimer = %d", g_bRunTimer);
+	}
+}
+
+Action SpawnAWitch(Handle timer)
+{
+	if (g_bRunTimer)
+	{
+		if (g_iCountWitchInRound > 0 && g_iCountWitch >= g_iCountWitchInRound)
+		{
+			LogCommand("#DEBUG: Witch = %d, Max count witch = %d; End_Timer()", g_iCountWitch, g_iCountWitchInRound);
+			End_Timer(true);
+			return Plugin_Continue;
+		}
+		if (g_iCountWitchAlive > 0 && g_iCountWitch >= g_iCountWitchAlive && GetCountAliveWitches() >= g_iCountWitchAlive)
+		{
+			Start_Timer();
+			return Plugin_Continue;
+		}
+		int anyclient = GetAnyClient();
+		if (!anyclient)
+		{
+			Start_Timer();
+			return Plugin_Continue;
+		}
+		g_bWitchExec = true;
+		SpawnCommand(anyclient);
+		LogCommand("#DEBUG: Attempting to spawn");
+		g_bWitchExec = false;
+		Start_Timer();
+	}
+	return Plugin_Stop;
+}
+
+void SpawnCommand(int client)
+{
+	if (client)
+	{	
+		float SpawnPos[3], SpawnAng[3];
+		int iRandom = GetRandom();
+		if (iRandom > 0 && L4D_GetRandomPZSpawnPosition(iRandom, 8, 30, SpawnPos))
+		{
+			int iNdex = CreateEntityByName("witch");
+			if (iNdex <= MaxClients)
+			{
+				LogCommand("#DEBUG: Failed to create witch");
+				return;
+			}
+			SetAbsOrigin(iNdex, SpawnPos);
+			SpawnAng[1] = GetRandomFloatEx(-179.0, 179.0);
+			SetAbsAngles(iNdex, SpawnAng);
+			DispatchSpawn(iNdex);
+		}
+	}
+}
+
+int GetAnyClient()
+{
+	int i;
+	for (i = 1; i <= MaxClients; i++)
+	{
+		if (IsClientInGame(i) && !IsFakeClient(i))
+		{
+			return i;
+		}
+	}
+	return 0;
+}
+
+int FindEntityByClassname2(int startEnt, const char[] classname)
+{
+	while (startEnt < GetMaxEntities() && !IsValidEntity(startEnt))
+	{
+		startEnt++;
+	}
+	return FindEntityByClassname(startEnt, classname);
+}
+
+int GetCountAliveWitches()
+{
+	int countAlive = 0;
+	int iNdex = -1;
+	while ((iNdex = FindEntityByClassname2(iNdex, "witch")) != -1)
+	{
+		countAlive++;
+		LogCommand("#DEBUG: Witch ID = %i (Alive witches = %i)", iNdex, countAlive);
+		if (g_fWitchDistance > 0)
+		{
+			float WitchPos[3];
+			float PlayerPos[3];
+			GetEntPropVector(iNdex, Prop_Send, "m_vecOrigin", WitchPos);
+			int k = 0;
+			int clients = 0;
+			for (int i = 1; i <= MaxClients; i++)
+			{	
+				if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == 2)
+				{
+					clients++;
+					GetClientAbsOrigin(i, PlayerPos);
+					float distance = GetVectorDistance(WitchPos, PlayerPos);
+					LogCommand("#DEBUG: Distance to witch = %f; Max distance = %f", distance, g_fWitchDistance);
+					if (distance > g_fWitchDistance)
+					{
+						k++;
+					}
+				}
+			}
+			if (k == clients)
+			{
+				AcceptEntityInput(iNdex, "Kill");
+				countAlive--;
+			}
+		}
+	}
+	LogCommand("#DEBUG: Alive witches = %d, Max count alive witches = %d", countAlive, g_iCountWitchAlive);
+	return countAlive;
+}
+
+int GetRandom()
+{
+	int client;
+	ArrayList array = new ArrayList();
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == 2)
+		{
+			array.Push(i);
+		}
+	}
+	if (array.Length > 0)
+	{
+		client = array.Get(GetRandomIntEx(0, array.Length - 1));
+	}
+	delete array;
+	return client;
+}
+
+int GetRandomIntEx(int min, int max)
+{
+	int random = GetURandomInt();
+	if (random == 0)
+	{
+		random++;
+	}
+	return RoundToCeil(float(random) / (float(2147483647) / float(max - min + 1))) + min - 1;
+}
+
+float GetRandomFloatEx(float min, float max)
+{
+	return (GetURandomFloat() * (max - min)) + min;
+}
+
+void LogCommand(const char[] format, any ...)
+{
+	if(!g_bDebugLog)
+	{
+		return;
+	}
+	char buffer[512];
+	VFormat(buffer, sizeof(buffer), format, 2);
+	char sPath[PLATFORM_MAX_PATH], sTime[32];
+	BuildPath(Path_SM, sPath, sizeof(sPath), "logs/wispaco.log");
+	File file = OpenFile(sPath, "a+");
+	FormatTime(sTime, sizeof(sTime), "L %m/%d/%Y - %H:%M:%S");
+	file.WriteLine("%s: %s", sTime, buffer);
+	FlushFile(file);
+	delete file;
+}
