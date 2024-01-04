@@ -164,17 +164,18 @@ int GetSafeRoomDoor()
 	g_iEnt_SafeDoor = MaxClients + 1;
 	while ((g_iEnt_SafeDoor = FindEntityByClassname(g_iEnt_SafeDoor, SAFEDOOR_CLASS_01)) != -1)
 	{
-		if (g_iEnt_SafeDoor > 0)
+		if (!IsValidEntity(g_iEnt_SafeDoor) && !IsValidEdict(g_iEnt_SafeDoor))
 		{
-			char model[128];
-			GetEntPropString(g_iEnt_SafeDoor, Prop_Data, "m_ModelName", model, sizeof(model));
-			int spawn_flags = GetEntProp(g_iEnt_SafeDoor, Prop_Data, "m_spawnflags");
-			if (((strcmp(model, SAFEDOOR_MODEL_01) == 0) && ((spawn_flags == 8192) || (spawn_flags == 0))) 
-			|| ((strcmp(model, SAFEDOOR_MODEL_02) == 0) && ((spawn_flags == 8192) || (spawn_flags == 0)))
-			|| ((strcmp(model, SAFEDOOR_MODEL_03) == 0) && ((spawn_flags == 8192) || (spawn_flags == 0))))
-			{
-				return g_iEnt_SafeDoor;
-			}
+			continue;
+		}
+		char model[128];
+		GetEntPropString(g_iEnt_SafeDoor, Prop_Data, "m_ModelName", model, sizeof(model));
+		int spawn_flags = GetEntProp(g_iEnt_SafeDoor, Prop_Data, "m_spawnflags");
+		if (((strcmp(model, SAFEDOOR_MODEL_01) == 0) && ((spawn_flags == 8192) || (spawn_flags == 0))) 
+		|| ((strcmp(model, SAFEDOOR_MODEL_02) == 0) && ((spawn_flags == 8192) || (spawn_flags == 0)))
+		|| ((strcmp(model, SAFEDOOR_MODEL_03) == 0) && ((spawn_flags == 8192) || (spawn_flags == 0))))
+		{
+			return g_iEnt_SafeDoor;
 		}
 	}
 	return -1;
