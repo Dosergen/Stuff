@@ -2,6 +2,8 @@
 #pragma newdecls required
 
 #include <sourcemod>
+#include <sdkhooks>
+#include <sdktools>
 
 #define PLUGIN_VERSION "0.4"
 
@@ -47,14 +49,15 @@ public void OnPluginStart()
 			if (iByte_TMPP == 0x74 || iByte_TMPP == 0x0F)
 			{
 				aTMPP += view_as<Address>(iOffset_TMPP);
-				for (int i = 0; i < 6; i++)
+				int i;
+				for (i = 0; i < 6; i++)
 				{
 					iOriginalBytes_TMPP[i] = LoadFromAddress(aTMPP + view_as<Address>(i), NumberType_Int8);
 				}
 				StoreToAddress(aTMPP, (iByte_TMPP != 0x0F) ? 0xEB : 0xE9, NumberType_Int8);
 				if (iByte_TMPP != 0x74)
 				{
-					for (int i = 1; i < 6; i++)
+					for (i = 1; i < 6; i++)
 					{
 						StoreToAddress(aTMPP + view_as<Address>(i), (i == 5) ? 0x00 : GetNextProperOffset(i), NumberType_Int8);
 					}
