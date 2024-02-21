@@ -16,7 +16,6 @@
 
 static int g_iTankCount;
 static int g_iTankClassIndex;
- 
 float g_fNextTankPunchAllowed[MAXPLAYERS+1];
  
 public Plugin myinfo = 
@@ -106,7 +105,7 @@ Action Timer_DoorCheck(Handle timer, int clientUserID)
  
 void IsLookingAtBreakableDoor(int client)
 {
-	int g_iEntSafeDoor;
+	int g_iDoorEntity;
 	float origin[3], angles[3], endorigin[3], Push[3], power;
 	GetClientAbsOrigin(client, origin);
 	GetClientAbsAngles(client, angles);
@@ -114,45 +113,45 @@ void IsLookingAtBreakableDoor(int client)
 	TR_TraceRayFilter(origin, angles, MASK_SHOT, RayType_Infinite, TraceFilterClients, client);
 	if (TR_DidHit())
 	{
-		g_iEntSafeDoor = TR_GetEntityIndex();
+		g_iDoorEntity = TR_GetEntityIndex();
 		TR_GetEndPosition(endorigin);
-		if (g_iEntSafeDoor != -1 && GetVectorDistance(origin, endorigin) <= 90.0)
+		if (g_iDoorEntity != -1 && GetVectorDistance(origin, endorigin) <= 90.0)
 		{
 			char sClassName[64], sModelName[64];
-			GetEntityClassname(g_iEntSafeDoor, sClassName, sizeof(sClassName));
-			GetEntPropString(g_iEntSafeDoor, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
+			GetEntityClassname(g_iDoorEntity, sClassName, sizeof(sClassName));
+			GetEntPropString(g_iDoorEntity, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
 			if (StrContains(sClassName, DOOR_CLASS_01) != -1 && StrContains(sModelName, DOOR_MODEL_01) != -1 
 			|| StrContains(sClassName, DOOR_CLASS_02) != -1 && StrContains(sModelName, DOOR_MODEL_02) != -1)
 			{
-				GetEntPropVector(g_iEntSafeDoor, Prop_Send, "m_vecOrigin", endorigin);
+				GetEntPropVector(g_iDoorEntity, Prop_Send, "m_vecOrigin", endorigin);
 				float vPos[3], vAng[3];
-				GetEntPropVector(g_iEntSafeDoor, Prop_Send, "m_vecOrigin", vPos);
-				GetEntPropVector(g_iEntSafeDoor, Prop_Send, "m_angRotation", vAng);
-				SetEntProp(g_iEntSafeDoor, Prop_Send, "m_CollisionGroup", 1);
-				SetEntProp(g_iEntSafeDoor, Prop_Data, "m_CollisionGroup", 1);
+				GetEntPropVector(g_iDoorEntity, Prop_Send, "m_vecOrigin", vPos);
+				GetEntPropVector(g_iDoorEntity, Prop_Send, "m_angRotation", vAng);
+				SetEntProp(g_iDoorEntity, Prop_Send, "m_CollisionGroup", 1);
+				SetEntProp(g_iDoorEntity, Prop_Data, "m_CollisionGroup", 1);
 				vPos[2] += 10000.0;
-				TeleportEntity(g_iEntSafeDoor, vPos, NULL_VECTOR, NULL_VECTOR);
+				TeleportEntity(g_iDoorEntity, vPos, NULL_VECTOR, NULL_VECTOR);
 				vPos[2] -= 10000.0;
-				SetEntityRenderMode(g_iEntSafeDoor, RENDER_TRANSALPHA);
-				SetEntityRenderColor(g_iEntSafeDoor, 0, 0, 0, 0);
-				int g_iEntBrokenEnt = CreateEntityByName("prop_physics");
-				DispatchKeyValue(g_iEntBrokenEnt, "model", sModelName);
-				DispatchKeyValue(g_iEntBrokenEnt, "spawnflags", "4");
-				DispatchSpawn(g_iEntBrokenEnt);
+				SetEntityRenderMode(g_iDoorEntity, RENDER_TRANSALPHA);
+				SetEntityRenderColor(g_iDoorEntity, 0, 0, 0, 0);
+				int g_iBrokenEntity = CreateEntityByName("prop_physics");
+				DispatchKeyValue(g_iBrokenEntity, "model", sModelName);
+				DispatchKeyValue(g_iBrokenEntity, "spawnflags", "4");
+				DispatchSpawn(g_iBrokenEntity);
 				GetAngleVectors(angles, Push, NULL_VECTOR, NULL_VECTOR);
 				power = GetRandomFloat(600.0, 800.0);
 				Push[0] *= power;
 				Push[1] *= power;
 				Push[2] *= power;
-				TeleportEntity(g_iEntBrokenEnt, vPos, vAng, Push);
-				if (g_iEntBrokenEnt != -1)
+				TeleportEntity(g_iBrokenEntity, vPos, vAng, Push);
+				if (g_iBrokenEntity != -1)
 				{
 					char remove[64];
 					FormatEx(remove, sizeof(remove), "OnUser1 !self:kill::%f:1", 5.0);
 					SetVariantString(remove);
-					SetEntityRenderFx(g_iEntBrokenEnt, RENDERFX_FADE_SLOW);
-					AcceptEntityInput(g_iEntBrokenEnt, "AddOutput");
-					AcceptEntityInput(g_iEntBrokenEnt, "FireUser1");
+					SetEntityRenderFx(g_iBrokenEntity, RENDERFX_FADE_SLOW);
+					AcceptEntityInput(g_iBrokenEntity, "AddOutput");
+					AcceptEntityInput(g_iBrokenEntity, "FireUser1");
 				}
 			}
 		}
