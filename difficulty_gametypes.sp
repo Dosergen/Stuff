@@ -184,7 +184,7 @@ public Action ChangeLevel(Handle timer, int client)
 {
 	// Need to turn off hibernate so changelevel completes (should be reset from server.cfg)
 	ServerCommand("sm_cvar mp_gamemode %s; sm_cvar sv_hibernate_when_empty 0", g_sAllowedGameType);
-	if(g_bLeft4Dead2)
+	if (g_bLeft4Dead2)
 	{
 		ServerCommand("changelevel c8m5_rooftop");
 	}

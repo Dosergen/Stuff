@@ -115,13 +115,13 @@ void IsLookingAtBreakableDoor(int client)
 	{
 		g_iDoorEntity = TR_GetEntityIndex();
 		TR_GetEndPosition(endorigin);
-		if (g_iDoorEntity != -1 && GetVectorDistance(origin, endorigin) <= 90.0)
+		if (g_iDoorEntity > 0 && GetVectorDistance(origin, endorigin) <= 90.0)
 		{
 			char sClassName[64], sModelName[64];
 			GetEntityClassname(g_iDoorEntity, sClassName, sizeof(sClassName));
 			GetEntPropString(g_iDoorEntity, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
-			if (StrContains(sClassName, DOOR_CLASS_01) != -1 && StrContains(sModelName, DOOR_MODEL_01) != -1 
-			|| StrContains(sClassName, DOOR_CLASS_02) != -1 && StrContains(sModelName, DOOR_MODEL_02) != -1)
+			if (strcmp(sClassName, DOOR_CLASS_01) == 0 && strcmp(sModelName, DOOR_MODEL_01) == 0 
+			|| strcmp(sClassName, DOOR_CLASS_02) == 0 && strcmp(sModelName, DOOR_MODEL_02) == 0)
 			{
 				GetEntPropVector(g_iDoorEntity, Prop_Send, "m_vecOrigin", endorigin);
 				float vPos[3], vAng[3];
@@ -144,7 +144,7 @@ void IsLookingAtBreakableDoor(int client)
 				Push[1] *= power;
 				Push[2] *= power;
 				TeleportEntity(g_iBrokenEntity, vPos, vAng, Push);
-				if (g_iBrokenEntity != -1)
+				if (g_iBrokenEntity > 0)
 				{
 					char remove[64];
 					FormatEx(remove, sizeof(remove), "OnUser1 !self:kill::%f:1", 5.0);
