@@ -325,7 +325,7 @@ void SpawnCommand(int client)
 			int iNdex = CreateEntityByName("witch");
 			if (iNdex <= MaxClients)
 			{
-				LogCommand("#DEBUG: Failed to create witch");
+				LogCommand("#DEBUG: Failed to create a witch");
 				return;
 			}
 			SetAbsOrigin(iNdex, SpawnPos);
