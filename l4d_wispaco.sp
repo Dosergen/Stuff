@@ -74,7 +74,7 @@ public Plugin myinfo =
 {
 	name = "[L4D/2] WiSpaCo",
 	author = "Sheleu, Dosergen",
-	description = "This plugin spawns more witches on map.",
+	description = "Witch revival manager by timer.",
 	version = PLUGIN_VERSION,
 	url = "https://forums.alliedmods.net/showthread.php?t=137431"
 }
