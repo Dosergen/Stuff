@@ -82,7 +82,7 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	EngineVersion test = GetEngineVersion();
-	if( test != Engine_Left4Dead && test != Engine_Left4Dead2 )
+	if (test != Engine_Left4Dead && test != Engine_Left4Dead2)
 	{
 		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
 		return APLRes_SilentFailure;
@@ -434,7 +434,7 @@ float GetRandomFloatEx(float min, float max)
 
 void LogCommand(const char[] format, any ...)
 {
-	if(!g_bDebugLog)
+	if (!g_bDebugLog)
 	{
 		return;
 	}
