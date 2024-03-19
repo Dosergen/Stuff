@@ -87,12 +87,10 @@ public Action StatusCmd(int client, int args)
 		{
 			if (CheckCommandAccess(client, "sm_admin", ADMFLAG_GENERIC, false))
 			{
-				
 				if (GetCmdReplySource() == SM_REPLY_TO_CHAT)
 				{
 					ReplyToCommand(client, "[SM] %t", "See console for output");
 				}
-				
 				DisplayStatus(client);
 				ForStatusCmd(client);
 			}
@@ -103,7 +101,6 @@ public Action StatusCmd(int client, int args)
 			{
 				ReplyToCommand(client, "[SM] %t", "See console for output");
 			}
-			
 			DisplayStatus(client);
 			if (CheckCommandAccess(client, "sm_admin", ADMFLAG_GENERIC, false))
 			{
@@ -122,7 +119,7 @@ public Action StatusCmd(int client, int args)
 void ForStatusCmd(int client)
 {
 	PrintToConsole(client, "# userid name                             uniqueid               ip-address                   ping");
-	for(int i = 1; i <= MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (IsClientInGame(i) && !IsFakeClient(i))
 		{
@@ -153,9 +150,9 @@ public void DisplayStatus(int client)
 	GetCurrentMap(g_sCurrentMap, sizeof(g_sCurrentMap));
 	g_hNextMap = FindConVar("sm_nextmap");
 	GetConVarString(g_hNextMap, g_sNextmap, sizeof(g_sNextmap));
-	for(int i = 1; i <= MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (IsClientInGame(i))
+		if (IsClientInGame(i) && !IsFakeClient(i))
 		{
 			g_iClientInServer++;
 		}
@@ -232,7 +229,7 @@ public Action PingCmd(int client, int args)
 			ReplyToCommand(client, "[SM] %t", "See console for output");
 		}
 		PrintToConsole(client, "Client ping times:");
-		for(int i = 1; i <= MaxClients; i++)
+		for (int i = 1; i <= MaxClients; i++)
 		{
 			if (IsClientInGame(i) && !IsFakeClient(i))
 			{
@@ -249,7 +246,7 @@ public Action PingCmd(int client, int args)
 
 public Action Timer_CountReset(Handle timer, any args)
 {
-	for(int i = 1; i <= MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		g_iCmdCount[i] = 0;
 	}
@@ -265,7 +262,7 @@ stock int GetLatency(int client)
 stock void StringToLower(char[] f_sInput)
 {
 	int f_iSize = strlen(f_sInput);
-	for(int i = 0; i <= f_iSize; ++i)
+	for (int i = 0; i <= f_iSize; ++i)
 	{
 		f_sInput[i] = CharToLower(f_sInput[i]);
 	}
