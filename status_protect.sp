@@ -32,7 +32,7 @@ public void OnPluginStart()
 {
 	CreateConVar("sm_status_version", PLUGIN_VERSION, "Status Protect version.", FCVAR_NOTIFY|FCVAR_DONTRECORD);
 
-	g_hCvarCmdSpam = CreateConVar("sm_antispam_statusping", "3", "How many times allowed to type the status command.", CVAR_FLAGS, true, 2.0, true, 10.0);
+	g_hCvarCmdSpam = CreateConVar("sm_antispam_status", "3", "How many times allowed to type the status command.", CVAR_FLAGS, true, 2.0, true, 10.0);
 	g_hCvarShowStatus = CreateConVar("sm_show_status", "2", "Show Status (0: to all, 1: admins, 2: only your status).", CVAR_FLAGS, true, 0.0, true, 2.0);
 	g_hCvarShowPing = CreateConVar("sm_show_ping", "1", "Ping (0: off, 1: on).", CVAR_FLAGS, true, 0.0, true, 1.0);
 
