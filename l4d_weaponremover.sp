@@ -1,61 +1,24 @@
-#pragma newdecls required
 #pragma semicolon 1
+#pragma newdecls required
 
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.02c"
-#define CVAR_FLAGS	FCVAR_NOTIFY
+#define	PLUGIN_VERSION "1.02c"
+#define	CVAR_FLAGS	FCVAR_NOTIFY
 
-ConVar h_CvarEnable;
-bool b_PluginEnable;
-bool b_Left4Dead2;
+bool	b_PluginEnable, b_Left4Dead2;
+int		ent_table[128][2], new_ent_counter = 0;
 
-int ent_table[128][2];
-int new_ent_counter = 0;
+int		i_limit_all, i_limit_autoshotgun, i_limit_rifle, i_limit_hunting_rifle, i_limit_pistol,
+		i_limit_pumpshotgun, i_limit_smg, i_limit_grenade_launcher, i_limit_pistol_magnum, i_limit_rifle_ak47,
+		i_limit_rifle_desert, i_limit_rifle_m60, i_limit_rifle_sg552, i_limit_shotgun_chrome, i_limit_shotgun_spas,
+		i_limit_smg_mp5, i_limit_smg_silenced, i_limit_sniper_awp, i_limit_sniper_military, i_limit_sniper_scout;
 
-int i_limit_all;
-int i_limit_autoshotgun;
-int i_limit_rifle;
-int i_limit_hunting_rifle;
-int i_limit_pistol;
-int i_limit_pumpshotgun;
-int i_limit_smg;
-int i_limit_grenade_launcher;
-int i_limit_pistol_magnum;
-int i_limit_rifle_ak47;
-int i_limit_rifle_desert;
-int i_limit_rifle_m60;
-int i_limit_rifle_sg552;
-int i_limit_shotgun_chrome;
-int i_limit_shotgun_spas;
-int i_limit_smg_mp5;
-int i_limit_smg_silenced;
-int i_limit_sniper_awp;
-int i_limit_sniper_military;
-int i_limit_sniper_scout;
-
-ConVar h_limit_all;
-ConVar h_limit_autoshotgun;
-ConVar h_limit_rifle;
-ConVar h_limit_hunting_rifle;
-ConVar h_limit_pistol;
-ConVar h_limit_pumpshotgun;
-ConVar h_limit_smg;
-ConVar h_limit_grenade_launcher;
-ConVar h_limit_pistol_magnum;
-ConVar h_limit_rifle_ak47;
-ConVar h_limit_rifle_desert;
-ConVar h_limit_rifle_m60;
-ConVar h_limit_rifle_sg552;
-ConVar h_limit_shotgun_chrome;
-ConVar h_limit_shotgun_spas;
-ConVar h_limit_smg_mp5;
-ConVar h_limit_smg_silenced;
-ConVar h_limit_sniper_awp;
-ConVar h_limit_sniper_military;
-ConVar h_limit_sniper_scout;
-
+ConVar	h_CvarEnable, h_limit_all, h_limit_autoshotgun, h_limit_rifle, h_limit_hunting_rifle, h_limit_pistol,
+		h_limit_pumpshotgun, h_limit_smg, h_limit_grenade_launcher, h_limit_pistol_magnum, h_limit_rifle_ak47,
+		h_limit_rifle_desert, h_limit_rifle_m60, h_limit_rifle_sg552, h_limit_shotgun_chrome, h_limit_shotgun_spas,
+		h_limit_smg_mp5, h_limit_smg_silenced, h_limit_sniper_awp, h_limit_sniper_military, h_limit_sniper_scout;
 
 public Plugin myinfo =
 {
@@ -69,11 +32,11 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {	
 	EngineVersion iEngineVersion = GetEngineVersion();
-	if( iEngineVersion == Engine_Left4Dead ) 
+	if (iEngineVersion == Engine_Left4Dead) 
 	{
 		b_Left4Dead2 = false;
 	}
-	else if( iEngineVersion == Engine_Left4Dead2 ) 
+	else if (iEngineVersion == Engine_Left4Dead2) 
 	{
 		b_Left4Dead2 = true;
 	}
@@ -90,9 +53,7 @@ public void OnPluginStart()
 	CreateConVar("l4d_weaponremove_version", PLUGIN_VERSION, "[L4D/2] Weapon Remover limits the maximum number of times a weapon can be grabbed", FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	h_CvarEnable = CreateConVar("l4d_weaponremove_enable", "1", "Enable or disable Weapon Remover plugin", CVAR_FLAGS);
 	h_limit_all = CreateConVar("l4d_weaponremove_limit_all", "0", "Limits all weapons to this many pickups (0 = no limit)", CVAR_FLAGS);
-
 	// L4D1 & L4D2
-	
 	h_limit_autoshotgun = CreateConVar("l4d_weaponremove_limit_autoshotgun", "1", "Limit for Autoshotguns (0 = infinite, -1 = disable)", CVAR_FLAGS);
 	h_limit_rifle = CreateConVar("l4d_weaponremove_limit_rifle", "1", "Limit for M4s (0 = infinite, -1 = disable)", CVAR_FLAGS);
 	h_limit_hunting_rifle = CreateConVar("l4d_weaponremove_limit_hunting_rifle", "1", "Limit for Sniper Rifles (0 = infinite, -1 = disable)", CVAR_FLAGS);
@@ -108,9 +69,7 @@ public void OnPluginStart()
 	h_limit_pistol.AddChangeHook(ConVarChanged_Cvars);
 	h_limit_pumpshotgun.AddChangeHook(ConVarChanged_Cvars);
 	h_limit_smg.AddChangeHook(ConVarChanged_Cvars);
-	
 	// L4D2
-	
 	if (b_Left4Dead2)
 	{
 		h_limit_grenade_launcher = CreateConVar("l4d2_weaponremove_limit_grenade_launcher", "1", "Limit for this weapon (0 = infinite, -1 = disable)", CVAR_FLAGS);
@@ -126,7 +85,7 @@ public void OnPluginStart()
 		h_limit_sniper_awp = CreateConVar("l4d2_weaponremove_limit_sniper_awp", "1", "Limit for this weapon (0 = infinite, -1 = disable)", CVAR_FLAGS);
 		h_limit_sniper_military = CreateConVar("l4d2_weaponremove_limit_sniper_military", "1", "Limit for this weapon (0 = infinite, -1 = disable)", CVAR_FLAGS);
 		h_limit_sniper_scout = CreateConVar("l4d2_weaponremove_limit_sniper_scout", "1", "Limit for this weapon (0 = infinite, -1 = disable)", CVAR_FLAGS);	
-		
+
 		h_limit_grenade_launcher.AddChangeHook(ConVarChanged_Cvars);
 		h_limit_pistol_magnum.AddChangeHook(ConVarChanged_Cvars);
 		h_limit_rifle_ak47.AddChangeHook(ConVarChanged_Cvars);
@@ -141,7 +100,6 @@ public void OnPluginStart()
 		h_limit_sniper_military.AddChangeHook(ConVarChanged_Cvars);
 		h_limit_sniper_scout.AddChangeHook(ConVarChanged_Cvars);
 	}
-
 	AutoExecConfig(true, "l4d_weaponremover");
 }
 
@@ -169,7 +127,6 @@ void GetCvars()
 	i_limit_pistol = h_limit_pistol.IntValue;
 	i_limit_pumpshotgun = h_limit_pumpshotgun.IntValue;
 	i_limit_smg = h_limit_smg.IntValue;
-	
 	if (b_Left4Dead2)
 	{
 		i_limit_grenade_launcher = h_limit_grenade_launcher.IntValue;
@@ -192,15 +149,13 @@ void IsAllowed()
 {
 	bool bCvarAllow = h_CvarEnable.BoolValue;
 	GetCvars();
-
 	if (b_PluginEnable == false && bCvarAllow == true)
 	{
 		b_PluginEnable = true;
 		HookEvent("spawner_give_item", eSpawnerGiveItem, EventHookMode_Post);
 		HookEvent("round_start", eRoundStart, EventHookMode_Post);
 	}
-
-	else if(b_PluginEnable == true && bCvarAllow == false)
+	else if (b_PluginEnable == true && bCvarAllow == false)
 	{
 		b_PluginEnable = false;
 		UnhookEvent("spawner_give_item", eSpawnerGiveItem, EventHookMode_Post);
@@ -210,25 +165,21 @@ void IsAllowed()
 
 public void eRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
-	for(int i = 0; i < sizeof(ent_table); i++)
+	for (int i = 0; i < sizeof(ent_table); i++)
 	{
 		ent_table[i][0] = -1;
 		ent_table[i][1] = -1;
 	}
 	new_ent_counter = 0;
-
 	// Remove all weapons which have a limit of "-1"
 	// L4D1 + 2
-	
 	if (i_limit_autoshotgun < 0) DeleteAllEntities("weapon_autoshotgun_spawn");
 	if (i_limit_rifle < 0) DeleteAllEntities("weapon_rifle_spawn");
 	if (i_limit_hunting_rifle < 0) DeleteAllEntities("weapon_hunting_rifle_spawn");
 	if (i_limit_pistol < 0) DeleteAllEntities("weapon_pistol_spawn");
 	if (i_limit_pumpshotgun < 0) DeleteAllEntities("weapon_pumpshotgun_spawn");
 	if (i_limit_smg < 0) DeleteAllEntities("weapon_smg_spawn");
-	
 	// L4D2
-	
 	if (b_Left4Dead2)
 	{
 		if (i_limit_grenade_launcher < 0) DeleteAllEntities("weapon_grenade_launcher_spawn");
@@ -253,22 +204,17 @@ public void eSpawnerGiveItem(Event event, const char[] name, bool dontBroadcast)
 	{
 		return;
 	}
-	
 	char item_name[32];
 	event.GetString("item", item_name, sizeof(item_name));
-	
 	int entity_id = event.GetInt("spawner");
-	if(GetUseCount(entity_id) == -1)
+	if (GetUseCount(entity_id) == -1)
 	{
 		ent_table[new_ent_counter][0] = entity_id;
 		ent_table[new_ent_counter][1] = 0;
 		new_ent_counter++;
 	}
-	
 	SetUseCount(entity_id);
-	
 	//PrintToServer("item_name is %s ", item_name); // DEBUG
-	
 	if	((GetUseCount(entity_id) == i_limit_all) ||
 		((StrEqual(item_name, "weapon_autoshotgun", false) == true) && (GetUseCount(entity_id) == i_limit_autoshotgun)) ||
 		((StrEqual(item_name, "weapon_rifle", false) == true) && (GetUseCount(entity_id) == i_limit_rifle)) ||
@@ -296,9 +242,9 @@ public void eSpawnerGiveItem(Event event, const char[] name, bool dontBroadcast)
 
 int GetUseCount(const int entid)
 {
-	for(int i = 0; i < sizeof(ent_table); i++)
+	for (int i = 0; i < sizeof(ent_table); i++)
 	{
-		if(ent_table[i][0] == entid)
+		if (ent_table[i][0] == entid)
 		{
 			return ent_table[i][1];
 		}
@@ -308,9 +254,9 @@ int GetUseCount(const int entid)
 
 void SetUseCount(const int entid)
 {
-	for(int j = 0; j < sizeof(ent_table); j++)
+	for (int j = 0; j < sizeof(ent_table); j++)
 	{
-		if(ent_table[j][0] == entid)
+		if (ent_table[j][0] == entid)
 		{
 			ent_table[j][1]++;
 		}
