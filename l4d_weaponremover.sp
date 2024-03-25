@@ -152,14 +152,14 @@ void IsAllowed()
 	if (b_PluginEnable == false && bCvarAllow == true)
 	{
 		b_PluginEnable = true;
-		HookEvent("spawner_give_item", eSpawnerGiveItem, EventHookMode_Post);
 		HookEvent("round_start", eRoundStart, EventHookMode_Post);
+		HookEvent("spawner_give_item", eSpawnerGiveItem, EventHookMode_Post);
 	}
 	else if (b_PluginEnable == true && bCvarAllow == false)
 	{
 		b_PluginEnable = false;
-		UnhookEvent("spawner_give_item", eSpawnerGiveItem, EventHookMode_Post);
 		UnhookEvent("round_start", eRoundStart, EventHookMode_Post);
+		UnhookEvent("spawner_give_item", eSpawnerGiveItem, EventHookMode_Post);
 	}
 }
 
