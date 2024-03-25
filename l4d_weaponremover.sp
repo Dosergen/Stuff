@@ -165,6 +165,10 @@ void IsAllowed()
 
 public void eRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
+	if (!b_PluginEnable)
+	{
+		return;
+	}
 	for (int i = 0; i < sizeof(ent_table); i++)
 	{
 		ent_table[i][0] = -1;
