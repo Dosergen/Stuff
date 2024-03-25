@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.02c"
+#define PLUGIN_VERSION "1.02d"
 #define CVAR_FLAGS	FCVAR_NOTIFY
 
 bool    b_PluginEnable, b_Left4Dead2;
@@ -60,7 +60,7 @@ public void OnPluginStart()
 	h_limit_pistol = CreateConVar("l4d_weaponremove_limit_pistol", "1", "Limit for Pistols (0 = infinite, -1 = disable)", CVAR_FLAGS);
 	h_limit_pumpshotgun = CreateConVar("l4d_weaponremove_limit_pumpshotgun", "1", "Limit for Pumpshotguns (0 = infinite, -1 = disable)", CVAR_FLAGS);
 	h_limit_smg = CreateConVar("l4d_weaponremove_limit_smg", "1", "Limit for SMGs (0 = infinite, -1 = disable)", CVAR_FLAGS);
-	
+
 	h_CvarEnable.AddChangeHook(ConVarChanged_Allow);
 	h_limit_all.AddChangeHook(ConVarChanged_Cvars);
 	h_limit_autoshotgun.AddChangeHook(ConVarChanged_Cvars);
@@ -165,10 +165,6 @@ void IsAllowed()
 
 public void eRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
-	if (!b_PluginEnable)
-	{
-		return;
-	}
 	for (int i = 0; i < sizeof(ent_table); i++)
 	{
 		ent_table[i][0] = -1;
@@ -204,10 +200,6 @@ public void eRoundStart(Event event, const char[] name, bool dontBroadcast)
 
 public void eSpawnerGiveItem(Event event, const char[] name, bool dontBroadcast)
 {
-	if (!b_PluginEnable)
-	{
-		return;
-	}
 	char item_name[32];
 	event.GetString("item", item_name, sizeof(item_name));
 	int entity_id = event.GetInt("spawner");
