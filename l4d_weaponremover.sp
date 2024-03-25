@@ -4,21 +4,21 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define	PLUGIN_VERSION "1.02c"
-#define	CVAR_FLAGS	FCVAR_NOTIFY
+#define PLUGIN_VERSION "1.02c"
+#define CVAR_FLAGS	FCVAR_NOTIFY
 
-bool	b_PluginEnable, b_Left4Dead2;
-int		ent_table[128][2], new_ent_counter = 0;
+bool    b_PluginEnable, b_Left4Dead2;
+int     ent_table[128][2], new_ent_counter = 0;
 
-int		i_limit_all, i_limit_autoshotgun, i_limit_rifle, i_limit_hunting_rifle, i_limit_pistol,
-		i_limit_pumpshotgun, i_limit_smg, i_limit_grenade_launcher, i_limit_pistol_magnum, i_limit_rifle_ak47,
-		i_limit_rifle_desert, i_limit_rifle_m60, i_limit_rifle_sg552, i_limit_shotgun_chrome, i_limit_shotgun_spas,
-		i_limit_smg_mp5, i_limit_smg_silenced, i_limit_sniper_awp, i_limit_sniper_military, i_limit_sniper_scout;
+int     i_limit_all, i_limit_autoshotgun, i_limit_rifle, i_limit_hunting_rifle, i_limit_pistol,
+        i_limit_pumpshotgun, i_limit_smg, i_limit_grenade_launcher, i_limit_pistol_magnum, i_limit_rifle_ak47,
+        i_limit_rifle_desert, i_limit_rifle_m60, i_limit_rifle_sg552, i_limit_shotgun_chrome, i_limit_shotgun_spas,
+        i_limit_smg_mp5, i_limit_smg_silenced, i_limit_sniper_awp, i_limit_sniper_military, i_limit_sniper_scout;
 
-ConVar	h_CvarEnable, h_limit_all, h_limit_autoshotgun, h_limit_rifle, h_limit_hunting_rifle, h_limit_pistol,
-		h_limit_pumpshotgun, h_limit_smg, h_limit_grenade_launcher, h_limit_pistol_magnum, h_limit_rifle_ak47,
-		h_limit_rifle_desert, h_limit_rifle_m60, h_limit_rifle_sg552, h_limit_shotgun_chrome, h_limit_shotgun_spas,
-		h_limit_smg_mp5, h_limit_smg_silenced, h_limit_sniper_awp, h_limit_sniper_military, h_limit_sniper_scout;
+ConVar  h_CvarEnable, h_limit_all, h_limit_autoshotgun, h_limit_rifle, h_limit_hunting_rifle, h_limit_pistol,
+        h_limit_pumpshotgun, h_limit_smg, h_limit_grenade_launcher, h_limit_pistol_magnum, h_limit_rifle_ak47,
+        h_limit_rifle_desert, h_limit_rifle_m60, h_limit_rifle_sg552, h_limit_shotgun_chrome, h_limit_shotgun_spas,
+        h_limit_smg_mp5, h_limit_smg_silenced, h_limit_sniper_awp, h_limit_sniper_military, h_limit_sniper_scout;
 
 public Plugin myinfo =
 {
