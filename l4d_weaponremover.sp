@@ -108,12 +108,12 @@ public void OnConfigsExecuted()
 	IsAllowed();
 }
 
-public void ConVarChanged_Allow(ConVar convar, const char[] oldValue, const char[] newValue)
+void ConVarChanged_Allow(ConVar convar, const char[] oldValue, const char[] newValue)
 {
 	IsAllowed();
 }
 
-public void ConVarChanged_Cvars(ConVar convar, const char[] oldValue, const char[] newValue)
+void ConVarChanged_Cvars(ConVar convar, const char[] oldValue, const char[] newValue)
 {
 	GetCvars();
 }
@@ -163,7 +163,7 @@ void IsAllowed()
 	}
 }
 
-public void eRoundStart(Event event, const char[] name, bool dontBroadcast)
+void eRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	for (int i = 0; i < sizeof(ent_table); i++)
 	{
@@ -198,7 +198,7 @@ public void eRoundStart(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
-public void eSpawnerGiveItem(Event event, const char[] name, bool dontBroadcast)
+void eSpawnerGiveItem(Event event, const char[] name, bool dontBroadcast)
 {
 	char item_name[32];
 	event.GetString("item", item_name, sizeof(item_name));
