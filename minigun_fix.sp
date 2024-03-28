@@ -59,9 +59,9 @@ public void OnClientDisconnect(int client)
 
 public void OnEntityCreated(int entity, const char[] classname)
 {
-	if (strcmp(classname, "prop_minigun") == 0 ||
-		strcmp(classname, "prop_minigun_l4d1") == 0 || 
-		strcmp(classname, "prop_mounted_machine_gun") == 0)
+	if (strcmp(classname, "prop_minigun") == 0 
+	|| strcmp(classname, "prop_minigun_l4d1") == 0 
+	|| strcmp(classname, "prop_mounted_machine_gun") == 0)
 	{
 		SDKHook(entity, SDKHook_Use, OnUse);
 	}
