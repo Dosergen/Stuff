@@ -20,7 +20,7 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	EngineVersion test = GetEngineVersion();
-	if( test != Engine_Left4Dead && test != Engine_Left4Dead2 )
+	if (test != Engine_Left4Dead && test != Engine_Left4Dead2)
 	{
 		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
 		return APLRes_SilentFailure;
@@ -59,9 +59,9 @@ public void OnClientDisconnect(int client)
 
 public void OnEntityCreated(int entity, const char[] classname)
 {
-	if( strcmp(classname, "prop_minigun") == 0 ||
+	if (strcmp(classname, "prop_minigun") == 0 ||
 		strcmp(classname, "prop_minigun_l4d1") == 0 || 
-		strcmp(classname, "prop_mounted_machine_gun") == 0 )
+		strcmp(classname, "prop_mounted_machine_gun") == 0)
 	{
 		SDKHook(entity, SDKHook_Use, OnUse);
 	}
