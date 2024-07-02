@@ -1,0 +1,203 @@
+"Phrases"
+{
+	"Disco on message"
+	{
+		"ru"			"Режим Диско! ТАНЦУЮТ ВСЕ!"
+	}
+	"Explode player"
+	{
+		"ru"			"Взорвать игрока"
+	}
+	"was exploded"
+	{
+		"ru"			"Игрок '{1}' - взорван"
+	}
+	"Enabled friendly fire"
+	{
+		"ru"			"Включен огонь по своим"
+	}
+	"Disabled friendly fire"
+	{
+		"ru"			"Отключен огонь по своим"
+	}
+	"Friendly Fire Off"
+	{
+		"ru"			"Огонь по своим Выкл"
+	}
+	"Friendly Fire On"
+	{
+		"ru"			"Огонь по своим Вкл"
+	}
+	"Toggled happy on target"
+	{
+		"ru"			"Переключатель 'счастья' для игрока '{1}'"
+	}
+	"Happy player"
+	{
+		"ru"			"Счастливый игрок"
+	}
+	"was Teleported"
+	{
+		"ru"			"Игрок '{1}' - телепортирован"
+	}
+	"Teleport player"
+	{
+		"ru"			"Телепортировать игрока"
+	}
+	"made the color"
+	{
+		"ru"			"Цвет игрока '{1}' изменен на {2}"
+	}
+	"Color"
+	{
+		"ru"			"Цвет"
+	}
+	"Colorize player"
+	{
+		"ru"			"Изменить цвет игрока"
+	}
+	"Enabled disco mode"
+	{
+		"ru"			"Включен режим диско"
+	}
+	"Disabled disco mode"
+	{
+		"ru"			"Выключен режим диско"
+	}
+	"Disco Mode Off"
+	{
+		"ru"			"Режим Диско Выкл"
+	}
+	"Disco Mode On"
+	{
+		"ru"			"Режим Диско Вкл"
+	}
+	"Toggled invisible on target"
+	{
+		"ru"			"Переключатель невидимости для игрока '{1}'"
+	}
+	"Set alpha on target"
+	{
+		"ru"			"Игроку '{1}' установлена прозрачность, со значением {2}"
+	}
+	"Invisible player"
+	{
+		"ru"			"Невидимый игрок и оружие"
+	}
+	"Invisible player only"
+	{
+		"ru"			"Невидимый только игрок"
+	}
+	"Set player alpha"
+	{
+		"ru"			"Прозрачность игрока"
+	}
+	"was overlayed"
+	{
+		"ru"			"Переключатель наложения {2} для игрока '{1}'"
+	}
+	"color_normal"
+	{
+		"ru"			"Стандартный"
+	}
+	"color_black"
+	{
+		"ru"			"Черный"
+	}
+	"color_red"
+	{
+		"ru"			"Красный"
+	}
+	"color_green"
+	{
+		"ru"			"Зеленый"
+	}
+	"color_blue"
+	{
+		"ru"			"Синий"
+	}
+	"color_yellow"
+	{
+		"ru"			"Желтый"
+	}
+	"color_purple"
+	{
+		"ru"			"Пурпурный"
+	}
+	"color_cyan"
+	{
+		"ru"			"Темно-синий"
+	}
+	"color_orange"
+	{
+		"ru"			"Оранжевый"
+	}
+	"color_pink"
+	{
+		"ru"			"Розовый"
+	}
+	"color_olive"
+	{
+		"ru"			"Оливковый"
+	}
+	"color_lime"
+	{
+		"ru"			"Желто-зеленый"
+	}
+	"color_violet"
+	{
+		"ru"			"Фиолетовый"
+	}
+	"color_lightblue"
+	{
+		"ru"			"Голубой"
+	}
+	"color_silver"
+	{
+		"ru"			"Серебристый"
+	}
+	"color_chocolate"
+	{
+		"ru"			"Шоколадный"
+	}
+	"color_saddlebrown"
+	{
+		"ru"			"Коричневой кожи"
+	}
+	"color_indigo"
+	{
+		"ru"			"Индиго"
+	}
+	"color_ghostwhite"
+	{
+		"ru"			"Призрачно-белый"
+	}
+	"color_thistle"
+	{
+		"ru"			"Чертополоха"
+	}
+	"color_aliceblue"
+	{
+		"ru"			"Блекло-голубой"
+	}
+	"color_steelblue"
+	{
+		"ru"			"Светло-стальной"
+	}
+	"color_teal"
+	{
+		"ru"			"Зеленовато-голубой"
+	}
+	"color_gold"
+	{
+		"ru"			"Золотой"
+	}
+	"color_tan"
+	{
+		"ru"			"Желтовато-коричневый"
+	}
+	"color_tomato"
+	{
+		"ru"			"Томатный"
+	}
+}

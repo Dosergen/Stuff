@@ -1,0 +1,120 @@
+Version 0.1:
+-Initial Release
+
+Version 0.2:
+-IMPORTANT NOTE: After installing and loading this version your MUST delete the file 'cfg/sourcemod/cannounce.cfg' and then restart the server.
+-Updated geolist to return list to console or chat, depending on where it was called from.
+-Enhanced play join message can now be configured from the translation file 'cannounce.phrases.txt'
+-Removed cvar 'sm_ca_showsteamid'
+-Client recieves a message when they are allowed to set their custom join message.
+
+Version 0.3:
+-IMPORTANT NOTE: Before installing this version you must delete the file 'cfg/sourcemod/cannounce.cfg'. No server restart required though.
+-Now compiled with sourcemod 1.0.4
+-IP Address now shown by default in enhanced player join message
+-Added cvar sm_ca_autoallowmsg to allow admins with Kick flag to always be allowed to set custom join messages.
+
+Version 0.4:
+-Bots no longer are announced when joining in Left 4 Dead.
+-Custom sounds are available for custom join annoucement.
+
+Version 0.5
+-Compiled with Sourcemod 1.1
+-Fix to allow plugin to work with HLStatsX (thanks to psychonic)
+
+Version 0.5.1
+-Fixed issue relating to psychostats duplicating players (thanks to psychonic...again)
+
+Version 0.6
+-IMPORTANT NOTE: After installing and loading this version your MUST delete the file 'cfg/sourcemod/cannounce.cfg' and then restart the server. If you have customized this file, check for non default settings and edit the file after restarting.
+-Compiled with sourcemod 1.2.0
+-Connect/Disconnect messages are no longer driven by the translation file (which is now excluded from package), instead a key/value file is created to customize this info (addons\sourcemod\data\cannounce_settings.txt)
+-Added ability to customize color and other information in connect/disconnect messages.
+-Removed translation file
+-removed cvar sm_ca_logconnects as it no longer functions
+-Added enhanced disconnect message and sm_ca_showenhanceddisc cvar to toggle it.
+
+Version 0.7
+-Fixed bug where bots would show disconnect messages
+
+Version 0.8
+-IMPORTANT UPGRADE NOTE: After updating and loading this version your MUST delete the file 'cfg/sourcemod/cannounce.cfg'. If you have customized this file, check for non default settings and edit the file after reloading the plugin.
+-Added color placeholder system to custom join message
+-Added cvar 'sm_ca_playsound' to enable a sound to be played on player connect.
+-Added cvar 'sm_ca_playsoundfile' to specify sound file to be played on player connect.
+-Added cvar 'sm_ca_showstandarddisc' to disable game default player disconnect message.
+
+Version 0.9
+-IMPORTANT UPGRADE NOTE: After updating and loading this version your MUST delete the file 'cfg/sourcemod/cannounce.cfg'. If you have customized this file, check for non default settings and edit the file after reloading the plugin.
+-Compiled with SourceMod 1.2.2
+-Moved all player join sound code to ensure only the standard join sound plays (if enabled) OR the custom join sound (if set) rather than both.
+-Added cvar 'sm_ca_playdiscsound' to enable a sound to be played on player disconnect.
+-Added cvar 'sm_ca_playdiscsoundfile' to specify sound file to be played on player disconnect.
+-Fix to prevent join messages spamming if server is full and player attempts to connect in some games.
+-Added message placeholder {PLAYERTYPE}' which will display 'Admin' if the client has the generic adming flag or 'Player' if not.
+-Moved connecting annoucement code from client auth to post admin check to allow '{PLAYERTYPE}' to function. This had the unintended effect of displaying the connect messages (and sounds) to the joining client.
+-Added message placeholder '{YELLOW}' for the new text color added into TF2
+
+Version 1.0
+-IMPORTANT UPGRADE NOTE: After updating and loading this version your MUST delete the file 'cfg/sourcemod/cannounce.cfg'. If you have customized this file, check for non default settings and edit the file after reloading the plugin.
+-Added sm_ca_connectdisplaytype cvar to control when connect messages are displayed.
+-Added placeholder {DISC_REASON} to display disconnect reason in enhanced message.
+-Command sm_joinmsg now requires quotes around the parameter; fix for causing problems in saved messages file.
+
+Version 1.0.1
+-Small bugfix to prevent error logs being generated
+
+Version 1.1
+-Fixed bulid script for easier recompile.
+-Added cvar sm_ca_showenhancedadmins to show seperate connect/disconnect messages to admins with the Generic Flag.
+-Added new section 'messages_admin' to data/cannounce_settings.txt to specify messages to use when sm_ca_showenhancedadmins is set.
+
+Version 1.2
+-Upgraded to Sourcemod 1.3.2
+-Added pre-caching of sounds used with 'sm_ca_playsound' and 'sm_ca_playdiscsound'
+-Added cvar 'sm_mapstartnosound' (float, defaults to 30.0) to specify time to play no connect sounds after map start
+-Added geoip 'city' support as per thread http://forums.alliedmods.net/showthread.php?t=124288 (thanks to n3wton - http://forums.alliedmods.net/member.php?u=73687)
+-Now strip carriage returns from disconnect messages, if applicable
+
+Version 1.3
+-Fixed issue with Geoipcity support
+-Added detection of local network for geoip (thanks to Darkthrone - https://forums.alliedmods.net/member.php?u=54636)
+-Added translation file and translation messages for Local Network country
+
+Version 1.4
+IMPORTANT UPGRADE NOTE: After updating and loading this version your MUST delete the file 'cfg/sourcemod/cannounce.cfg'. If you have customized this file, check for non default settings and edit the file after installing the plugin.
+-Added placeholder color {OLIVE}
+-Sounds for 'sm_ca_playsoundfile' and 'sm_ca_playdiscsoundfile' are now added to the download table on map start.
+-Begun new testing versioning method to allow for 3rd party testing of plugins.
+-Renamed cvar sm_mapstartnosound to sm_ca_mapstartnosound 
+-Added new cvar sm_ca_disableclientmsgchange which can prevent ALL clients from setting their own custom join message when using the sm_joinmsg command
+-Fix for connect/disconnect carriage return issue thanks to sipster19 - https://forums.alliedmods.net/showthread.php?p=1554329#post1554329
+
+Version 1.5
+-Fixed color OLIVE (thanks peewee41 - http://forums.alliedmods.net/showpost.php?p=1744359&postcount=624)
+
+Version 1.6
+IMPORTANT UPGRADE NOTE: Update the translation file 'addons/sourcemod/translations/cannounce.phrases.txt'
+-Added Dont Fear The Reaper's code for GeoIPCity SM Extension (http://forums.alliedmods.net/showpost.php?p=1605353&postcount=47) - Extension here (http://forums.alliedmods.net/showthread.php?t=132470). Will fall back to built in GeoIP support if extension not installed.
+-Added the following message placeholder constants {PLAYERCOUNTRYSHORT3}, {PLAYERREGION}, {PLAYERCITY}
+-Added more translation support (again thanks to Dont Fear The Reaper's code)
+
+Version 1.7
+-Compiled with sourcemod 1.7.3
+-Updated deprecated function GetClientAuthString to GetClientAuthId
+-Changed suppress event from player_connect to player_connect_client, will not supress if game does not support this event
+-Added Multi Colors (https://forums.alliedmods.net/showthread.php?t=247770) by Bara (https://forums.alliedmods.net/member.php?u=178115) and removed my own color handling. This includes color support from:
+	* Colors (https://forums.alliedmods.net/showthread.php?t=96831)
+	* More Colors (https://forums.alliedmods.net/showthread.php?t=185016)
+and will allow different color usage based on the game engine being ran. Please see those threads for available colors.
+-Thanks to the following people for testing this in various different games, i really appreciate the support!:
+	* HvG Community (https://forums.alliedmods.net/member.php?u=198744)
+	* HSFighter (https://forums.alliedmods.net/member.php?u=30457)
+	* Merudo (https://forums.alliedmods.net/member.php?u=267174)
+
+Version 1.8
+-Added check to allow player_connect event to still fire to support older games; reported by Voodoo Priest (https://forums.alliedmods.net/member.php?u=274325)
+
+Version 1.8.3
+-Converted plugin source to the latest syntax utilizing methodmaps
+-GeoIP2 is now included with SourceMod 1.11.6703 (https://forums.alliedmods.net/showthread.php?t=311477)
