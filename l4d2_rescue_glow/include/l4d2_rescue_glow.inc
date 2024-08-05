@@ -3,21 +3,21 @@
 #endif
 #define _rescue_glow_included
 
-public SharedPlugin __pl_rescue_glow = 
+public SharedPlugin __pl_rescue_glow =
 {
-    name = "l4d2_rescue_glow",
-    file = "l4d2_rescue_glow.smx",
+	name = "l4d2_rescue_glow",
+	file = "l4d2_rescue_glow.smx",
 #if defined REQUIRE_PLUGIN
-    required = 1,
+	required = 1,
 #else
-    required = 0,
+	required = 0,
 #endif
 };
 
 #if !defined REQUIRE_PLUGIN
 public void __pl_rescue_glow_SetNTVOptional()
 {
-    MarkNativeAsOptional("RescueGlow_HasGlow");
+	MarkNativeAsOptional("RescueGlow_HasGlow");
 }
 #endif
 
