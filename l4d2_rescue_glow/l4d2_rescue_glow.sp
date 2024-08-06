@@ -30,9 +30,12 @@ public APLRes AskPluginLoad2(Handle plugin, bool late, char[] error, int err_max
 		strcopy(error, err_max, "This plugin is for Left 4 Dead 2 only.");
 		return APLRes_SilentFailure;
 	}
+
 	g_hForward_OnAdded = new GlobalForward("RescueGlow_OnAdded", ET_Ignore, Param_Cell);
 	g_hForward_OnRemoved = new GlobalForward("RescueGlow_OnRemoved", ET_Ignore, Param_Cell);
+
 	CreateNative("RescueGlow_HasGlow", Native_HasGlow);
+
 	g_bLateLoad = late;
 	return APLRes_Success;
 }
@@ -40,17 +43,19 @@ public APLRes AskPluginLoad2(Handle plugin, bool late, char[] error, int err_max
 public void OnPluginStart()
 {
 	CreateConVar("rescue_glow_version", PLUGIN_VERSION, "[L4D/2] Rescue Glow plugin version.", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+
 	g_hCvarColor = CreateConVar("rescue_glow_color", "255 102 0", "Color of glow, split by space.");
 	g_hCvarFlash = CreateConVar("rescue_glow_flash", "1", "Will the glow flash?");
+
 	g_hCvarColor.AddChangeHook(OnConVarChanged);
 	g_hCvarFlash.AddChangeHook(OnConVarChanged);
+	
+	GetCvars();
 	
 	HookEvent("player_spawn", OnPlayerEvent);
 	HookEvent("player_team", OnPlayerEvent);
 	HookEvent("player_death", OnPlayerEvent);
 	HookEvent("round_start", OnRoundStart);
-	
-	GetAllCvars();
 	
 	AutoExecConfig(true, "l4d2_rescue_glow");
 	
@@ -71,17 +76,34 @@ public void OnPluginEnd()
 	ResetAllGlows();
 }
 
+void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	GetCvars();
+}
+
+void GetCvars()
+{
+	ParseColor(g_hCvarColor, g_iColor);
+	g_bFlash = g_hCvarFlash.BoolValue;
+}
+
+void ParseColor(ConVar convar, int output[3])
+{
+	char cvar_colors[13], colors_get[3][4];
+	convar.GetString(cvar_colors, sizeof(cvar_colors));
+	ExplodeString(cvar_colors, " ", colors_get, 3, 4);
+	for (int i = 0; i < 3; i++)
+	{
+		output[i] = Clamp(StringToInt(colors_get[i]), 0, 255);
+	}
+}
+
 public void OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost);
 }
 
-public void OnClientDisconnect_Post(int client)
-{
-	g_bAdded[client] = false;
-}
-
-public void OnPostThinkPost(int entity)
+void OnPostThinkPost(int entity)
 {
 	if (GetClientTeam(entity) == 2 && !IsPlayerAlive(entity))
 	{
@@ -112,47 +134,23 @@ public void OnPostThinkPost(int entity)
 	}
 }
 
-public void OnPlayerEvent(Event event, const char[] name, bool dontBroadcast)
+public void OnClientDisconnect(int client)
+{
+	g_bAdded[client] = false;
+}
+
+void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
+{
+	ResetAllGlows();
+}
+
+void OnPlayerEvent(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (client != 0)
 	{
 		RemoveGlow(client);
 	}
-}
-
-public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
-{
-	ResetAllGlows();
-}
-
-void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
-{
-	if (convar == g_hCvarColor)
-	{
-		ParseColor(g_hCvarColor, g_iColor);
-    }
-	else if (convar == g_hCvarFlash)
-	{
-		g_bFlash = g_hCvarFlash.BoolValue;
-	}
-}
-
-void ParseColor(ConVar convar, int output[3])
-{
-	char cvar_colors[13], colors_get[3][4];
-	convar.GetString(cvar_colors, sizeof(cvar_colors));
-	ExplodeString(cvar_colors, " ", colors_get, 3, 4);
-	for (int i = 0; i < 3; i++)
-	{
-		output[i] = Clamp(StringToInt(colors_get[i]), 0, 255);
-	}
-}
-
-void GetAllCvars()
-{
-	ParseColor(g_hCvarColor, g_iColor);
-	g_bFlash = g_hCvarFlash.BoolValue;
 }
 
 void SetGlow(int entity, int type = 0, const int color[3] = {0, 0, 0}, int range = 0, int range_min = 0, bool flash = false)
