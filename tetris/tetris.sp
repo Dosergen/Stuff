@@ -170,7 +170,7 @@ public void OnPluginStart()
 	g_bIsCSGO = GetEngineVersion() == Engine_CSGO;
 	g_bIsL4D = (GetEngineVersion() == Engine_Left4Dead || GetEngineVersion() == Engine_Left4Dead2);
 	
-	SQL_TConnect(SQL_OnDatabaseConnected, (SQL_CheckConfig("tetris")?"tetris":"storage-local"));
+	SQL_TConnect(SQL_OnDatabaseConnected, (SQL_CheckConfig("tetris") ? "tetris" : "storage-local"));
 	
 	AutoExecConfig(true, "tetris");
 }
