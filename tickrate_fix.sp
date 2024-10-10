@@ -179,15 +179,7 @@ void UpdatePistolDelays()
 
 float Clamp(float value, float min, float max)
 {
-	if (value < min) 
-	{
-		return min;
-	}
-	else if (value > max) 
-	{
-		return max;
-	}
-	return value;
+	return value < min ? min : value > max ? max : value;
 }
 
 void Hook_OnPreThink(int iClient)
