@@ -35,9 +35,9 @@ DoorsData g_ddDoors[MAX_EDICTS];
 //--------------- Fast Pistols & Slow Doors -------------
 //*******************************************************
 
-ConVar g_hPistolDelayDualies;
-ConVar g_hPistolDelaySingle;
-ConVar g_hPistolDelayIncapped;
+ConVar g_hCvarPistolDelayDualies;
+ConVar g_hCvarPistolDelaySingle;
+ConVar g_hCvarPistolDelayIncapped;
 ConVar g_hCvarDoorSpeed;
 
 float g_fNextAttack[MAXPLAYERS + 1];
@@ -72,9 +72,10 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnPluginStart()
 {
 	CreateConVar("l4d_tickrate_fixes_version", PLUGIN_VERSION, "Tickrate Fixes plugin version.", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hPistolDelayDualies = CreateConVar("l4d_tickrate_pistol_dualies", "0.15", "Minimum time (in seconds) between dual pistol shots", FCVAR_NOTIFY, true, 0.0, true, 5.0);
-	g_hPistolDelaySingle = CreateConVar("l4d_tickrate_pistol_single", "0.2", "Minimum time (in seconds) between single pistol shots", FCVAR_NOTIFY, true, 0.0, true, 5.0);
-	g_hPistolDelayIncapped = CreateConVar("l4d_tickrate_pistol_incapped", "0.3", "Minimum time (in seconds) between pistol shots while incapped", FCVAR_NOTIFY, true, 0.0, true, 5.0);
+	
+	g_hCvarPistolDelayDualies = CreateConVar("l4d_tickrate_pistol_dualies", "0.15", "Minimum time (in seconds) between dual pistol shots", FCVAR_NOTIFY, true, 0.0, true, 5.0);
+	g_hCvarPistolDelaySingle = CreateConVar("l4d_tickrate_pistol_single", "0.2", "Minimum time (in seconds) between single pistol shots", FCVAR_NOTIFY, true, 0.0, true, 5.0);
+	g_hCvarPistolDelayIncapped = CreateConVar("l4d_tickrate_pistol_incapped", "0.3", "Minimum time (in seconds) between pistol shots while incapped", FCVAR_NOTIFY, true, 0.0, true, 5.0);
 	g_hCvarDoorSpeed = CreateConVar("l4d_tickrate_door_speed", "1.5", "Sets the speed of all prop_door entities on a map. 1.05 means = 105% speed", FCVAR_NOTIFY, true, 0.0, true, 5.0);
 
 	GetCvars();
@@ -83,9 +84,9 @@ public void OnPluginStart()
 	Door_GetSettingsAll();
 	Door_SetSettingsAll();
 
-	g_hPistolDelayDualies.AddChangeHook(ConVarChanged_Cvars);
-	g_hPistolDelaySingle.AddChangeHook(ConVarChanged_Cvars);
-	g_hPistolDelayIncapped.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarPistolDelayDualies.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarPistolDelaySingle.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarPistolDelayIncapped.AddChangeHook(ConVarChanged_Cvars);
 	g_hCvarDoorSpeed.AddChangeHook(ConVarChanged_Cvars);
 
 	HookEvent("weapon_fire", Event_WeaponFire);
@@ -117,9 +118,9 @@ void ConVarChanged_Cvars(ConVar convar, char[] oldValue, char[] newValue)
 
 void GetCvars()
 {
-	g_fPistolDelayDualies = g_hPistolDelayDualies.FloatValue;
-	g_fPistolDelaySingle = g_hPistolDelaySingle.FloatValue;
-	g_fPistolDelayIncapped = g_hPistolDelayIncapped.FloatValue;
+	g_fPistolDelayDualies = g_hCvarPistolDelayDualies.FloatValue;
+	g_fPistolDelaySingle = g_hCvarPistolDelaySingle.FloatValue;
+	g_fPistolDelayIncapped = g_hCvarPistolDelayIncapped.FloatValue;
 	g_fDoorSpeed = g_hCvarDoorSpeed.FloatValue;
 }
 
