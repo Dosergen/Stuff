@@ -5,9 +5,9 @@
 #include <sdkhooks>
 #include <sdktools>
 
-#define MAX_EDICTS         2048 //(1 << 11)
-#define ENTITY_MAX_NAME    64
-#define PLUGIN_VERSION     "1.4.0"
+#define PLUGIN_VERSION   "1.4.0"
+#define ENTITY_MAX_NAME  64
+#define MAX_EDICTS       2048 //(1 << 11)
 
 enum /*DoorsTypeTracked*/
 {
@@ -72,7 +72,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnPluginStart()
 {
 	CreateConVar("l4d_tickrate_fixes_version", PLUGIN_VERSION, "Tickrate Fixes plugin version.", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	
+    
 	g_hCvarPistolDelayDualies = CreateConVar("l4d_tickrate_pistol_dualies", "0.15", "Minimum time (in seconds) between dual pistol shots", FCVAR_NOTIFY, true, 0.0, true, 5.0);
 	g_hCvarPistolDelaySingle = CreateConVar("l4d_tickrate_pistol_single", "0.2", "Minimum time (in seconds) between single pistol shots", FCVAR_NOTIFY, true, 0.0, true, 5.0);
 	g_hCvarPistolDelayIncapped = CreateConVar("l4d_tickrate_pistol_incapped", "0.3", "Minimum time (in seconds) between pistol shots while incapped", FCVAR_NOTIFY, true, 0.0, true, 5.0);
@@ -147,7 +147,6 @@ void Hook_DoorSpawnPost(int iEntity)
 	}
 	char sClassName[ENTITY_MAX_NAME];
 	GetEntityClassname(iEntity, sClassName, sizeof(sClassName));
-	// Save Original Settings.
 	for (int i = 0; i < sizeof(g_szDoors_Type_Tracked); i++) 
 	{
 		if (strcmp(sClassName, g_szDoors_Type_Tracked[i], false) == 0)
@@ -155,7 +154,6 @@ void Hook_DoorSpawnPost(int iEntity)
 			Door_GetSettings(iEntity, i);
 		}
 	}
-	// Set Settings.
 	Door_SetSettings(iEntity);
 }
 
@@ -208,10 +206,8 @@ void Hook_OnPreThink(int iClient)
 	}
 	float fOldValue = GetEntPropFloat(iActiveWeapon, Prop_Send, "m_flNextPrimaryAttack");
 	float fNewValue = g_fNextAttack[iClient];
-	// Never accidentally speed up fire rate
 	if (fNewValue > fOldValue) 
 	{
-		// PrintToChatAll("Readjusting delay: Old=%f, New=%f", fOldValue, fNewValue);
 		SetEntPropFloat(iActiveWeapon, Prop_Send, "m_flNextPrimaryAttack", fNewValue);
 	}
 }
@@ -234,19 +230,48 @@ void Event_WeaponFire(Event event, const char[] name , bool dontBroadcast)
 	{
 		return;
 	}
-	// int iDualies = GetEntProp(iActiveWeapon, Prop_Send, "m_hasDualWeapons");
 	if (GetEntProp(iClient, Prop_Send, "m_isIncapacitated")) 
 	{
 		g_fNextAttack[iClient] = GetGameTime() + g_fPistolDelayIncapped;
-	} 
+	}
 	else if (GetEntProp(iActiveWeapon, Prop_Send, "m_isDualWielding")) 
-	{ // What is the difference between m_isDualWielding and m_hasDualWeapons ?
+	{
 		g_fNextAttack[iClient] = GetGameTime() + g_fPistolDelayDualies;
-	} 
+	}
 	else 
 	{
 		g_fNextAttack[iClient] = GetGameTime() + g_fPistolDelaySingle;
 	}
+}
+
+void Door_GetSettings(int iEntity, int iType)
+{
+	g_ddDoors[iEntity].DoorsData_Type = iType;
+	g_ddDoors[iEntity].DoorsData_Speed = GetEntPropFloat(iEntity, Prop_Data, "m_flSpeed");
+	g_ddDoors[iEntity].DoorsData_ForceClose = GetEntProp(iEntity, Prop_Data, "m_bForceClosed") != 0;
+}
+
+void Door_GetSettingsAll()
+{
+	int iEntity = -1;
+	for (int i = 0; i < sizeof(g_szDoors_Type_Tracked); i++) 
+	{
+		while ((iEntity = FindEntityByClassname(iEntity, g_szDoors_Type_Tracked[i])) != -1) 
+		{
+			Door_GetSettings(iEntity, i);
+		}
+		iEntity = -1;
+	}
+}
+
+void Door_SetSettings(int iEntity)
+{
+	if (!IsValidEntity(iEntity)) 
+	{
+		return;
+	}
+	SetEntPropFloat(iEntity, Prop_Data, "m_flSpeed", g_ddDoors[iEntity].DoorsData_Speed * g_fDoorSpeed);
+	SetEntProp(iEntity, Prop_Data, "m_bForceClosed", false);
 }
 
 void Door_SetSettingsAll()
@@ -256,17 +281,20 @@ void Door_SetSettingsAll()
 	{
 		while ((iEntity = FindEntityByClassname(iEntity, g_szDoors_Type_Tracked[i])) != -1) 
 		{
-			Door_SetSettings(iEntity);
-			SetEntProp(iEntity, Prop_Data, "m_bForceClosed", false);
+			if (IsValidEntity(iEntity)) 
+			{
+				Door_SetSettings(iEntity);
+				SetEntProp(iEntity, Prop_Data, "m_bForceClosed", false);
+			}
 		}
 		iEntity = -1;
 	}
 }
 
-void Door_SetSettings(int iEntity) 
+void Door_ResetSettings(int iEntity)
 {
-	float fSpeed = g_ddDoors[iEntity].DoorsData_Speed * g_fDoorSpeed;
-	SetEntPropFloat(iEntity, Prop_Data, "m_flSpeed", fSpeed);
+	SetEntPropFloat(iEntity, Prop_Data, "m_flSpeed", g_ddDoors[iEntity].DoorsData_Speed);
+	SetEntProp(iEntity, Prop_Data, "m_bForceClosed", g_ddDoors[iEntity].DoorsData_ForceClose);
 }
 
 void Door_ResetSettingsAll()
@@ -282,38 +310,10 @@ void Door_ResetSettingsAll()
 	}
 }
 
-void Door_ResetSettings(int iEntity) 
-{
-	float fSpeed = g_ddDoors[iEntity].DoorsData_Speed;
-	SetEntPropFloat(iEntity, Prop_Data, "m_flSpeed", fSpeed);
-}
-
-void Door_GetSettingsAll()
-{
-	int iEntity = -1;
-	for (int i = 0; i < sizeof(g_szDoors_Type_Tracked); i++) 
-	{
-		while ((iEntity = FindEntityByClassname(iEntity, g_szDoors_Type_Tracked[i])) != INVALID_ENT_REFERENCE) 
-		{
-			Door_GetSettings(iEntity, i);
-		}
-		iEntity = -1;
-	}
-}
-
-void Door_GetSettings(int iEntity, int iDoorType)
-{
-	g_ddDoors[iEntity].DoorsData_Type = iDoorType;
-	g_ddDoors[iEntity].DoorsData_Speed = GetEntPropFloat(iEntity, Prop_Data, "m_flSpeed");
-	g_ddDoors[iEntity].DoorsData_ForceClose = GetEntProp(iEntity, Prop_Data, "m_bForceClosed") != 0;
-}
-
 void Door_ClearSettingsAll()
 {
 	for (int i = 0; i < MAX_EDICTS; i++) 
 	{
 		g_ddDoors[i].DoorsData_Type = DoorsTypeTracked_None;
-		g_ddDoors[i].DoorsData_Speed = 0.0;
-		g_ddDoors[i].DoorsData_ForceClose = false;
 	}
 }

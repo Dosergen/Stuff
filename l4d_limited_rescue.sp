@@ -132,7 +132,7 @@ void EvtSurvRescued(Event event, const char[] name, bool dontBroadcast)
 	{
 		if (IsValidEntRef(g_iForRescueProp[iVictim]))
 		{
-			CreateTimer(1.0, DelayRemoveEntity, g_iForRescueProp[iVictim]);
+			RemoveEntity(g_iForRescueProp[iVictim]);
 			#if DEBUG
 			PrintToChatAll("EvtSurvRescued: Removed rescue prop with index %i", EntRefToEntIndex(g_iForRescueProp[iVictim]));
 			#endif
@@ -216,7 +216,10 @@ void ScriptInit()
 			{
 				nearbyEntityCount++;
 				g_bIsRescueNearDelEntity[rescueEntities[j]] = true;
-				CreateTimer(1.0, DelayRemoveEntity, rescueEntities[j]);
+				if (IsValidEntRef(rescueEntities[j]))
+				{
+					RemoveEntity(rescueEntities[j]);
+				}
 				#if DEBUG
 				LogMessage("ScriptInit: Removed rescue entity with index %i at distance %.2f", rescueEntities[j], distance);
 				#endif
@@ -226,18 +229,6 @@ void ScriptInit()
 	#if DEBUG
 	LogMessage("ScriptInit: Completed processing of rescue entities");
 	#endif
-}
-
-Action DelayRemoveEntity(Handle timer, int entity)
-{
-    if (IsValidEntRef(entity))
-    {
-        RemoveEntity(entity);
-        #if DEBUG
-        LogMessage("DelayRemoveEntity: Delayed removal of rescue entity %i", entity);
-        #endif
-    }
-    return Plugin_Stop;
 }
 
 // Checks if survivors have left the safe area by checking the terror player manager entity
