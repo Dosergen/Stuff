@@ -51,7 +51,7 @@ bool g_bLateLoad;
 public Plugin myinfo = 
 {
 	name = "Tickrate Fixes",
-	author = "Sir, Griffin, Chanz, A1m`, Dosergen",
+	author = "Sir, Griffin, Chanz, Dosergen",
 	description = "Fixes a handful of silly Tickrate bugs",
 	version = PLUGIN_VERSION,
 	url = "https://github.com/SirPlease/L4D2-Competitive-Rework/blob/master/addons/sourcemod/scripting/TickrateFixes.sp"
@@ -160,8 +160,8 @@ void Hook_DoorSpawnPost(int iEntity)
 
 public void OnClientPutInServer(int iClient)
 {
-	SDKHook(iClient, SDKHook_PreThink, Hook_OnPreThink);
 	g_fNextAttack[iClient] = 0.0;
+	SDKHook(iClient, SDKHook_PreThink, Hook_OnPreThink);
 }
 
 public void OnClientDisconnect(int iClient)
@@ -171,14 +171,27 @@ public void OnClientDisconnect(int iClient)
 
 void UpdatePistolDelays()
 {
-	g_fPistolDelayDualies = (g_fPistolDelayDualies < 0.0) ? 0.0 : (g_fPistolDelayDualies > 5.0) ? 5.0 : g_fPistolDelayDualies;
-	g_fPistolDelaySingle = (g_fPistolDelaySingle < 0.0) ? 0.0 : (g_fPistolDelaySingle > 5.0) ? 5.0 : g_fPistolDelaySingle;
-	g_fPistolDelayIncapped = (g_fPistolDelayIncapped < 0.0) ? 0.0 : (g_fPistolDelayIncapped > 5.0) ? 5.0 : g_fPistolDelayIncapped;
+	g_fPistolDelayDualies = Clamp(g_fPistolDelayDualies, 0.0, 5.0);
+	g_fPistolDelaySingle = Clamp(g_fPistolDelaySingle, 0.0, 5.0);
+	g_fPistolDelayIncapped = Clamp(g_fPistolDelayIncapped, 0.0, 5.0);
+}
+
+float Clamp(float value, float min, float max)
+{
+	if (value < min) 
+	{
+		return min;
+	}
+	else if (value > max) 
+	{
+		return max;
+	}
+	return value;
 }
 
 void Hook_OnPreThink(int iClient)
 {
-	if (iClient < 1 || GetClientTeam(iClient) != 2)
+	if (!IsClientInGame(iClient) || GetClientTeam(iClient) != 2)
 	{
 		return;
 	}
@@ -206,7 +219,7 @@ void Hook_OnPreThink(int iClient)
 void Event_WeaponFire(Event event, const char[] name , bool dontBroadcast)
 {
 	int iClient = GetClientOfUserId(event.GetInt("userid"));
-	if (iClient < 1 || GetClientTeam(iClient) != 2)
+	if (!IsClientInGame(iClient) || GetClientTeam(iClient) != 2)
 	{
 		return;
 	}
