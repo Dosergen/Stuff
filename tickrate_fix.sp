@@ -161,13 +161,20 @@ void Hook_DoorSpawnPost(int iEntity)
 
 public void OnClientPutInServer(int iClient)
 {
-	g_fNextAttack[iClient] = 0.0;
-	SDKHook(iClient, SDKHook_PreThink, Hook_OnPreThink);
+	if (IsClientInGame(iClient))
+	{
+		g_fNextAttack[iClient] = 0.0;
+		SDKHook(iClient, SDKHook_PreThink, Hook_OnPreThink);
+	}
 }
 
 public void OnClientDisconnect(int iClient)
 {
-	SDKUnhook(iClient, SDKHook_PreThink, Hook_OnPreThink);
+	if (IsClientInGame(iClient))
+	{
+		g_fNextAttack[iClient] = 0.0;
+		SDKUnhook(iClient, SDKHook_PreThink, Hook_OnPreThink);
+	}
 }
 
 void UpdatePistolDelays()
