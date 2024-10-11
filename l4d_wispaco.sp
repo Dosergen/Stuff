@@ -82,7 +82,8 @@ ConVar  g_hCvarEnable,
 bool    g_bRunTimer = false,
         g_bLeftSafeArea = false,
         g_bWitchExec = false,
-        g_bHookedEvents = false;
+        g_bHookedEvents = false,
+		g_bSpawnWitchBride = false;
 
 Handle  g_hSpawnTimer;
 
@@ -359,26 +360,51 @@ Action SpawnAWitch(Handle timer)
 void SpawnCommand(int client)
 {
 	if (client)
-	{	
-		float SpawnPos[3], SpawnAng[3]; // Arrays to store the spawn position and angles
-		int iRandom = GetRandom(); // Get a random value to determine where to spawn
-		// If a valid spawn position is found based on the random value
-		if (iRandom > 0 && L4D_GetRandomPZSpawnPosition(iRandom, 8, 30, SpawnPos))
+	{
+		int iWitchiNdex;
+		int iRandom = GetRandom();
+		float fSpawnPos[3], fSpawnAng[3]; 
+		// Check if a valid spawn position is found based on the random value
+		if (iRandom > 0 && L4D_GetRandomPZSpawnPosition(iRandom, 8, 30, fSpawnPos))
 		{
-			// Try to create a "witch" entity
-			int iNdex = CreateEntityByName("witch");
-			if (iNdex == -1) // If entity creation fails
+			// Attempt to create a "witch" entity
+			iWitchiNdex = CreateEntityByName("witch");
+			// If entity creation fails, log the error and exit the function
+			if (iWitchiNdex == -1)
 			{
-				LogCommand("#DEBUG: Failed to create a witch");
-				return; // Exit the function if creation fails
+				LogCommand("#DEBUG: Failed to create a witch with sdktools");
+				return; // Exit if creation fails
 			}
-			// Set the entity's position at the selected spawn point
-			SetAbsOrigin(iNdex, SpawnPos);
-			// Randomize the witch's yaw angle (rotation around the vertical axis)
-			SpawnAng[1] = GetRandomFloatEx(-179.0, 179.0); // Set a random angle between -179 and 179 degrees
-			SetAbsAngles(iNdex, SpawnAng); // Apply the angle to the entity
+			// Set the entity's position at the found spawn location
+			SetAbsOrigin(iWitchiNdex, fSpawnPos);
+			// Randomize the yaw angle (rotation around the vertical axis) between -179 and 179 degrees
+			fSpawnAng[1] = GetRandomFloatEx(-179.0, 179.0); 
+			// Apply the randomized angle to the entity
+			SetAbsAngles(iWitchiNdex, fSpawnAng);
 			// Spawn the entity in the game
-			DispatchSpawn(iNdex);
+			DispatchSpawn(iWitchiNdex);
+		}
+		else // If no valid spawn position is found
+		{
+			// Check if we need to spawn a Witch Bride instead of a regular witch
+			if (g_bSpawnWitchBride)
+			{	
+				// Spawn a Witch Bride at the specified position and angle
+				iWitchiNdex = L4D2_SpawnWitchBride(fSpawnPos, fSpawnAng);
+			}
+			else
+			{
+				// Spawn a regular witch at the specified position and angle
+				iWitchiNdex = L4D2_SpawnWitch(fSpawnPos, fSpawnAng);
+			}
+			// Toggle the boolean to alternate between spawning Witch Bride and regular Witch
+			g_bSpawnWitchBride = !g_bSpawnWitchBride;
+			// If entity creation fails, log the error and exit the function
+			if (iWitchiNdex == -1)
+			{
+				LogCommand("#DEBUG: Failed to create a witch with lef4dhooks");
+				return; // Exit if creation fails
+			}
 		}
 	}
 }
