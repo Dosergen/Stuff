@@ -65,6 +65,7 @@ int     g_iCountWitch,
         g_iCountWitchAlive;
 
 bool    g_bPluginEnable,
+        g_bLeft4Dead2,
         g_bDirectorWitch,
         g_bFinaleStart,
         g_bDebugLog;
@@ -99,13 +100,20 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	EngineVersion test = GetEngineVersion();
-	if (test != Engine_Left4Dead && test != Engine_Left4Dead2)
+	if (test == Engine_Left4Dead2)
 	{
-		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
-		return APLRes_SilentFailure;
+		g_bLeft4Dead2 = true;
+		return APLRes_Success;
 	}
-	return APLRes_Success;
+	else if (test == Engine_Left4Dead)
+	{
+		g_bLeft4Dead2 = false;
+		return APLRes_Success;
+	}
+	strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
+	return APLRes_SilentFailure;
 }
+
 
 public void OnPluginStart()
 {
@@ -363,47 +371,45 @@ void SpawnCommand(int client)
 	{
 		int iWitchiNdex;
 		int iRandom = GetRandom();
-		float fSpawnPos[3], fSpawnAng[3]; 
+		float fSpawnPos[3], fSpawnAng[3];
 		// Attempt to find a valid spawn position based on the random value
 		if (iRandom > 0 && L4D_GetRandomPZSpawnPosition(iRandom, 8, 30, fSpawnPos))
 		{
-			// Attempt to create a "witch" entity
+			// Attempt to create a "witch" entity using the entity name "witch"
 			iWitchiNdex = CreateEntityByName("witch");
-			// If entity creation fails, log the error and exit the function
 			if (iWitchiNdex == -1)
 			{
 				LogCommand("#DEBUG: Failed to create a witch with sdktools");
-				return; // Exit if creation fails
+				return; // Exit the function if entity creation fails
 			}
-			// Set the entity's position at the found spawn location
+			// Set the entity's position to the found spawn position
 			SetAbsOrigin(iWitchiNdex, fSpawnPos);
 			// Randomize the yaw angle (rotation around the vertical axis) between -179 and 179 degrees
 			fSpawnAng[1] = GetRandomFloatEx(-179.0, 179.0); 
 			// Apply the randomized angle to the entity
 			SetAbsAngles(iWitchiNdex, fSpawnAng);
-			// Spawn the entity in the game
+			// Spawn the entity into the game world
 			DispatchSpawn(iWitchiNdex);
 		}
-		else // If no valid spawn position is found
+		else if (g_bLeft4Dead2)
 		{
-			// Check if we need to spawn a Witch Bride instead of a regular witch
+            // Check if we need to spawn a Witch Bride instead of a regular Witch
 			if (g_bSpawnWitchBride)
-			{	
-				// Try to spawn a Witch Bride at a fallback position
+			{
+				// Spawn a Witch Bride at the fallback position using L4D2_SpawnWitchBride
 				iWitchiNdex = L4D2_SpawnWitchBride(fSpawnPos, fSpawnAng);
 			}
 			else
 			{
-				// Try to spawn a regular witch at a fallback position
+				// Spawn a regular Witch at the fallback position using L4D2_SpawnWitch
 				iWitchiNdex = L4D2_SpawnWitch(fSpawnPos, fSpawnAng);
 			}
-			// Toggle the boolean to alternate between spawning Witch Bride and regular Witch
+			// Toggle the boolean flag to alternate between spawning a Witch Bride and a regular Witch
 			g_bSpawnWitchBride = !g_bSpawnWitchBride;
-			// If entity creation fails, log the error and exit the function
 			if (iWitchiNdex == -1)
 			{
 				LogCommand("#DEBUG: Failed to create a witch with lef4dhooks");
-				return; // Exit if creation fails
+				return; // Exit the function if entity creation fails
 			}
 		}
 	}
@@ -433,43 +439,43 @@ int FindEntityByClassname2(int startEnt, const char[] classname)
 
 int GetCountAliveWitches()
 {
-	int countAlive = 0;
-	int iNdex = -1;
-	while ((iNdex = FindEntityByClassname2(iNdex, "witch")) != -1)
+	int iCountAlive = 0;
+	int iWitchiNdex = -1;
+	while ((iWitchiNdex = FindEntityByClassname2(iWitchiNdex, "witch")) != -1)
 	{
-		countAlive++;
-		LogCommand("#DEBUG: Witch ID = %i (Alive witches = %i)", iNdex, countAlive);
+		iCountAlive++;
+		LogCommand("#DEBUG: Witch ID = %i (Alive witches = %i)", iWitchiNdex, iCountAlive);
 		if (g_fWitchDistance > 0)
 		{
-			float WitchPos[3];
-			float PlayerPos[3];
-			GetEntPropVector(iNdex, Prop_Send, "m_vecOrigin", WitchPos);
-			int clients = 0;
-			int tooFar = 0;
+			float fWitchPos[3];
+			float fPlayerPos[3];
+			GetEntPropVector(iWitchiNdex, Prop_Send, "m_vecOrigin", fWitchPos);
+			int iClients = 0;
+			int iTooFar = 0;
 			for (int i = 1; i <= MaxClients; i++)
 			{
 				if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == 2)
 				{
-					clients++;
-					GetClientAbsOrigin(i, PlayerPos);
-					float distance = GetVectorDistance(WitchPos, PlayerPos);
+					iClients++;
+					GetClientAbsOrigin(i, fPlayerPos);
+					float distance = GetVectorDistance(fWitchPos, fPlayerPos);
 					LogCommand("#DEBUG: Distance to witch = %f; Max distance = %f", distance, g_fWitchDistance);
 					if (distance > g_fWitchDistance)
 					{
-						tooFar++;
+						iTooFar++;
 					}
 				}
 			}
-			if (tooFar == clients)
+			if (iTooFar == iClients)
 			{
-				RemoveEntity(iNdex);
-				countAlive--;
-				LogCommand("#DEBUG: Witch removed for being too far; Alive witches = %d", countAlive);
+				RemoveEntity(iWitchiNdex);
+				iCountAlive--;
+				LogCommand("#DEBUG: Witch removed for being too far; Alive witches = %d", iCountAlive);
 			}
 		}
 	}
-	LogCommand("#DEBUG: Alive witches = %d, Max count alive witches = %d", countAlive, g_iCountWitchAlive);
-	return countAlive;
+	LogCommand("#DEBUG: Alive witches = %d, Max count alive witches = %d", iCountAlive, g_iCountWitchAlive);
+	return iCountAlive;
 }
 
 int GetRandom()
