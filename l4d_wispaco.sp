@@ -393,7 +393,6 @@ void SpawnCommand(int client)
 		}
 		else if (g_bLeft4Dead2)
 		{
-            // Check if we need to spawn a Witch Bride instead of a regular Witch
 			if (g_bSpawnWitchBride)
 			{
 				// Spawn a Witch Bride at the fallback position using L4D2_SpawnWitchBride
