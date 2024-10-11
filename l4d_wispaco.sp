@@ -467,7 +467,10 @@ int GetCountAliveWitches()
 			}
 			if (iTooFar == iClients)
 			{
-				RemoveEntity(iWitchiNdex);
+				if (IsValidEdict(iWitchiNdex))
+				{
+					RemoveEntity(iWitchiNdex);
+				}
 				iCountAlive--;
 				LogCommand("#DEBUG: Witch removed for being too far; Alive witches = %d", iCountAlive);
 			}
