@@ -84,7 +84,7 @@ bool    g_bRunTimer = false,
         g_bLeftSafeArea = false,
         g_bWitchExec = false,
         g_bHookedEvents = false,
-		g_bSpawnWitchBride = false;
+        g_bSpawnWitchBride = false;
 
 Handle  g_hSpawnTimer;
 
