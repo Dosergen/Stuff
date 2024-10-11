@@ -6,18 +6,26 @@
 #include <sdktools>
 #include <entity_prop_stocks>
 
-#define VERSION "1.4.7"
+#define VERSION "1.4.8"
 
 #define MAX_DOOR_DISTANCE 90.0
 #define PUNCH_COOLDOWN 2.0
 #define DOOR_TELEPORT_HEIGHT 10000.0
 
-#define DOOR_CLASS_01 "prop_door_rotating"
-#define DOOR_CLASS_02 "prop_door_rotating_checkpoint"
-#define DOOR_MODEL_01 "models/props_doors/doorfreezer01.mdl"
-#define DOOR_MODEL_02 "models/props_doors/checkpoint_door_01.mdl"
-#define DOOR_MODEL_03 "models/props_doors/checkpoint_door_-01.mdl"
-#define DOOR_MODEL_04 "models/lighthouse/checkpoint_door_lighthouse01.mdl"
+// Consolidated door models and classes into arrays for faster comparison
+static const char g_DoorClasses[][MAX_NAME_LENGTH] = 
+{ 
+	"prop_door_rotating", 
+	"prop_door_rotating_checkpoint" 
+};
+
+static const char g_DoorModels[][MAX_NAME_LENGTH] = 
+{
+	"models/props_doors/doorfreezer01.mdl", 
+	"models/props_doors/checkpoint_door_01.mdl",
+	"models/props_doors/checkpoint_door_-01.mdl",
+	"models/lighthouse/checkpoint_door_lighthouse01.mdl"
+};
 
 static int g_iTankCount;
 static int g_iTankClassIndex;
@@ -140,10 +148,7 @@ void IsLookingAtBreakableDoor(int client)
 			char sClassName[64], sModelName[64];
 			GetEntityClassname(g_iDoorEntity, sClassName, sizeof(sClassName));
 			GetEntPropString(g_iDoorEntity, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
-			if (strcmp(sClassName, DOOR_CLASS_01) == 0 && strcmp(sModelName, DOOR_MODEL_01) == 0
-			|| strcmp(sClassName, DOOR_CLASS_02) == 0 && strcmp(sModelName, DOOR_MODEL_02) == 0
-			|| strcmp(sClassName, DOOR_CLASS_02) == 0 && strcmp(sModelName, DOOR_MODEL_03) == 0
-			|| strcmp(sClassName, DOOR_CLASS_02) == 0 && strcmp(sModelName, DOOR_MODEL_04) == 0)
+			if (IsValidDoor(sClassName, sModelName))
 			{
 				GetEntPropVector(g_iDoorEntity, Prop_Send, "m_vecOrigin", endorigin);
 				float vPos[3], vAng[3];
@@ -178,6 +183,25 @@ void IsLookingAtBreakableDoor(int client)
 			}
 		}
 	}
+}
+
+// Consolidated door validation into a single function
+bool IsValidDoor(const char[] className, const char[] modelName)
+{
+	for (int i = 0; i < sizeof(g_DoorClasses); i++)
+	{
+		if (strcmp(className, g_DoorClasses[i]) == 0)
+		{
+			for (int j = 0; j < sizeof(g_DoorModels); j++)
+			{
+				if (strcmp(modelName, g_DoorModels[j]) == 0)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 bool IsValidClient(int client)
