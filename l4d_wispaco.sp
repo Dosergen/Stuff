@@ -364,7 +364,7 @@ void SpawnCommand(int client)
 		int iWitchiNdex;
 		int iRandom = GetRandom();
 		float fSpawnPos[3], fSpawnAng[3]; 
-		// Check if a valid spawn position is found based on the random value
+		// Attempt to find a valid spawn position based on the random value
 		if (iRandom > 0 && L4D_GetRandomPZSpawnPosition(iRandom, 8, 30, fSpawnPos))
 		{
 			// Attempt to create a "witch" entity
@@ -389,12 +389,12 @@ void SpawnCommand(int client)
 			// Check if we need to spawn a Witch Bride instead of a regular witch
 			if (g_bSpawnWitchBride)
 			{	
-				// Spawn a Witch Bride at the specified position and angle
+				// Try to spawn a Witch Bride at a fallback position
 				iWitchiNdex = L4D2_SpawnWitchBride(fSpawnPos, fSpawnAng);
 			}
 			else
 			{
-				// Spawn a regular witch at the specified position and angle
+				// Try to spawn a regular witch at a fallback position
 				iWitchiNdex = L4D2_SpawnWitch(fSpawnPos, fSpawnAng);
 			}
 			// Toggle the boolean to alternate between spawning Witch Bride and regular Witch
