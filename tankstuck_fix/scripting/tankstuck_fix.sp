@@ -305,11 +305,10 @@ void SlapNearbySurvivors(int tank, float origin[3])
 			float surOrigin[3];
 			GetClientEyePosition(i, surOrigin);
 			float distance = GetVectorDistance(origin, surOrigin);
-			if (GetInfectedAttacker(i) != -1 || distance > slapDistance)
+			if (distance <= slapDistance && GetInfectedAttacker(i) == -1)
 			{
-				continue;
+				ApplySlapEffect(i, tank);
 			}
-			ApplySlapEffect(i, tank);
 		}
 	}
 }
@@ -355,7 +354,7 @@ stock bool IsInfected(int client)
 
 stock bool IsIncapped(int client)
 {
-	return !!GetEntProp(client, Prop_Send, "m_isIncapacitated", 1);
+	return !!GetEntProp(client, Prop_Send, "m_isIncapacitated");
 }
 
 stock bool IsValidClient(int client)
@@ -383,7 +382,7 @@ stock bool ShakeClient(int client, int command = SHAKE_START, float amplitude = 
 	{
 		return false;
 	}
-	bf.WriteByte(command);        // Shake Command
+	bf.WriteByte(command);        // shake command
 	bf.WriteFloat(amplitude);     // shake magnitude/amplitude
 	bf.WriteFloat(frequency);     // shake noise frequency
 	bf.WriteFloat(duration);      // shake lasts this long
