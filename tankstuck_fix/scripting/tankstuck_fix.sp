@@ -164,7 +164,10 @@ void EvtOnAbilityUse(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (IsInfected(client) && IsValidTank(client))
 	{
-		delete g_hInRockThrow_Timer[client];
+		if (g_hInRockThrow_Timer[client] != null)
+		{
+			delete g_hInRockThrow_Timer[client];
+		}
 		g_hInRockThrow_Timer[client] = CreateTimer(3.0, OnAbilityUse, client);
 		g_binRockThrow[client] = true;
 	}
@@ -186,7 +189,10 @@ void EvtOnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 		//#if DEBUG
 		//PrintToChatAll("[DEBUG] Tank %d hurt Survivor %d", attacker, victim);
 		//#endif
-		delete g_hRecentlyHurtSurvivors_Timer[attacker];
+		if (g_hRecentlyHurtSurvivors_Timer[attacker] != null)
+		{
+			delete g_hRecentlyHurtSurvivors_Timer[attacker];
+		}
 		g_hRecentlyHurtSurvivors_Timer[attacker] = CreateTimer(8.0, ResetRecentlyHurtSurvivors, attacker);
 		g_bisTankActive[attacker] = true;
 		g_brecentlyHurtSurvivors[attacker] = true;
@@ -233,6 +239,8 @@ void EvtOnTankDeath(Event event, const char[] name, bool dontBroadcast)
 	int tank = GetClientOfUserId(event.GetInt("userid"));
 	if (IsInfected(tank))
 	{
+		delete g_hInRockThrow_Timer[tank];
+		delete g_hRecentlyHurtSurvivors_Timer[tank];
 		g_bisTankActive[tank] = false;
 	}
 }
@@ -289,18 +297,20 @@ Action CheckTankLocation(Handle timer, any userid)
 
 void SlapNearbySurvivors(int tank, float origin[3])
 {
-	float surOrigin[3];
 	float slapDistance = g_fSlapDistance[tank];
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (!IsClientInGame(i) || !IsPlayerAlive(i) || IsIncapped(i))
-			continue;
-		GetClientEyePosition(i, surOrigin);
-		if (GetVectorDistance(origin, surOrigin) > slapDistance)
-			continue;
-		if (g_bLeft4Dead2 && L4D2_GetInfectedAttacker(i) > 0)
-			continue;
-		ApplySlapEffect(i, tank);
+		if (IsClientInGame(i) && IsPlayerAlive(i) && !IsIncapped(i) && GetClientTeam(i) == 2)
+		{
+			float surOrigin[3];
+			GetClientEyePosition(i, surOrigin);
+			float distance = GetVectorDistance(origin, surOrigin);
+			if (GetInfectedAttacker(i) != -1 || distance > slapDistance)
+			{
+				continue;
+			}
+			ApplySlapEffect(i, tank);
+		}
 	}
 }
 
@@ -397,22 +407,25 @@ stock bool IsOnLadder()
 	return false;
 }
 
-stock int L4D2_GetInfectedAttacker(int client)
+stock int GetInfectedAttacker(int client)
 {
 	int attacker;
-	/* Charger */
-	attacker = GetEntPropEnt(client, Prop_Send, "m_pummelAttacker");
-	if (attacker > 0) return attacker;
-	attacker = GetEntPropEnt(client, Prop_Send, "m_carryAttacker");
-	if (attacker > 0) return attacker;
+	if (g_bLeft4Dead2)
+	{
+		/* Charger */
+		attacker = GetEntPropEnt(client, Prop_Send, "m_pummelAttacker");
+		if (attacker > 0) return attacker;
+		attacker = GetEntPropEnt(client, Prop_Send, "m_carryAttacker");
+		if (attacker > 0) return attacker;
+		/* Jockey */
+		attacker = GetEntPropEnt(client, Prop_Send, "m_jockeyAttacker");
+		if (attacker > 0) return attacker;
+	}
 	/* Hunter */
 	attacker = GetEntPropEnt(client, Prop_Send, "m_pounceAttacker");
 	if (attacker > 0) return attacker;
 	/* Smoker */
 	attacker = GetEntPropEnt(client, Prop_Send, "m_tongueOwner");
-	if (attacker > 0) return attacker;
-	/* Jockey */
-	attacker = GetEntPropEnt(client, Prop_Send, "m_jockeyAttacker");
 	if (attacker > 0) return attacker;
 	return -1;
 }
