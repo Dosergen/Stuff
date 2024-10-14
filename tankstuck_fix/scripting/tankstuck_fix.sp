@@ -7,7 +7,7 @@
 
 #define DEBUG 0
 
-#define PLUGIN_VERSION                  "1.0.3"
+#define PLUGIN_VERSION                  "1.0.4"
 
 #define	SHAKE_START                     0     // Starts the screen shake for all players within the radius.
 #define	SHAKE_STOP                      1     // Stops the screen shake for all players within the radius.
@@ -21,11 +21,6 @@
 
 bool   g_bLeft4Dead2,
        g_bPluginEnable,
-       g_bLateLoad = false,
-       g_bHookedEvents = false,
-       g_bisFlingPlayerSigLoaded = false,
-       g_bisInGame[MAXPLAYERS + 1],
-       g_bisBot[MAXPLAYERS + 1],
        g_brecentlyHurtSurvivors[MAXPLAYERS + 1],
        g_bisTankActive[MAXPLAYERS + 1],
        g_binRockThrow[MAXPLAYERS + 1];
@@ -53,6 +48,9 @@ float  g_fDistanceInitial,
        g_fLastOrigin[MAXPLAYERS + 1][3],
        g_fSlapDistance[MAXPLAYERS + 1];
 
+bool   g_bHookedEvents = false,
+       g_bisFlingPlayerSigLoaded = false;
+
 public Plugin myinfo = 
 {
 	name           = "[L4D/2] Tank Stuck Fix",
@@ -64,23 +62,19 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-	if (!IsDedicatedServer())
-	{
-		strcopy(error, err_max, "Plugin only support dedicated servers");
-		return APLRes_SilentFailure;
-	}
 	EngineVersion test = GetEngineVersion();
-	if (test == Engine_Left4Dead2) 
+	if (test == Engine_Left4Dead2)
 	{
-		g_bLeft4Dead2 = true;		
+		g_bLeft4Dead2 = true;
+		return APLRes_Success;
 	}
-	else if (test != Engine_Left4Dead) 
+	else if (test == Engine_Left4Dead)
 	{
-		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
-		return APLRes_SilentFailure;
+		g_bLeft4Dead2 = false;
+		return APLRes_Success;
 	}
-	g_bLateLoad = late;
-	return APLRes_Success;
+	strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
+	return APLRes_SilentFailure;
 }
 
 public void OnPluginStart()
@@ -104,17 +98,6 @@ public void OnPluginStart()
 	g_cvSlapMaxDistance.AddChangeHook(ConVarChanged_Cvars);
 	g_cvSlapPower.AddChangeHook(ConVarChanged_Cvars);
 	g_cvSlapVerticalMultiplier.AddChangeHook(ConVarChanged_Cvars);
-
-	if (g_bLateLoad) 
-	{
-		for (int i = 1; i <= MaxClients; i++) 
-		{
-			if (IsClientInGame(i))
-			{
-				OnClientPutInServer(i);
-			}
-		}
-	}
 
 	if (g_bPluginEnable && g_bLeft4Dead2)
 	{
@@ -176,32 +159,10 @@ public void OnMapStart()
 	PrecacheSound(SOUND_ROAR, true);
 }
 
-public void OnClientPutInServer(int client)
-{
-	if (!g_bPluginEnable)
-	{
-		return;
-	}
-	if (client > 0)
-	{
-		g_bisInGame[client] = true;
-		g_bisBot[client] = IsFakeClient(client);
-	}
-}
-
-public void OnClientDisconnect(int client)
-{
-	if (client > 0)
-	{
-		g_bisInGame[client] = false;
-		g_bisBot[client] = false;
-	}
-}
-
 void EvtOnAbilityUse(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (IsValidTank(client) && IsPlayerTank(client))
+	if (IsInfected(client) && IsClientTank(client))
 	{
 		delete g_hInRockThrow_Timer[client];
 		g_hInRockThrow_Timer[client] = CreateTimer(3.0, OnAbilityUse, client);
@@ -220,7 +181,7 @@ void EvtOnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 {
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
-	if (IsValidTank(attacker) && IsSurvivor(victim) && IsPlayerTank(attacker))
+	if (IsInfected(attacker) && IsSurvivor(victim) && IsClientTank(attacker))
 	{
 		//#if DEBUG
 		//PrintToChatAll("[DEBUG] Tank %d hurt Survivor %d", attacker, victim);
@@ -235,7 +196,7 @@ void EvtOnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 		//PrintToChatAll("[DEBUG] Updated Tank %d: Active = true, RecentlyHurt = true, SlapDistance = %.2f", attacker, g_fSlapDistance[attacker]);
 		//#endif
 	}
-	else if (!g_bisTankActive[victim] && IsSurvivor(attacker) && IsValidTank(victim) && IsPlayerTank(victim))
+	else if (!g_bisTankActive[victim] && IsSurvivor(attacker) && IsInfected(victim) && IsClientTank(victim))
 	{
 		//#if DEBUG
 		//PrintToChatAll("[DEBUG] Survivor %d hurt Tank %d", attacker, victim);
@@ -257,7 +218,7 @@ Action ResetRecentlyHurtSurvivors(Handle timer, any tank)
 void EvtOnTankSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int tank = GetClientOfUserId(event.GetInt("userid"));
-	if (IsValidTank(tank))
+	if (IsInfected(tank))
 	{
 		g_bisTankActive[tank] = false;
 		g_istuckTicks[tank] = 0;
@@ -270,7 +231,7 @@ void EvtOnTankSpawn(Event event, const char[] name, bool dontBroadcast)
 void EvtOnTankDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int tank = GetClientOfUserId(event.GetInt("userid"));
-	if (IsValidTank(tank))
+	if (IsInfected(tank))
 	{
 		g_bisTankActive[tank] = false;
 	}
@@ -279,7 +240,7 @@ void EvtOnTankDeath(Event event, const char[] name, bool dontBroadcast)
 Action CheckTankLocation(Handle timer, any userid)
 {
 	int tank = GetClientOfUserId(userid);
-	if (!IsValidTank(tank) || !IsPlayerTank(tank) || IsIncapped(tank))
+	if (!IsInfected(tank) || !IsClientTank(tank) || IsIncapped(tank))
 	{
 		return Plugin_Stop;
 	}
@@ -329,18 +290,17 @@ Action CheckTankLocation(Handle timer, any userid)
 void SlapNearbySurvivors(int tank, float origin[3])
 {
 	float surOrigin[3];
+	float slapDistance = g_fSlapDistance[tank];
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (IsClientInGame(i) && IsPlayerAlive(i))
-		{
-			GetClientEyePosition(i, surOrigin);
-			if (GetVectorDistance(origin, surOrigin) <= g_fSlapDistance[tank])
-			{
-				if (g_bLeft4Dead2 && L4D2_GetInfectedAttacker(i) > 0) continue;
-				if (IsIncapped(i)) continue;
-				ApplySlapEffect(i, tank);
-			}
-		}
+		if (!IsClientInGame(i) || !IsPlayerAlive(i) || IsIncapped(i))
+			continue;
+		GetClientEyePosition(i, surOrigin);
+		if (GetVectorDistance(origin, surOrigin) > slapDistance)
+			continue;
+		if (g_bLeft4Dead2 && L4D2_GetInfectedAttacker(i) > 0)
+			continue;
+		ApplySlapEffect(i, tank);
 	}
 }
 
@@ -375,7 +335,17 @@ void FlingPlayerAwayFromTank(int client, int tank)
 
 stock bool IsValidClient(int client)
 {
-	return client > 0 && client <= MaxClients;
+	return client > 0 && client <= MaxClients && IsClientInGame(client);
+}
+
+stock bool IsSurvivor(int client)
+{
+	return IsValidClient(client) && GetClientTeam(client) == 2;
+}
+
+stock bool IsInfected(int client)
+{
+	return IsValidClient(client) && GetClientTeam(client) == 3;
 }
 
 stock bool IsIncapped(int client)
@@ -383,17 +353,7 @@ stock bool IsIncapped(int client)
 	return !!GetEntProp(client, Prop_Send, "m_isIncapacitated", 1);
 }
 
-stock bool IsSurvivor(int client)
-{
-	return IsValidClient(client) && g_bisInGame[client] && GetClientTeam(client) == 2;
-}
-
-stock bool IsValidTank(int client)
-{
-	return IsValidClient(client) && g_bisInGame[client] && GetClientTeam(client) == 3;
-}
-
-stock bool IsPlayerTank(int client)
+stock bool IsClientTank(int client)
 {
 	return GetEntProp(client, Prop_Send, "m_zombieClass") == (g_bLeft4Dead2 ? 8 : 5);
 }
