@@ -162,7 +162,7 @@ public void OnMapStart()
 void EvtOnAbilityUse(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (IsInfected(client) && IsClientTank(client))
+	if (IsInfected(client) && IsValidTank(client))
 	{
 		delete g_hInRockThrow_Timer[client];
 		g_hInRockThrow_Timer[client] = CreateTimer(3.0, OnAbilityUse, client);
@@ -181,7 +181,7 @@ void EvtOnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 {
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
-	if (IsInfected(attacker) && IsSurvivor(victim) && IsClientTank(attacker))
+	if (IsInfected(attacker) && IsSurvivor(victim) && IsValidTank(attacker))
 	{
 		//#if DEBUG
 		//PrintToChatAll("[DEBUG] Tank %d hurt Survivor %d", attacker, victim);
@@ -196,7 +196,7 @@ void EvtOnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 		//PrintToChatAll("[DEBUG] Updated Tank %d: Active = true, RecentlyHurt = true, SlapDistance = %.2f", attacker, g_fSlapDistance[attacker]);
 		//#endif
 	}
-	else if (!g_bisTankActive[victim] && IsSurvivor(attacker) && IsInfected(victim) && IsClientTank(victim))
+	else if (!g_bisTankActive[victim] && IsSurvivor(attacker) && IsInfected(victim) && IsValidTank(victim))
 	{
 		//#if DEBUG
 		//PrintToChatAll("[DEBUG] Survivor %d hurt Tank %d", attacker, victim);
@@ -240,7 +240,7 @@ void EvtOnTankDeath(Event event, const char[] name, bool dontBroadcast)
 Action CheckTankLocation(Handle timer, any userid)
 {
 	int tank = GetClientOfUserId(userid);
-	if (!IsInfected(tank) || !IsClientTank(tank) || IsIncapped(tank))
+	if (!IsInfected(tank) || !IsValidTank(tank) || IsIncapped(tank))
 	{
 		return Plugin_Stop;
 	}
@@ -333,11 +333,6 @@ void FlingPlayerAwayFromTank(int client, int tank)
 	L4D2_FlingPlayer(client, flingVelocity, 76, tank);
 }
 
-stock bool IsValidClient(int client)
-{
-	return client > 0 && client <= MaxClients && IsClientInGame(client);
-}
-
 stock bool IsSurvivor(int client)
 {
 	return IsValidClient(client) && GetClientTeam(client) == 2;
@@ -353,7 +348,12 @@ stock bool IsIncapped(int client)
 	return !!GetEntProp(client, Prop_Send, "m_isIncapacitated", 1);
 }
 
-stock bool IsClientTank(int client)
+stock bool IsValidClient(int client)
+{
+	return client > 0 && client <= MaxClients && IsClientInGame(client);
+}
+
+stock bool IsValidTank(int client)
 {
 	return GetEntProp(client, Prop_Send, "m_zombieClass") == (g_bLeft4Dead2 ? 8 : 5);
 }
