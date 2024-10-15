@@ -6,10 +6,10 @@
 #include <sdktools>
 #include <entity_prop_stocks>
 
-#define PLUGIN_VERSION "1.4.8"
+#define PLUGIN_VERSION   "1.4.8"
 
-#define	DOOR_CLASSES 2
-#define	DOOR_MODELS 4
+#define	DOOR_CLASSES     2
+#define	DOOR_MODELS      4
 
 static const char g_sDoorClasses[2][32] = 
 { 
@@ -185,17 +185,31 @@ void IsLookingAtBreakableDoor(int client)
 
 bool IsValidDoor(const char[] className, const char[] modelName)
 {
+	if (className[0] == '\0' || modelName[0] == '\0') 
+	{
+		return false;
+	}
 	for (int i = 0; i < DOOR_CLASSES; i++)
 	{
 		if (strcmp(className, g_sDoorClasses[i]) == 0)
 		{
-			for (int j = 0; j < DOOR_MODELS; j++)
-			{
-				if (strcmp(modelName, g_sDoorModels[j]) == 0)
-				{
-					return true;
-				}
-			}
+			return ArrayContains(modelName, g_sDoorModels, DOOR_MODELS);
+		}
+	}
+	return false;
+}
+
+bool ArrayContains(const char[] value, const char array[][64], int size)
+{
+	if (value[0] == '\0') 
+	{
+		return false;
+	}
+	for (int i = 0; i < size; i++)
+	{
+		if (strcmp(value, array[i]) == 0)
+		{
+			return true;
 		}
 	}
 	return false;
