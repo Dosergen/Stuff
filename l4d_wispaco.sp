@@ -493,10 +493,11 @@ int GetRandom()
 	int client = 0;
 	if (array.Length > 0)
 	{
-		client = array.Get(GetRandomIntEx(0, array.Length - 1));
+		int randomIndex = GetRandomIntEx(0, array.Length - 1);
+		client = array.Get(randomIndex);
 	}
 	delete array;
-	return client;  // Ensure we return 0 if no valid client is found
+	return client;
 }
 
 int GetRandomIntEx(int min, int max)
