@@ -11,13 +11,13 @@
 #define	DOOR_CLASSES     2
 #define	DOOR_MODELS      4
 
-static const char g_sDoorClasses[2][32] = 
+static const char g_sDoorClasses[DOOR_CLASSES][32] = 
 { 
 	"prop_door_rotating", 
 	"prop_door_rotating_checkpoint" 
 };
 
-static const char g_sDoorModels[4][64] = 
+static const char g_sDoorModels[DOOR_MODELS][64] = 
 {
 	"models/props_doors/doorfreezer01.mdl", 
 	"models/props_doors/checkpoint_door_01.mdl",
@@ -193,23 +193,13 @@ bool IsValidDoor(const char[] className, const char[] modelName)
 	{
 		if (strcmp(className, g_sDoorClasses[i]) == 0)
 		{
-			return ArrayContains(modelName, g_sDoorModels, DOOR_MODELS);
-		}
-	}
-	return false;
-}
-
-bool ArrayContains(const char[] value, const char array[][64], int size)
-{
-	if (value[0] == '\0') 
-	{
-		return false;
-	}
-	for (int i = 0; i < size; i++)
-	{
-		if (strcmp(value, array[i]) == 0)
-		{
-			return true;
+			for (int j = 0; i < DOOR_MODELS; j++)
+			{
+				if (strcmp(modelName, g_sDoorModels[i]) == 0)
+				{
+					return true;
+				}
+			}
 		}
 	}
 	return false;
