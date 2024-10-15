@@ -6,7 +6,10 @@
 #include <sdktools>
 #include <entity_prop_stocks>
 
-#define VERSION "1.4.8"
+#define PLUGIN_VERSION "1.4.8"
+
+#define	DOOR_CLASSES 2
+#define	DOOR_MODELS 4
 
 static const char g_sDoorClasses[2][32] = 
 { 
@@ -33,7 +36,7 @@ public Plugin myinfo =
 	name = "TankDoorFix",
 	author = "PP(R)TH: Dr. Gregory House, Glide Loading, Uncle Jessie, Dosergen",
 	description = "Fixes Tank not destroying doors properly",
-	version = VERSION,
+	version = PLUGIN_VERSION,
 	url = "http://forums.alliedmods.net/showthread.php?t=225087"
 }
 
@@ -60,7 +63,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
-	CreateConVar("tankdoorfix_version", VERSION, "TankDoorFix Version", FCVAR_NOTIFY | FCVAR_DONTRECORD);
+	CreateConVar("tankdoorfix_version", PLUGIN_VERSION, "TankDoorFix Version", FCVAR_NOTIFY | FCVAR_DONTRECORD);
 
 	g_hPluginEnabled = CreateConVar("tankdoorfix_enabled", "1", "Enable or disable the plugin", FCVAR_NOTIFY);
 	
@@ -182,11 +185,11 @@ void IsLookingAtBreakableDoor(int client)
 
 bool IsValidDoor(const char[] className, const char[] modelName)
 {
-	for (int i = 0; i < sizeof(g_sDoorClasses); i++)
+	for (int i = 0; i < DOOR_CLASSES; i++)
 	{
 		if (strcmp(className, g_sDoorClasses[i]) == 0)
 		{
-			for (int j = 0; j < sizeof(g_sDoorModels); j++)
+			for (int j = 0; j < DOOR_MODELS; j++)
 			{
 				if (strcmp(modelName, g_sDoorModels[j]) == 0)
 				{
