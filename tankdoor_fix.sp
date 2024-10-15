@@ -8,13 +8,13 @@
 
 #define VERSION "1.4.8"
 
-static const char g_DoorClasses[][32] = 
+static const char g_sDoorClasses[2][32] = 
 { 
 	"prop_door_rotating", 
 	"prop_door_rotating_checkpoint" 
 };
 
-static const char g_DoorModels[][64] = 
+static const char g_sDoorModels[4][64] = 
 {
 	"models/props_doors/doorfreezer01.mdl", 
 	"models/props_doors/checkpoint_door_01.mdl",
@@ -182,13 +182,13 @@ void IsLookingAtBreakableDoor(int client)
 
 bool IsValidDoor(const char[] className, const char[] modelName)
 {
-	for (int i = 0; i < sizeof(g_DoorClasses); i++)
+	for (int i = 0; i < sizeof(g_sDoorClasses); i++)
 	{
-		if (strcmp(className, g_DoorClasses[i]) == 0)
+		if (strcmp(className, g_sDoorClasses[i]) == 0)
 		{
-			for (int j = 0; j < sizeof(g_DoorModels); j++)
+			for (int j = 0; j < sizeof(g_sDoorModels); j++)
 			{
-				if (strcmp(modelName, g_DoorModels[j]) == 0)
+				if (strcmp(modelName, g_sDoorModels[j]) == 0)
 				{
 					return true;
 				}
