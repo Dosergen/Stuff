@@ -8,18 +8,13 @@
 
 #define VERSION "1.4.8"
 
-#define MAX_DOOR_DISTANCE 90.0
-#define PUNCH_COOLDOWN 2.0
-#define DOOR_TELEPORT_HEIGHT 10000.0
-
-// Consolidated door models and classes into arrays for faster comparison
-static const char g_DoorClasses[][MAX_NAME_LENGTH] = 
+static const char g_DoorClasses[][32] = 
 { 
 	"prop_door_rotating", 
 	"prop_door_rotating_checkpoint" 
 };
 
-static const char g_DoorModels[][MAX_NAME_LENGTH] = 
+static const char g_DoorModels[][64] = 
 {
 	"models/props_doors/doorfreezer01.mdl", 
 	"models/props_doors/checkpoint_door_01.mdl",
@@ -113,7 +108,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			float gameTime = GetGameTime();
 			if (GetEntPropFloat(tankweapon, Prop_Send, "m_flTimeWeaponIdle") <= gameTime && g_fNextTankPunchAllowed[client] <= gameTime)
 			{
-				g_fNextTankPunchAllowed[client] = gameTime + PUNCH_COOLDOWN;
+				g_fNextTankPunchAllowed[client] = gameTime + 2.0;
 				CreateTimer(1.0, Timer_DoorCheck, GetClientUserId(client));
 			}
 		}
@@ -143,7 +138,7 @@ void IsLookingAtBreakableDoor(int client)
 	{
 		g_iDoorEntity = TR_GetEntityIndex();
 		TR_GetEndPosition(endorigin);
-		if (g_iDoorEntity > 0 && GetVectorDistance(origin, endorigin) <= MAX_DOOR_DISTANCE)
+		if (g_iDoorEntity > 0 && GetVectorDistance(origin, endorigin) <= 90.0)
 		{
 			char sClassName[64], sModelName[64];
 			GetEntityClassname(g_iDoorEntity, sClassName, sizeof(sClassName));
@@ -156,9 +151,9 @@ void IsLookingAtBreakableDoor(int client)
 				GetEntPropVector(g_iDoorEntity, Prop_Send, "m_angRotation", vAng);
 				SetEntProp(g_iDoorEntity, Prop_Send, "m_CollisionGroup", 1);
 				SetEntProp(g_iDoorEntity, Prop_Data, "m_CollisionGroup", 1);
-				vPos[2] += DOOR_TELEPORT_HEIGHT;
+				vPos[2] += 10000.0;
 				TeleportEntity(g_iDoorEntity, vPos, NULL_VECTOR, NULL_VECTOR);
-				vPos[2] -= DOOR_TELEPORT_HEIGHT;
+				vPos[2] -= 10000.0;
 				SetEntityRenderMode(g_iDoorEntity, RENDER_TRANSALPHA);
 				SetEntityRenderColor(g_iDoorEntity, 0, 0, 0, 0);
 				int g_iBrokenEntity = CreateEntityByName("prop_physics");
@@ -185,7 +180,6 @@ void IsLookingAtBreakableDoor(int client)
 	}
 }
 
-// Consolidated door validation into a single function
 bool IsValidDoor(const char[] className, const char[] modelName)
 {
 	for (int i = 0; i < sizeof(g_DoorClasses); i++)
