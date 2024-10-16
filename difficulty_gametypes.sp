@@ -103,8 +103,7 @@ bool AnyHumanPlayers()
 bool IsTooEasy()
 {
 	g_hCvarDifficulty.GetString(g_sGameDifficulty, sizeof(g_sGameDifficulty));
-	bool g_bAvDiff = (strcmp(g_sGameDifficulty, DIFFICULTY_EASY, false) == 0 || strcmp(g_sGameDifficulty, DIFFICULTY_NORMAL, false) == 0);
-	return g_bAvDiff;
+	return (strcmp(g_sGameDifficulty, DIFFICULTY_EASY, false) == 0 || strcmp(g_sGameDifficulty, DIFFICULTY_NORMAL, false) == 0);
 }
 
 void UpdateDifficulty()
@@ -123,33 +122,33 @@ public void OnMapStart()
 	g_hCvarMPGameMode.GetString(g_sGameMode, sizeof(g_sGameMode));
 	g_hCvarSVGameTypes.GetString(g_sGameTypes, sizeof(g_sGameTypes));
 	ExplodeString(g_sGameTypes, ",", g_sGameType, sizeof(g_sGameType), sizeof(g_sGameType[]));
-	g_sAllowedGameType = g_sGameType[0];
-	for (int iNdex = 0; iNdex < sizeof(g_sGameType); iNdex++)
+	// Reset flag for level change
+	g_bChgLvlFlg = true;
+	for (int i = 0; i < sizeof(g_sGameType); i++) 
 	{
-		TrimString(g_sGameType[iNdex]);
-		if (strcmp(g_sGameType[iNdex], g_sGameMode, false) == 0)
+		TrimString(g_sGameType[i]);
+		if (strlen(g_sGameType[i]) == 0)
+			continue;
+		if (strcmp(g_sGameType[i], g_sGameMode, false) == 0) 
 		{
-			g_bChgLvlFlg = false;
+			g_bChgLvlFlg = false;  // Valid game mode found, no need to change level
 			break;
 		}
-		if (strlen(g_sGameType[iNdex]) == 0)
-		{
-			if (!g_bChgLvlFlg)
-			{
-				g_bChgLvlFlg = true;
-				CreateTimer(1.0, ChangeLevel);
-			}
-		}
+	}
+	// If no valid game mode found, change level to the first allowed mode
+	if (g_bChgLvlFlg) 
+	{
+		strcopy(g_sAllowedGameType, sizeof(g_sAllowedGameType), g_sGameType[0]);
+		CreateTimer(1.0, ChangeLevel);
 	}
 }
 
 public bool OnClientConnect(int client, char[] rejectmsg, int maxlength)
 {
 	if (IsFakeClient(client))
-	{
 		return true;
-	}
-	if (IsTooEasy() || g_bChgLvlFlg)
+	// Reject if too easy difficulty or invalid game mode
+	if (IsTooEasy() || g_bChgLvlFlg) 
 	{
 		ServerCommand("sm_cvar sv_hibernate_when_empty 0; sm_cvar %s 1", g_bLeft4Dead2 ? "sb_all_bot_game" : "sb_all_bot_team");
 		strcopy(rejectmsg, maxlength, "Server does not support this Gamemode");
