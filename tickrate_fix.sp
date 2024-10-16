@@ -101,6 +101,7 @@ public void OnPluginStart()
 			}
 		}
 	}
+
 	AutoExecConfig(true, "tickrate_fix");
 }
 
