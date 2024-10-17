@@ -121,8 +121,9 @@ public void OnMapStart()
 	}
 	g_hCvarMPGameMode.GetString(g_sGameMode, sizeof(g_sGameMode));
 	g_hCvarSVGameTypes.GetString(g_sGameTypes, sizeof(g_sGameTypes));
+	LogMessage("Current Game Mode: %s", g_sGameMode);
+	LogMessage("Game Types from CVAR: %s", g_sGameTypes);
 	ExplodeString(g_sGameTypes, ",", g_sGameType, sizeof(g_sGameType), sizeof(g_sGameType[]));
-	// Reset flag for level change
 	g_bChgLvlFlg = true;
 	for (int i = 0; i < sizeof(g_sGameType); i++) 
 	{
@@ -131,13 +132,14 @@ public void OnMapStart()
 			continue;
 		if (strcmp(g_sGameType[i], g_sGameMode, false) == 0) 
 		{
-			g_bChgLvlFlg = false;  // Valid game mode found, no need to change level
+			LogMessage("Valid Game Mode found: %s", g_sGameType[i]);
+			g_bChgLvlFlg = false;
 			break;
 		}
 	}
-	// If no valid game mode found, change level to the first allowed mode
 	if (g_bChgLvlFlg) 
 	{
+		LogMessage("No valid Game Mode found, changing level...");
 		strcopy(g_sAllowedGameType, sizeof(g_sAllowedGameType), g_sGameType[0]);
 		CreateTimer(1.0, ChangeLevel);
 	}
@@ -150,6 +152,7 @@ public bool OnClientConnect(int client, char[] rejectmsg, int maxlength)
 	// Reject if too easy difficulty or invalid game mode
 	if (IsTooEasy() || g_bChgLvlFlg) 
 	{
+		LogMessage("Client rejected: Server does not support this Gamemode");
 		ServerCommand("sm_cvar sv_hibernate_when_empty 0; sm_cvar %s 1", g_bLeft4Dead2 ? "sb_all_bot_game" : "sb_all_bot_team");
 		strcopy(rejectmsg, maxlength, "Server does not support this Gamemode");
 		return false;
