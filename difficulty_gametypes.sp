@@ -1,10 +1,9 @@
 /*
-    Prevent client from creating game on "easy" and "normal" difficulties.
-    Forced setting of «advanced» difficulty level in the game.
-    Prevent client from using mm_dedicated_force_servers to override sv_gametypes on the server.
-    If mp_gamemode from the lobby is not included in sv_gametypes, reject the client connection.
-    If sv_gametypes is not set in your server.cfg file, it should default to:
-    coop, realism, survival, versus, scavenge, dash, holdout, shootzones
+    1. Prevents game creation on "easy" and "normal" difficulties, forcing the game to use "advanced".
+    2. Prevents the use of the mm_dedicated_force_servers command to override server game modes.
+    3. If mp_gamemode from the lobby is not included in sv_gametypes on the server, the client connection is rejected.
+    4. If sv_gametypes is not set in the server.cfg, it defaults to:
+       coop, realism, survival, versus, scavenge, dash, holdout, shootzones.
 */
 
 #pragma semicolon 1
@@ -13,7 +12,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.7.2"
+#define PLUGIN_VERSION "1.7.3"
 #define DIFFICULTY_EASY "easy"
 #define DIFFICULTY_NORMAL "normal"
 #define DIFFICULTY_ADVANCED "hard"
@@ -22,9 +21,6 @@ ConVar g_hCvarMPGameMode;
 ConVar g_hCvarSVGameTypes;
 ConVar g_hCvarDifficulty;
 
-char g_sGameMode[32];
-char g_sGameTypes[1024];
-char g_sGameType[32][32];
 char g_sGameDifficulty[32];
 char g_sAllowedGameType[32];
 
@@ -112,37 +108,37 @@ void UpdateDifficulty()
 	g_hCvarDifficulty.SetString(DIFFICULTY_ADVANCED);
 }
 
-public void OnMapStart() 
+public void OnMapStart()
 {
 	g_bTooEasy = IsTooEasy();
 	if (g_bTooEasy) 
 	{
 		UpdateDifficulty();
 	}
+	char g_sGameMode[32], g_sGameTypes[1024], g_sGameType[32][32];
 	g_hCvarMPGameMode.GetString(g_sGameMode, sizeof(g_sGameMode));
 	g_hCvarSVGameTypes.GetString(g_sGameTypes, sizeof(g_sGameTypes));
 	LogMessage("Current Game Mode: %s", g_sGameMode);
 	LogMessage("Game Types from CVAR: %s", g_sGameTypes);
-	ExplodeString(g_sGameTypes, ",", g_sGameType, sizeof(g_sGameType), sizeof(g_sGameType[]));
-	g_bChgLvlFlg = true;
-	for (int i = 0; i < sizeof(g_sGameType); i++) 
+	int numGameTypes = ExplodeString(g_sGameTypes, ",", g_sGameType, sizeof(g_sGameType), sizeof(g_sGameType[]));
+	for (int i = 0; i < numGameTypes; i++)
 	{
 		TrimString(g_sGameType[i]);
 		if (strlen(g_sGameType[i]) == 0)
 			continue;
-		if (strcmp(g_sGameType[i], g_sGameMode, false) == 0) 
+		// Game mode matches an allowed game type
+		if (strcmp(g_sGameType[i], g_sGameMode, false) == 0)
 		{
 			LogMessage("Valid Game Mode found: %s", g_sGameType[i]);
 			g_bChgLvlFlg = false;
-			break;
+			return;
 		}
 	}
-	if (g_bChgLvlFlg) 
-	{
-		LogMessage("No valid Game Mode found, changing level...");
-		strcopy(g_sAllowedGameType, sizeof(g_sAllowedGameType), g_sGameType[0]);
-		CreateTimer(1.0, ChangeLevel);
-	}
+	// No valid game mode found, initiate level change
+	LogMessage("No valid Game Mode found, changing level...");
+	g_bChgLvlFlg = true;
+	strcopy(g_sAllowedGameType, sizeof(g_sAllowedGameType), g_sGameType[0]);
+	CreateTimer(1.0, ChangeLevel);
 }
 
 public bool OnClientConnect(int client, char[] rejectmsg, int maxlength)
