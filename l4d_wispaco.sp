@@ -306,11 +306,6 @@ void First_Start_Timer()
 
 void Start_Timer()
 {
-	if (g_hSpawnTimer != null)
-	{
-		delete g_hSpawnTimer;
-		g_hSpawnTimer = null;
-	}
 	float WitchSpawnTime = GetRandomFloat(g_fWitchTimeMin, g_fWitchTimeMax);
 	LogCommand("#DEBUG: Start_Timer; Witch spawn time = %f", WitchSpawnTime);
 	g_hSpawnTimer = CreateTimer(WitchSpawnTime, SpawnAWitch, _);
