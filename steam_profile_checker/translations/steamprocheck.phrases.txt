@@ -1,0 +1,331 @@
+"Phrases"
+{
+	"Not Enough Hours"
+	{
+		"#format" "{1:i},{2:i}"
+		
+		"en" "You have {1} out of the {2} hours required to join this server."
+		"es" "¡Tienes {1} de las {2} horas necesarias para unirte a este servidor."
+		"pt" "Você tem {1} das {2} horas necessárias pra se unir a este servidor."
+		"pl" "Masz tylko {1} z {2} wymaganych godzin, żeby dołączyć do serwera."
+		"ru" "У вас наиграно {1} из {2} необходимых часов, чтобы присоединиться к серверу."
+	}
+	"Invisible Hours"
+	{
+		"en" "Error while retrieving your hours! Make sure they're public."
+		"es" "¡Error al intentar obtener tus horas de juego! Asegúrate de que sean públicas." 
+		"pt" "Erro ao tentar obter suas horas de jogo! Verifique que elas sejam públicas."
+		"pl" "Błąd przy pozyskiwaniu informacji na temat twoich godzin! Upewnij się, że są publiczne."
+		"ru" "Ошибка при получении информации о ваших часах в игре! Убедитесь, что они публичны."
+	}
+	"Invalid STEAMID"
+	{
+		"en" "{green}[SPC]{default} Invalid STEAMID."
+		"es" "{green}[SPC]{default} ¡STEAMID inválido."
+		"pt" "{green}[SPC]{default} STEAMID inválido."
+		"pl" "{green}[SPC]{default} Niepoprawne STEAMID."
+		"ru" "{green}[SPC]{default} Неправильный STEAMID."
+	}
+	"Hour Check Not Whitelisted"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Steam ID {gray}{1} {default}is {red}not {default}hour whitelisted."
+		"es" "{green}[SPC]{default} El Steam ID {gray}{1} {red}no está {default}en la whitelist de horas."
+		"pt" "{green}[SPC]{default} A Steam ID {gray}{1} {red}não está {default}na whitelist das horas."
+		"pl" "{green}[SPC]{default} Steam ID {gray}{1} {red}nie jest {default}na hour whitelist."
+		"ru" "{green}[SPC]{default} Steam ID {gray}{1} {red}не находится {default}в белом списке по часам."
+	}
+	"Ban Check Not Whitelisted"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Steam ID {gray}{1} {default}is {red}not {default}ban whitelisted."
+		"es" "{green}[SPC]{default} El Steam ID {gray}{1} {red}no está {default}en la whitelist de bans."
+		"pt" "{green}[SPC]{default} A Steam ID {gray}{1} {red}não está {default}na whitelist dos bans."
+		"pl" "{green}[SPC]{default} Steam ID {gray}{1} {red}nie jest {default}na ban whitelist."
+		"ru" "{green}[SPC]{default} Steam ID {gray}{1} {red}не находится {default}в белом списке по банам."
+	}
+	"Level Check Not Whitelisted"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Steam ID {gray}{1} {default}is {red}not {default}level whitelisted."
+		"es" "{green}[SPC]{default} El Steam ID {gray}{1} {red}no está {default}en la whitelist de niveles."
+		"pt" "{green}[SPC]{default} A Steam ID {gray}{1} {red}não está {default}na whitelist dos níveis."
+		"pl" "{green}[SPC]{default} Steam ID {gray}{1} {red}nie jest {default}na level whitelist."
+		"ru" "{green}[SPC]{default} Steam ID {gray}{1} {red}не находится {default}в белом списке по уровням."
+	}	
+	"Hour Check Whitelisted"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Steam ID {gray}{1} {green}is {default}hour whitelisted."
+		"es" "{green}[SPC]{default} El Steam ID {gray}{1} {green}está {default}en la whitelist de horas."
+		"pt" "{green}[SPC]{default} A Steam ID {gray}{1} {green}está {default}na whitelist das horas."
+		"pl" "{green}[SPC]{default} Steam ID {gray}{1} {green}jest {default}na hour whitelist."
+		"ru" "{green}[SPC]{default} Steam ID {gray}{1} {green}находится {default}в белом списке по часам."
+	}
+	"Ban Check Whitelisted"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Steam ID {gray}{1} {green}is {default}ban whitelisted."
+		"es" "{green}[SPC]{default} El Steam ID {gray}{1} {green}está {default}en la whitelist de bans."
+		"pt" "{green}[SPC]{default} A Steam ID {gray}{1} {green}está {default}na whitelist dos bans."
+		"pl" "{green}[SPC]{default} Steam ID {gray}{1} {green}jest {default}ban whitelist."
+		"ru" "{green}[SPC]{default} Steam ID {gray}{1} {green}находится {default}в белом списке по банам."
+	}
+	"Level Check Whitelisted"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Steam ID {gray}{1} {green}is {default}level whitelisted."
+		"es" "{green}[SPC]{default} El Steam ID {gray}{1} {green}está {default}en la whitelist de niveles."
+		"pt" "{green}[SPC]{default} A Steam ID {gray}{1} {green}está {default}na whitelist dos níveis."
+		"pl" "{green}[SPC]{default} Steam ID {gray}{1} {green}jest {default}na level whitelist."
+		"ru" "{green}[SPC]{default} Steam ID {gray}{1} {green}находится {default}в белом списке по уровням."
+	}
+	"Successfully Hour Removed"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Successfully removed {gray}{1} {default}from the hours whitelist."
+		"es" "{green}[SPC]{default} ¡Removida ID {gray}{1} {default}de la whitelist de horas con éxito."
+		"pt" "{green}[SPC]{default} Removida ID {gray}{1} {default}da whitelist das horas com sucesso."
+		"pl" "{green}[SPC]{default} Pomyślnie usunięto {gray}{1} {default}z hours whitelist."
+		"ru" "{green}[SPC]{default} Успешно удалили {gray}{1} {default}из белого списка по часам."
+	}
+	"Successfully Ban Removed"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Successfully removed {gray}{1} {default}from the hours whitelist."
+		"es" "{green}[SPC]{default} ¡Removida ID {gray}{1} {default}de la whitelist de horas con éxito."
+		"pt" "{green}[SPC]{default} Removida ID {gray}{1} {default}da whitelist das horas com sucesso."
+		"pl" "{green}[SPC]{default} Pomyślnie usunięto {gray}{1} {default}z hours whitelist."
+		"ru" "{green}[SPC]{default} Успешно удалили {gray}{1} {default}из белого списка по банам."
+	}
+	"Successfully Level Removed"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Successfully removed {gray}{1} {default}from the level whitelist."
+		"es" "{green}[SPC]{default} ¡Removida ID {gray}{1} {default}de la whitelist de niveles con éxito."
+		"pt" "{green}[SPC]{default} Removida ID {gray}{1} {default}da whitelist dos níveis com sucesso."
+		"pl" "{green}[SPC]{default} Pomyślnie usunięto {gray}{1} {default}z hours level whitelist."
+		"ru" "{green}[SPC]{default} Успешно удалили {gray}{1} {default}из белого списка по уровням."
+	}
+	"Nothing Hour Removed"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} ID {gray}{1} {default}was not in hours whitelist."
+		"es" "{green}[SPC]{default} ¡La ID {gray}{1} {default}no estaba en la whitelist de horas."
+		"pt" "{green}[SPC]{default} ID {gray}{1} {default}não estava na whitelist das horas."
+		"pl" "{green}[SPC]{default} ID {gray}{1} {default}nie jest na hours whitelist."
+		"ru" "{green}[SPC]{default} ID {gray}{1} {default}не находится в белом списке по часам."
+	}
+	"Nothing Ban Removed"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} ID {gray}{1} {default}was not in bans whitelist."
+		"es" "{green}[SPC]{default} ¡La ID {gray}{1} {default}no estaba en la whitelist de bans."
+		"pt" "{green}[SPC]{default} ID {gray}{1} {default}não estava na whitelist dos bans."
+		"pl" "{green}[SPC]{default} ID {gray}{1} {default}nie jest na bans whitelist."
+		"ru" "{green}[SPC]{default} ID {gray}{1} {default}не находится в белом списке по банам."
+	}
+	"Nothing Level Removed"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} ID {gray}{1} {default}was not in level whitelist."
+		"es" "{green}[SPC]{default} ¡La ID {gray}{1} {default}no estaba en la whitelist de niveles."
+		"pt" "{green}[SPC]{default} ID {gray}{1} {default}não estava na whitelist dos níveis."
+		"pl" "{green}[SPC]{default} ID {gray}{1} {default}nie jest na level whitelist."
+		"ru" "{green}[SPC]{default} ID {gray}{1} {default}не находится в белом списке по уровням."
+	}
+	"Successfully Hour Added"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Successfully added {gray}{1} {default}to the hours whitelist."
+		"es" "{green}[SPC]{default} ¡Agregada la ID {gray}{1} {default}a la whitelist de horas."
+		"pt" "{green}[SPC]{default} Adicionada a ID {gray}{1} {default}à whitelist das horas com sucesso."
+		"pl" "{green}[SPC]{default} Pomyślnie dodano {gray}{1} {default}do hours whitelist."
+		"ru" "{green}[SPC]{default} Успешно добавлен {gray}{1} {default}в белый список по часам."
+	}
+	"Successfully Ban Added"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Successfully added {gray}{1} {default}to the bans whitelist."
+		"es" "{green}[SPC]{default} ¡Agregada la ID {gray}{1} {default}a la whitelist de bans."
+		"pt" "{green}[SPC]{default} Adicionada a ID {gray}{1} {default}à whitelist dos bans com sucesso."
+		"pl" "{green}[SPC]{default} Pomyślnie dodano {gray}{1} {default}do bans whitelist."
+		"ru" "{green}[SPC]{default} Успешно добавлен {gray}{1} {default}в белый список по банам."
+	}
+	"Successfully Level Added"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} Successfully added {gray}{1} {default}to the level whitelist."
+		"es" "{green}[SPC]{default} ¡Agregada la ID {gray}{1} {default}a la whitelist de niveles."
+		"pt" "{green}[SPC]{default} Adicionada a ID {gray}{1} {default}à whitelist dos níveis com sucesso."
+		"pl" "{green}[SPC]{default} Pomyślnie dodano {gray}{1} {default}do level whitelist."
+		"ru" "{green}[SPC]{default} Успешно добавлен {gray}{1} {default}в белый список по уровням."
+	}	
+	"Nothing Hour Added"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} ID {gray}{1} {default}was already in hours whitelist."
+		"es" "{green}[SPC]{default} ¡La ID {gray}{1} {default}ya estaba en la whitelist de horas."
+		"pt" "{green}[SPC]{default} ID {gray}{1} {default}já estava na whitelist das horas."
+		"pl" "{green}[SPC]{default} ID {gray}{1} {default}jest już na hours whitelist."
+		"ru" "{green}[SPC]{default} ID {gray}{1} {default}уже в белом списке по часам."
+	}
+	"Nothing Ban Added"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} ID {gray}{1} {default}was already in bans whitelist."
+		"es" "{green}[SPC]{default} ¡La ID {gray}{1} {default}ya estaba en la whitelist de bans."
+		"pt" "{green}[SPC]{default} ID {gray}{1} {default}já estava na whitelist dos bans."
+		"pl" "{green}[SPC]{default} ID {gray}{1} {default}jest już na bans whitelist."
+		"ru" "{green}[SPC]{default} ID {gray}{1} {default}уже в белом списке по банам."
+	}
+	"Nothing Level Added"
+	{
+		"#format" "{1:s}"
+		
+		"en" "{green}[SPC]{default} ID {gray}{1} {default}was already in level whitelist."
+		"es" "{green}[SPC]{default} ¡La ID {gray}{1} {default}ya estaba en la whitelist de niveles."
+		"pt" "{green}[SPC]{default} ID {gray}{1} {default}já estava na whitelist dos níveis."
+		"pl" "{green}[SPC]{default} ID {gray}{1} {default}jest już na level whitelist."
+		"ru" "{green}[SPC]{default} ID {gray}{1} {default}уже в белом списке по уровням."
+	}
+	"Command Usage"
+	{
+		"en" "{green}[SPC]{default} Usage: sm_spc <hours|bans|level> <add|remove|check> <STEAMID64>"
+		"es" "{green}[SPC]{default} Uso: sm_spc <hours|bans|level> <add|remove|check> <STEAMID64>"
+		"pt" "{green}[SPC]{default} Uso: sm_spc <hours|bans|level> <add|remove|check> <STEAMID64>"
+		"pl" "{green}[SPC]{default} Usage: sm_spc <hours|bans|level> <add|remove|check> <STEAMID64>"
+		"ru" "{green}[SPC]{default} Использование: sm_spc <hours|bans|level> <add|remove|check> <STEAMID64>"
+	}
+	"VAC Kicked"
+	{
+		"en" "This server disallows VAC Banned players."
+		"es" "Este servidor prohíbe jugadores con VAC Bans."
+		"pt" "Esse servidor proíbe jogadores com VAC Ban."
+		"pl" "Ten serwer nie dopuszcza graczy z blokadą VAC."
+		"ru" "Этот сервер не допускает игроков с VAC блокировкой."
+	}
+	"VAC Kicked Days"
+	{
+		"format" "{1:i}"
+		
+		"en" "This server disallows players with less than {1} days since their last VAC Ban."
+		"es" "Este servidor prohíbe jugadores con menos de {1} días desde su último VAC Ban."
+		"pt" "Esse servidor proíbe jogadores com menos de {1} dias desde o seu último VAC Ban."
+		"pl" "Ten serwer nie dopuszcza graczy, którzy mają mniej niż {1} dni od ostatniej blokady VAC."
+		"ru" "На этот сервер не допускаются игроки, у которых с момента последней VAC блокировки прошло менее {1} дней."
+	}
+	"VAC Kicked Amount"
+	{
+		"format" "{1:i}"
+		
+		"en" "This server disallows players with more than {1} VAC Bans."
+		"es" "Este servidor prohíbe jugadores con más de {1} VAC Bans."
+		"pt" "Esse servidor proíbe jogadores com mais de {1} VAC Bans."
+		"pl" "Ten serwer nie dopuszcza graczy, którzy mają więcej niż {1} blokad VAC."
+		"ru" "Этот сервер не допускает игроков, имеющих более {1} VAC блокировок."
+	}
+	"Community Ban Kicked"
+	{
+		"en" "This server disallows Steam Community Banned players."
+		"es" "Este servidor prohíbe jugadores baneados de la Comunidad de Steam."
+		"pt" "Esse servidor proíbe jogadores banidos da Comunidade de Steam."
+		"pl" "Ten serwer nie dopuszcza graczy z Steam Community Ban."
+		"ru" "На этот сервер не допускаются игроки с блокировкой сообщества Steam."
+	}
+	"Game Bans Exceeded"
+	{
+		"format" "{1:i}"
+		
+		"en" "This server disallows players with more than {1} Game Bans."
+		"es" "Este servidor prohíbe jugadores con más de {1} Game Bans."
+		"pt" "Esse servidor proíbe jogadores com mais de {1} Game Bans."
+		"pl" "Ten serwer nie dopuszcza graczy, którzy mają więcej niż {1} Game Bans."
+		"ru" "На этом сервере не допускаются игроки, имеющие более {1} игровых банов."
+	}
+	"Economy Ban Kicked"
+	{
+		"en" "This server disallows Trade Banned players."
+		"es" "Este servidor prohíbe jugadores con Trade Ban."
+		"pt" "Esse servidor proíbe jogadores com Trade Ban."
+		"pl" "Ten serwer nie dopuszcza graczy z Trade Banem."
+		"ru" "На этот сервер не допускаются игроки с запретом на торговлю."
+	}
+	"Economy Ban/Prob Kicked"
+	{
+		"en" "This server disallows players with Trade Ban and Probation states."
+		"es" "Este servidor prohíbe jugadores en situación de Trade Ban o Probation."
+		"pt" "Esse servidor proíbe jogadores em situação de Trade Ban ou Probation."
+		"pl" "Ten serwer nie dopuszcza graczy z Trade Banem oraz Probation states."
+		"ru" "На этот сервер не допускаются игроки с торговым баном и условным сроком."
+	}
+	"Invisible Level"
+	{
+		"en" "Error while retrieving your Steam level! Make sure your profile is public."
+		"es" "¡Error al obtener tu nivel de Steam! Asegúrate de que tu perfil sea público."
+		"pt" "Erro ao obter o seu nível de Steam! Verifique que o seu perfil seja público."
+		"pl" "Bląd przy pozyskiwaniu twojego lvl steam! Upewnij się, że twój profil jest publiczny."
+		"ru" "Ошибка при получении вашего уровня в steam! Убедитесь, что ваш профиль является публичным."
+	}
+	"Low Level"
+	{
+		"#format" "{1:i},{2:i}"
+		
+		"en" "Your Steam level is {1}. Only levels {2} and above are allowed in this server."
+		"es" "Tu nivel de Steam es {1}. Sólo niveles de {2} para arriba son permitidos en este servidor."
+		"pt" "O seu nível de Steam é {1}. Somente níveis {2} para acima são aceitos nesse servidor."
+		"pl" "Masz {1} level steam. Jedynie levele {2} i powyżej mają dostęp do tego serwera."
+		"ru" "У вас {1} уровень в steam. Доступ к этому серверу имеют только игроки {2} уровня и выше."
+	}
+	"High Level"
+	{
+		"#format" "{1:i},{2:i}"
+		
+		"en" "Your Steam level is {1}. Only levels {2} and below are allowed in this server."
+		"es" "Tu nivel de Steam es {1}. Sólo niveles de {2} para abajo son permitidos en este servidor."
+		"pt" "O seu nível de Steam é {1}. Somente níveis {2} para abaixo são aceitos nesse servidor."
+		"pl" "Masz {1} level steam. Jedynie levele {2} i poniżej mają dostęp do tego serwera."
+		"ru" "У вас {1} уровень в steam. Доступ к этому серверу имеют только игроки {2} уровня и ниже."
+	}
+	"No Private Profile"
+	{
+		"en" "Private profiles aren't allowed here!"
+		"es" "¡No se aceptan perfiles privados en este servidor!"
+		"pt" "Neste servidor os perfis privados não são aceitos!"
+		"pl" "Prywatne profile nie są dozwolone tutaj!"
+		"ru" "Приватные профили здесь запрещены!"
+	}
+	"Select a Table"
+	{
+		"en" "Whitelist Menu"
+		"es" "Menú de Lista Blanca"
+		"pt" "Menu da Lista de Permissões"
+		"pl" "Menu Białej Listy"
+		"ru" "Меню белого списка"
+	}
+	"No Results"
+	{
+		"en" "{green}[SPC]{default} This table is empty!"
+		"es" "{green}[SPC]{default} ¡Esta tabla está vacía!"
+		"pt" "{green}[SPC]{default} Esta tabela está vazia!"
+		"pl" "{green}[SPC]{default} Ta tabela jest pusta!"
+		"ru" "{green}[SPC]{default} Эта таблица пуста!"
+	}
+}
