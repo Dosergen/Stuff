@@ -216,10 +216,7 @@ void ScriptInit()
 			{
 				nearbyEntityCount++;
 				g_bIsRescueNearDelEntity[rescueEntities[j]] = true;
-				if (IsValidEntRef(rescueEntities[j]))
-				{
-					RemoveEntity(rescueEntities[j]);
-				}
+				RemoveEntity(rescueEntities[j]);
 				#if DEBUG
 				LogMessage("ScriptInit: Removed rescue entity with index %i at distance %.2f", rescueEntities[j], distance);
 				#endif

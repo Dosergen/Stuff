@@ -393,18 +393,14 @@ Action SetConstantSpawnTime(int client, int args)
 		GetCmdArg(1, arg, sizeof(arg));
 		time = StringToFloat(arg);
 		if (time < 0.0)
-		{
 			time = 1.0;
-		}
 		SetConVarFloat(hSpawnTimeMin, time);
 		SetConVarFloat(hSpawnTimeMax, time);
 		SetSpawnTimes(); //refresh times since hooked event from SetConVarFloat is temporarily disabled
 		ReplyToCommand(client, "[AIS] Minimum and maximum spawn time set to %.3f seconds.", time);
 	}
 	else
-	{
 		ReplyToCommand(client, "l4d_ais_time <# of seconds>");
-	}
 	ChangeByConstantTime = false;
 	return Plugin_Handled;
 }
@@ -439,13 +435,9 @@ void CalculateSpawnTimes()
 				for (i = 1; i <= MAX_INFECTED; i++)
 				{
 					if (i < SILimit)
-					{
 						SpawnTimes[i] = SpawnTimes[i-1] + unit;
-					}
 					else
-					{
 						SpawnTimes[i] = SpawnTimeMax;
-					}
 				}
 			}
 			case 2: //decremental spawn time mode
@@ -454,13 +446,9 @@ void CalculateSpawnTimes()
 				for (i = 1; i <= MAX_INFECTED; i++)
 				{
 					if (i < SILimit)
-					{
 						SpawnTimes[i] = SpawnTimes[i-1] - unit;
-					}
 					else
-					{
 						SpawnTimes[i] = SpawnTimeMax;
-					}
 				}
 			}
 			//randomized spawn time mode does not use time tables
@@ -483,9 +471,7 @@ void SetSpawnWeights()
 		weight = hSpawnWeights[i].IntValue;
 		SpawnWeights[i] = weight;
 		if (weight >= 0)
-		{
 			TotalWeight += weight;
-		}
 	}
 	//calculate end intervals
 	float unit = 1.0/TotalWeight;
@@ -500,9 +486,7 @@ void SetSpawnWeights()
 	}
 	#if DEBUG_WEIGHTS
 	for (i = 0; i < NUM_TYPES_INFECTED; i++)
-	{
 		LogMessage("[AIS] %s weight: %d (%.5f)", Spawns[i], SpawnWeights[i], IntervalEnds[i]);
-	}
 	#endif
 }
 
@@ -654,13 +638,9 @@ Action StartWitchTimer(Handle timer)
 	{
 		float time;
 		if (VariableWitchPeriod)
-		{
 			time = GetRandomFloat(0.0, WitchPeriod);
-		}
 		else
-		{
 			time = WitchPeriod;
-		}
 		WitchTimerStarted = true;
 		hWitchTimer = CreateTimer(time, SpawnWitchAuto, WitchPeriod-time);
 		#if DEBUG_TIMES
@@ -731,9 +711,7 @@ Action StartSpawnTimerManually(int client, int args)
 			GetCmdArg(1, arg, sizeof(arg));
 			time = StringToFloat(arg);
 			if (time < 0.0)
-			{
 				time = 1.0;
-			}
 			StartCustomSpawnTimer(time);
 			ReplyToCommand(client, "[AIS] Spawn timer started manually. Next potential spawn in %.3f seconds.", time);
 		}
