@@ -111,9 +111,7 @@ public Action OnTakeDamage(int victim, int& attacker, int& inflictor, float& dam
 public void OnMapStart()
 {
 	for (int i = 1; i <= MaxClients; i++)
-	{
 		ResetClientState(i);
-	}
 }
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon)
@@ -127,9 +125,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	if (isIncapacitated && GetClientTeam(client) == 2 && !isHangingFromLedge)
 	{
 		if (buttons & IN_FORWARD)
-		{
 			ForwardTime[client] = Min(ForwardTime[client] + TICKRATE, MAX_FORWARD_TIME);
-		}
 	}
 	return Plugin_Continue;
 }

@@ -667,7 +667,7 @@ void EndWitchTimer()
 {
 	if (WitchTimerStarted)
 	{
-		if (hWitchTimer!= null)
+		if (hWitchTimer != null)
 		{
 			delete hWitchTimer;
 			hWitchTimer = null;

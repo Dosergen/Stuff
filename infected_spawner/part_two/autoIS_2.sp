@@ -1,5 +1,5 @@
-#pragma newdecls required
 #pragma semicolon 1
+#pragma newdecls required
 
 #include <sourcemod>
 #include <sdktools>
@@ -630,38 +630,35 @@ void GenerateSpawn(int client)
 	CountSpecialInfected(); //refresh infected count
 	if (SICount < SILimit) //spawn when infected count hasn't reached limit
 	{
-		int size;
-		if (SpawnSize > SILimit - SICount) //prevent amount of special infected from exceeding SILimit
-			size = SILimit - SICount;
-		else
-			size = SpawnSize;
-		int index;
+		int size = (SpawnSize > SILimit - SICount) ? SILimit - SICount : SpawnSize; //prevent amount of special infected from exceeding SILimit
 		int SpawnQueue[MAX_INFECTED] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 		//refresh current SI counts
 		SITypeCount();
 		//generate the spawn queue
 		for (int i = 0; i < size; i++)
 		{
-			index = GenerateIndex();
-			if (index == -1)
-				break;
-			SpawnQueue[i]= index;
-			SpawnCounts[index] += 1;
+			int index = GenerateIndex();
+			if (index != -1)
+			{
+				SpawnQueue[i]= index;
+				SpawnCounts[index] += 1;
+			}
 		}
 		for (int i = 0; i < MAX_INFECTED; i++)
 		{
-			if(SpawnQueue[i] < 0) //stops if the current array index is out of bound
-				break;
-			int bot = CreateFakeClient("Infected Bot");
-			if (bot != 0)
+			if (SpawnQueue[i] >= 0)
 			{
-				ChangeClientTeam(bot, TEAM_INFECTED);
-				CreateTimer(0.1, kickbot, bot);
+				int bot = CreateFakeClient("Infected Bot");
+				if (bot != 0)
+				{
+					ChangeClientTeam(bot, TEAM_INFECTED);
+					CreateTimer(0.1, kickbot, bot);
+				}
+				CheatCommand(client, "z_spawn_old", Spawns[SpawnQueue[i]]); 
+				#if DEBUG_SPAWNS
+				LogMessage("[AIS] Spawned %s", Spawns[SpawnQueue[i]]);
+				#endif
 			}
-			CheatCommand(client, "z_spawn_old", Spawns[SpawnQueue[i]]); 
-			#if DEBUG_SPAWNS
-			LogMessage("[AIS] Spawned %s", Spawns[SpawnQueue[i]]);
-			#endif
 		}
 	}
 }
@@ -718,14 +715,11 @@ Action kickbot(Handle timer, any client)
 
 void CheatCommand(int client, char[] command, char[] arguments = "")
 {
-	if (!client || !IsClientInGame(client))
+	if (client <= 0 || !IsClientInGame(client))
 	{
-		for (int target = 1; target <= MaxClients; target++)
-		{
-			client = target;
-			break;
-		}
-		return; // case no valid Client found
+		client = FindValidClient();
+		if (client <= 0)
+			return;
 	}
 	int userFlags = GetUserFlagBits(client);
 	SetUserFlagBits(client, ADMFLAG_ROOT);
@@ -734,6 +728,16 @@ void CheatCommand(int client, char[] command, char[] arguments = "")
 	FakeClientCommand(client, "%s %s", command, arguments);
 	SetCommandFlags(command, flags);
 	SetUserFlagBits(client, userFlags);
+}
+
+int FindValidClient()
+{
+	for (int target = 1; target <= MaxClients; target++)
+	{
+		if (IsClientInGame(target))
+			return target;
+	}
+	return 0;
 }
 
 int GenerateIndex()
