@@ -224,7 +224,7 @@ Action ResetRecentlyHurtSurvivors(Handle timer, any tank)
 void EvtOnTankSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int tank = GetClientOfUserId(event.GetInt("userid"));
-	if (IsInfected(tank))
+	if (IsInfected(tank) && IsValidTank(tank))
 	{
 		g_bisTankActive[tank] = false;
 		g_istuckTicks[tank] = 0;
@@ -237,7 +237,7 @@ void EvtOnTankSpawn(Event event, const char[] name, bool dontBroadcast)
 void EvtOnTankDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int tank = GetClientOfUserId(event.GetInt("userid"));
-	if (IsInfected(tank))
+	if (IsInfected(tank) && IsValidTank(tank))
 	{
 		delete g_hInRockThrow_Timer[tank];
 		delete g_hRecentlyHurtSurvivors_Timer[tank];

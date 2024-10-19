@@ -74,21 +74,21 @@ void UpdateCvars()
 	SetConVarInt(survivorCrawlSpeed, hSpeed.IntValue);
 }
 
-public void OnClientPutInServer(int iClient)
+public void OnClientPutInServer(int client)
 {
-	if (IsClientInGame(iClient))
+	if (IsClientInGame(client))
 	{
-		ResetClientState(iClient);
-		SDKHook(iClient, SDKHook_OnTakeDamage, OnTakeDamage);
+		ResetClientState(client);
+		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	}
 }
 
-public void OnClientDisconnect(int iClient)
+public void OnClientDisconnect(int client)
 {
-	if (IsClientInGame(iClient))
+	if (IsClientInGame(client))
 	{
-		ResetClientState(iClient);
-		SDKUnhook(iClient, SDKHook_OnTakeDamage, OnTakeDamage);
+		ResetClientState(client);
+		SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	}
 }
 
@@ -123,9 +123,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	bool isIncapacitated = GetEntProp(client, Prop_Send, "m_isIncapacitated") != 0;
 	bool isHangingFromLedge = GetEntProp(client, Prop_Send, "m_isHangingFromLedge") != 0;
 	if (Allow[client] && isIncapacitated && (buttons & IN_FORWARD))
-	{
 		return Plugin_Handled;
-	}
 	if (isIncapacitated && GetClientTeam(client) == 2 && !isHangingFromLedge)
 	{
 		if (buttons & IN_FORWARD)
