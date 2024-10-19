@@ -8,22 +8,13 @@
 
 #define PLUGIN_VERSION   "1.4.8"
 
-#define	DOOR_CLASSES     2
-#define	DOOR_MODELS      4
+#define DOOR_CLASS_01 "prop_door_rotating"
+#define DOOR_CLASS_02 "prop_door_rotating_checkpoint"
 
-static const char g_sDoorClasses[DOOR_CLASSES][32] = 
-{ 
-	"prop_door_rotating", 
-	"prop_door_rotating_checkpoint" 
-};
-
-static const char g_sDoorModels[DOOR_MODELS][64] = 
-{
-	"models/props_doors/doorfreezer01.mdl", 
-	"models/props_doors/checkpoint_door_01.mdl",
-	"models/props_doors/checkpoint_door_-01.mdl",
-	"models/lighthouse/checkpoint_door_lighthouse01.mdl"
-};
+#define DOOR_MODEL_01 "models/props_doors/doorfreezer01.mdl"
+#define DOOR_MODEL_02 "models/props_doors/checkpoint_door_01.mdl"
+#define DOOR_MODEL_03 "models/props_doors/checkpoint_door_-01.mdl"
+#define DOOR_MODEL_04 "models/lighthouse/checkpoint_door_lighthouse01.mdl"
 
 static int g_iTankCount;
 static int g_iTankClassIndex;
@@ -183,26 +174,11 @@ void IsLookingAtBreakableDoor(int client)
 	}
 }
 
-bool IsValidDoor(const char[] className, const char[] modelName)
+bool IsValidDoor(const char className[64], const char modelName[64])
 {
-	if (className[0] == '\0' || modelName[0] == '\0') 
-	{
-		return false;
-	}
-	for (int i = 0; i < DOOR_CLASSES; i++)
-	{
-		if (strcmp(className, g_sDoorClasses[i]) == 0)
-		{
-			for (int j = 0; i < DOOR_MODELS; j++)
-			{
-				if (strcmp(modelName, g_sDoorModels[i]) == 0)
-				{
-					return true;
-				}
-			}
-		}
-	}
-	return false;
+	return (strcmp(className, DOOR_CLASS_01) == 0 && strcmp(modelName, DOOR_MODEL_01) == 0) 
+			|| (strcmp(className, DOOR_CLASS_02) == 0 && (strcmp(modelName, DOOR_MODEL_02) == 0 
+				|| strcmp(modelName, DOOR_MODEL_03) == 0 || strcmp(modelName, DOOR_MODEL_04) == 0));
 }
 
 bool IsValidClient(int client)
