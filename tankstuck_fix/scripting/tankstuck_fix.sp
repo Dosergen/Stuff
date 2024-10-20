@@ -100,9 +100,7 @@ public void OnPluginStart()
 	g_cvSlapVerticalMultiplier.AddChangeHook(ConVarChanged_Cvars);
 
 	if (g_bPluginEnable && g_bLeft4Dead2)
-	{
 		g_bisFlingPlayerSigLoaded = LoadFlingPlayerSignature();
-	}
 }
 
 public void OnConfigsExecuted()
@@ -165,9 +163,7 @@ void EvtOnAbilityUse(Event event, const char[] name, bool dontBroadcast)
 	if (IsInfected(client) && IsValidTank(client))
 	{
 		if (g_hInRockThrow_Timer[client] != null)
-		{
 			delete g_hInRockThrow_Timer[client];
-		}
 		g_hInRockThrow_Timer[client] = CreateTimer(3.0, OnAbilityUse, client);
 		g_binRockThrow[client] = true;
 	}
@@ -184,33 +180,31 @@ void EvtOnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 {
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
-	if (IsInfected(attacker) && IsSurvivor(victim) && IsValidTank(attacker))
+	if (IsTankActive(attacker) && IsInfected(attacker) && IsSurvivor(victim) && IsValidTank(attacker))
 	{
-		//#if DEBUG
-		//PrintToChatAll("[DEBUG] Tank %d hurt Survivor %d", attacker, victim);
-		//#endif
+		#if DEBUG
+		PrintToChatAll("[DEBUG] Tank %d hurt Survivor %d", attacker, victim);
+		#endif
 		if (g_hRecentlyHurtSurvivors_Timer[attacker] != null)
-		{
 			delete g_hRecentlyHurtSurvivors_Timer[attacker];
-		}
 		g_hRecentlyHurtSurvivors_Timer[attacker] = CreateTimer(8.0, ResetRecentlyHurtSurvivors, attacker);
 		g_bisTankActive[attacker] = true;
 		g_brecentlyHurtSurvivors[attacker] = true;
 		g_istuckTicks[attacker] = 0;
 		g_fSlapDistance[attacker] = g_fDistanceInitial;
-		//#if DEBUG
-		//PrintToChatAll("[DEBUG] Updated Tank %d: Active = true, RecentlyHurt = true, SlapDistance = %.2f", attacker, g_fSlapDistance[attacker]);
-		//#endif
+		#if DEBUG
+		PrintToChatAll("[DEBUG] Updated Tank %d: Active = true, RecentlyHurt = true, SlapDistance = %.2f", attacker, g_fSlapDistance[attacker]);
+		#endif
 	}
 	else if (!g_bisTankActive[victim] && IsSurvivor(attacker) && IsInfected(victim) && IsValidTank(victim))
 	{
-		//#if DEBUG
-		//PrintToChatAll("[DEBUG] Survivor %d hurt Tank %d", attacker, victim);
-		//#endif
+		#if DEBUG
+		PrintToChatAll("[DEBUG] Survivor %d hurt Tank %d", attacker, victim);
+		#endif
 		g_bisTankActive[victim] = true;
-		//#if DEBUG
-		//PrintToChatAll("[DEBUG] Updated Tank %d: Active = true", victim);
-		//#endif
+		#if DEBUG
+		PrintToChatAll("[DEBUG] Updated Tank %d: Active = true", victim);
+		#endif
 	}
 }
 
@@ -249,20 +243,14 @@ Action CheckTankLocation(Handle timer, any userid)
 {
 	int tank = GetClientOfUserId(userid);
 	if (!IsInfected(tank) || !IsValidTank(tank) || IsIncapped(tank))
-	{
 		return Plugin_Stop;
-	}
 	if (!g_bisTankActive[tank])
-	{
-		g_bisTankActive[tank] = IsOnLadder();
-	}
+		g_bisTankActive[tank] = IsSurvivorOnLadder();
 	#if DEBUG
 	PrintToChatAll("[DEBUG] Tank %d is active: %s", tank, g_bisTankActive[tank] ? "true" : "false");
 	#endif
 	if (!g_bisTankActive[tank] || g_brecentlyHurtSurvivors[tank] || g_binRockThrow[tank])
-	{
 		return Plugin_Continue;
-	}
 	float origin[3];
 	GetClientEyePosition(tank, origin);
 	if (GetVectorDistance(g_fLastOrigin[tank], origin) < 100.0)
@@ -287,9 +275,7 @@ Action CheckTankLocation(Handle timer, any userid)
 	{
 		g_fSlapDistance[tank] += g_fDistanceIntervalIncrease;
 		if (g_fSlapDistance[tank] > g_fMaxDistance)
-		{
 			g_fSlapDistance[tank] = g_fMaxDistance;
-		}
 		SlapNearbySurvivors(tank, origin);
 	}
 	return Plugin_Continue;
@@ -306,9 +292,7 @@ void SlapNearbySurvivors(int tank, float origin[3])
 			GetClientEyePosition(i, surOrigin);
 			float distance = GetVectorDistance(origin, surOrigin);
 			if (distance <= slapDistance && GetInfectedAttacker(i) == -1)
-			{
 				ApplySlapEffect(i, tank);
-			}
 		}
 	}
 }
@@ -316,13 +300,9 @@ void SlapNearbySurvivors(int tank, float origin[3])
 void ApplySlapEffect(int client, int tank)
 {
 	if (g_bLeft4Dead2 && g_bisFlingPlayerSigLoaded)
-	{
 		FlingPlayerAwayFromTank(client, tank);
-	}
 	else
-	{
 		SlapPlayer(client, 0, true);
-	}
 	ShakeClient(client, SHAKE_START, 30.0, 10.0, 2.0);
 	EmitSoundToClient(client, SOUND_QUAKE, tank);
 	EmitSoundToClient(client, SOUND_ROAR, tank);
@@ -367,21 +347,20 @@ stock bool IsValidTank(int client)
 	return GetEntProp(client, Prop_Send, "m_zombieClass") == (g_bLeft4Dead2 ? 8 : 5);
 }
 
+stock bool IsTankActive(int client)
+{
+	return IsValidClient(client) && GetEntProp(client, Prop_Send, "m_fireLayerSequence") > 0;
+}
+
 stock bool ShakeClient(int client, int command = SHAKE_START, float amplitude = 50.0, float frequency = 150.0, float duration = 3.0)
 {
 	BfWrite bf = UserMessageToBfWrite(StartMessageOne("Shake", client));
 	if (bf == null)
-	{
 		return false;
-	}
 	if (command == SHAKE_STOP)
-	{
 		amplitude = 0.0;
-	}
-	else if (amplitude <= 0.0) 
-	{
+	else if (amplitude <= 0.0)
 		return false;
-	}
 	bf.WriteByte(command);        // shake command
 	bf.WriteFloat(amplitude);     // shake magnitude/amplitude
 	bf.WriteFloat(frequency);     // shake noise frequency
@@ -390,7 +369,7 @@ stock bool ShakeClient(int client, int command = SHAKE_START, float amplitude = 
 	return true;
 }
 
-stock bool IsOnLadder()
+stock bool IsSurvivorOnLadder()
 {
 	int i;
 	for (i = 1; i <= MaxClients; i++)
@@ -398,9 +377,7 @@ stock bool IsOnLadder()
 		if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == 2)
 		{
 			if (GetEntityMoveType(i) & MOVETYPE_LADDER)
-			{
 				return true;
-			}
 		}
 	}
 	return false;
