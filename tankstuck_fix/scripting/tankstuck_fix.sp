@@ -351,8 +351,10 @@ stock bool IsValidTank(int client)
 
 stock bool IsTankActive(int client)
 {
+	if (!IsValidClient(client))
+		return false;
 	int sequence = GetEntProp(client, Prop_Send, "m_nSequence");
-	return IsValidClient && sequence >= 1 && 4 <= sequence;
+	return sequence >= 1 && sequence <= 4;
 }
 
 stock bool ShakeClient(int client, int command = SHAKE_START, float amplitude = 50.0, float frequency = 150.0, float duration = 3.0)
