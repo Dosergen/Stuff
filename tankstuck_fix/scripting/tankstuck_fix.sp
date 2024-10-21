@@ -16,7 +16,6 @@
 #define	SHAKE_START_RUMBLEONLY          4     // Starts a shake effect that only rumbles the controller, no screen effect.
 #define	SHAKE_START_NORUMBLE            5     // Starts a shake that does NOT rumble the controller.
 
-#define ACTIVE_SEQUENCE_MASK ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4))
 #define SOUND_QUAKE (g_bLeft4Dead2 ? "player/charger/hit/charger_smash_02.wav" : "player/t/hit/hulk_punch_1")
 #define SOUND_ROAR "player/tank/voice/yell/tank_yell_12.wav"
 
@@ -354,8 +353,14 @@ stock bool IsTankActive(int client)
 {
 	if (!IsValidClient(client))
 		return false;
+	static const int validSequences[] = {1, 2, 3, 4};
 	int sequence = GetEntProp(client, Prop_Send, "m_nSequence");
-	return (ACTIVE_SEQUENCE_MASK & (1 << sequence)) != 0;
+	for (int i = 0; i < 4; i++)
+	{	
+		if (sequence == validSequences[i])
+			return true;
+	}
+	return false;
 }
 
 stock bool ShakeClient(int client, int command = SHAKE_START, float amplitude = 50.0, float frequency = 150.0, float duration = 3.0)
