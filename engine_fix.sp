@@ -5,7 +5,7 @@
 #include <sdktools>
 #include <sdkhooks>
 
-#define debug 0
+#define DEBUG 0
 #define PLUGIN_VERSION "1.3"
 
 #define FIRST_RESTORE_TIME 0.3
@@ -15,25 +15,28 @@
 #define CONSTANT_HEALTH 1
 #define MAX_TEMP_HEALTH MAX_HEALTH - CONSTANT_HEALTH
 
-#define LADDER_SPEED_GLITCH_FIX (1 << 1)
-#define NO_FALL_DAMAGE_BUG_FIX (1 << 2)
-#define HEALTH_BOOST_GLITCH_FIX (1 << 3)
-#define LADDER_RELOAD_GLITCH_FIX (1 << 4)
+bool    g_bCvarWarnEnabled, 
+        g_bTempWarnLock[MAXPLAYERS+1];
 
-int g_iCvarEngineFlags;
-bool g_bCvarWarnEnabled;
-float g_fCvarDecayRate;
+Handle  g_hFixGlitchTimer[MAXPLAYERS+1],
+        g_hRestoreTimer[MAXPLAYERS+1];
 
-#if debug
-bool g_bDebugEnabled[MAXPLAYERS+1];
-Handle g_hDebugTimer[MAXPLAYERS+1];
-#endif
+int     g_iCvarEngineFlags,
+        g_iHealthToRestore[MAXPLAYERS+1],
+        g_iLastKnownHealth[MAXPLAYERS+1];
 
-bool g_bTempWarnLock[MAXPLAYERS+1];
-int g_iHealthToRestore[MAXPLAYERS+1], g_iLastKnownHealth[MAXPLAYERS+1];
-Handle g_hFixGlitchTimer[MAXPLAYERS+1], g_hRestoreTimer[MAXPLAYERS+1];
+float   g_fCvarDecayRate;
 
-ConVar hCvarDecayRate, hCvarWarnEnabled, hCvarEngineFlags;
+ConVar  hCvarDecayRate,
+        hCvarWarnEnabled,
+        hCvarEngineFlags;
+
+enum
+{
+	LadderSpeedGlitch = 1,
+	NoFallDamageBug,
+	HealthBoostGlitch
+};
 
 public Plugin myinfo =
 {
@@ -47,7 +50,7 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	EngineVersion test = GetEngineVersion();
-	if( test != Engine_Left4Dead && test != Engine_Left4Dead2 )
+	if (test != Engine_Left4Dead && test != Engine_Left4Dead2)
 	{
 		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
 		return APLRes_SilentFailure;
@@ -59,29 +62,27 @@ public void OnPluginStart()
 {
 	CreateConVar("engine_fix_version", PLUGIN_VERSION, "Engine Fix plugin version", FCVAR_REPLICATED|FCVAR_NOTIFY);
 
-	hCvarWarnEnabled = CreateConVar("engine_warning", "0", "Display a warning message saying that player using expolit: 1=enable, 0=disable.", FCVAR_NONE, true, 0.0, true, 1.0);
-	hCvarEngineFlags = CreateConVar("engine_fix_flags", "14", "Enables what kind of exploit should be fixed/blocked. Flags (add together): 0=disable, 2=ladder speed glitch, 4=no fall damage bug, 8=health boost glitch, 16=ladder reload glitch.", FCVAR_NONE, true, 0.0, true, 30.0);
+	hCvarWarnEnabled = CreateConVar("engine_warning", "0", "Display a warning message saying that player using expolit: 1=enable, 0=disable.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	hCvarEngineFlags = CreateConVar("engine_fix_flags", "14", "Enables what kind of exploit should be fixed/blocked. Flags (add together): 0=disable, 2=ladder speed glitch, 4=no fall damage bug, 8=health boost glitch.", FCVAR_NOTIFY, true, 0.0, true, 14.0);
 	
 	hCvarDecayRate = FindConVar("pain_pills_decay_rate");
 	hCvarDecayRate.AddChangeHook(OnConvarChange);
-
-	GetCvars();
 	
+	GetCvars();
+
 	hCvarWarnEnabled.AddChangeHook(OnConvarChange);
 	hCvarEngineFlags.AddChangeHook(OnConvarChange);
 
 	AutoExecConfig(true, "engine_fix");
 
-	if (g_iCvarEngineFlags & HEALTH_BOOST_GLITCH_FIX)
-	{	
+	if (g_iCvarEngineFlags & (1 << HealthBoostGlitch))
 		EF_ToogleEvents(true);
-	}
-#if debug
-	RegConsoleCmd("debug", CmdDebug);
-#endif
+	#if DEBUG
+	RegConsoleCmd("DEBUG", CmdDebug);
+	#endif
 }
 
-public void OnConvarChange(ConVar convar, const char[] oldValue, const char[] newValue)
+void OnConvarChange(ConVar convar, const char[] oldValue, const char[] newValue)
 {
 	GetCvars();
 }
@@ -91,7 +92,7 @@ void GetCvars()
 	g_fCvarDecayRate = hCvarDecayRate.FloatValue;
 	g_bCvarWarnEnabled = hCvarWarnEnabled.BoolValue;
 	g_iCvarEngineFlags = hCvarEngineFlags.IntValue;
-	EF_ToogleEvents(!!(g_iCvarEngineFlags & HEALTH_BOOST_GLITCH_FIX));
+	EF_ToogleEvents(!!(g_iCvarEngineFlags & (1 << HealthBoostGlitch)));
 }
 
 void EF_ToogleEvents(bool bHook)
@@ -100,9 +101,7 @@ void EF_ToogleEvents(bool bHook)
 	if (!bIsHooked && bHook)
 	{
 		for (int i = 1; i <= MAXPLAYERS; i++)
-		{
 			EF_ClearAllVars(i);
-		}
 		HookEvent("round_start", EF_ev_RoundStart, EventHookMode_PostNoCopy);
 		HookEvent("pills_used", EF_ev_PillsUsed);
 		HookEvent("player_hurt", EF_ev_PlayerHurt);
@@ -123,28 +122,17 @@ void EF_ToogleEvents(bool bHook)
 	}
 }
 
-public void OnMapEnd()
-{
-	for (int i = 0; i <= MAXPLAYERS; i++)
-	{
-		g_hRestoreTimer[i] = null;
-		g_hFixGlitchTimer[i] = null;
-#if debug
-		g_hDebugTimer[i] = null;
-#endif
-	}
-}
-
 /*                                      +==========================================+
                                         |               LADDER GLITCH              |
                                         |             NO FALL DMG GLITCH           |
                                         +==========================================+
 */
-public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
+
+public Action OnPlayerRunCmd(int client, int &buttons)
 {
-	if (g_iCvarEngineFlags && IsValidClient(client) && IsPlayerAlive(client) && !IsFakeClient(client))
+	if (g_iCvarEngineFlags && IsPlayerAlive(client) && !IsFakeClient(client))
 	{
-		if (g_iCvarEngineFlags & LADDER_SPEED_GLITCH_FIX && GetEntityMoveType(client) == MOVETYPE_LADDER)
+		if (g_iCvarEngineFlags & (1 << LadderSpeedGlitch) && GetEntityMoveType(client) == MOVETYPE_LADDER)
 		{
 			static int iUsingBug[MAXPLAYERS+1];
 			if (buttons & 8 || buttons & 16)
@@ -166,12 +154,10 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 				}
 			}
 			else
-			{
 				iUsingBug[client] = 0;
-			}
 		}
-		if (g_iCvarEngineFlags & NO_FALL_DAMAGE_BUG_FIX && GetClientTeam(client) == 2 && IsFallDamage(client) && buttons & IN_USE)
-		{
+		if (g_iCvarEngineFlags & (1 << NoFallDamageBug) && GetClientTeam(client) == 2 && IsFallDamage(client) && buttons & IN_USE){
+
 			buttons &= ~IN_USE;
 			if (g_bCvarWarnEnabled && !g_bTempWarnLock[client])
 			{
@@ -184,26 +170,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	return Plugin_Continue;
 }
 
-public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
-{
-	if (g_iCvarEngineFlags & LADDER_RELOAD_GLITCH_FIX && IsValidClient(client) && IsPlayerAlive(client) && !IsFakeClient(client))
-	{
-		if (GetEntityMoveType(client) == MOVETYPE_LADDER)
-		{
-			int iWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-			if (iWeapon != -1 && GetEntProp(iWeapon, Prop_Send, "m_fEffects") & 0x20 && GetEntPropFloat(iWeapon, Prop_Send, "m_reloadQueuedStartTime") != 0.0)
-			{
-				SetEntPropFloat(iWeapon, Prop_Send, "m_reloadQueuedStartTime", 0.0);
-				if (g_bCvarWarnEnabled)
-				{
-					WarningsMsg(client, 4);
-				}
-			}
-		}
-	}
-}
-
-Action EF_t_UnlockWarnMsg(Handle timer, int client)
+Action EF_t_UnlockWarnMsg(Handle timer, any client)
 {
 	g_bTempWarnLock[client] = false;
 	return Plugin_Stop;
@@ -218,12 +185,11 @@ bool IsFallDamage(int client)
                                         |               DROWN GLITCH               |
                                         +==========================================+
 */
+
 public void OnClientDisconnect(int client)
 {
-	if (client && g_iCvarEngineFlags & HEALTH_BOOST_GLITCH_FIX)
-	{
+	if (client && g_iCvarEngineFlags & (1 << HealthBoostGlitch))
 		EF_ClearAllVars(client);
-	}
 }
 
 void EF_ev_RoundStart(Event event, const char[] name, bool dontBroadcast)
@@ -232,9 +198,7 @@ void EF_ev_RoundStart(Event event, const char[] name, bool dontBroadcast)
 	{
 		EF_ClearAllVars(i);
 		if (IsClientInGame(i) && IsDrownPropNotEqual(i))
-		{
 			ForceEqualDrownProp(i);
-		}
 	}
 }
 
@@ -243,7 +207,8 @@ void EF_ev_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 	if (event.GetInt("type") & DMG_DROWN)
 	{
 		int client = GetClientOfUserId(event.GetInt("userid"));
-		if (IsIncapacitated(client)) return;
+		if (IsIncapacitated(client))
+			return;
 		if (event.GetInt("health") == CONSTANT_HEALTH)
 		{
 			int damage = event.GetInt("dmg_health");
@@ -253,18 +218,16 @@ void EF_ev_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 				g_iLastKnownHealth[client] -= CONSTANT_HEALTH;
 			}
 			if (g_iHealthToRestore[client] < 0)
-			{	
 				g_iHealthToRestore[client] = 0;
-			}
 			if (!g_iHealthToRestore[client])
 			{
 				EF_KillRestoreTimer(client);
 				CreateTimer(FIRST_RESTORE_TIME, EF_t_CheckRestoring, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 			}
 			g_iHealthToRestore[client] += damage;
-#if debug
+			#if DEBUG
 			PrintToChatAll("m_idrowndmg = %d, dmg = %d, temp hp to restote = %d", GetEntProp(client, Prop_Data, "m_idrowndmg"), damage, g_iHealthToRestore[client]);
-#endif
+			#endif
 			DataPack hdataPack;
 			CreateDataTimer(0.1, EF_t_SetDrownDmg, hdataPack, TIMER_FLAG_NO_MAPCHANGE);
 			hdataPack.WriteCell(client);
@@ -272,9 +235,7 @@ void EF_ev_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 			g_iLastKnownHealth[client] = 0;
 		}
 		else
-		{	
-			g_iLastKnownHealth[client] = event.GetInt("health");
-		}
+			g_iLastKnownHealth[client] = GetEventInt(event, "health");
 	}
 }
 
@@ -282,12 +243,8 @@ Action EF_t_SetDrownDmg(Handle timer, DataPack datapack)
 {
 	datapack.Reset();
 	int client = datapack.ReadCell();
-	
 	if (!IsSurvivor(client))
-	{
 		return Plugin_Stop;
-	}
-	
 	int drowndmg = datapack.ReadCell();
 	SetEntProp(client, Prop_Data, "m_idrowndmg", drowndmg);
 	return Plugin_Stop;
@@ -300,39 +257,33 @@ Action EF_t_CheckRestoring(Handle timer, int client)
 		g_iHealthToRestore[client] = 0;
 		return Plugin_Stop;
 	}
-
 	if (IsUnderWater(client))
-	{
 		return Plugin_Continue;
-	}
-
 	float fHealthToRestore = float(GetEntProp(client, Prop_Data, "m_idrowndmg") - GetEntProp(client, Prop_Data, "m_idrownrestored"));
 	if (fHealthToRestore <= 0)
 	{
-#if debug
+		#if DEBUG
 		PrintToChatAll("restoring started (player using glitch while have 1-10hp");
-#endif
+		#endif
 		g_hRestoreTimer[client] = CreateTimer(RESTORE_TIME, EF_t_RestoreTempHealth, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 		return Plugin_Stop;
 	}
 	int iRestoreCount = RoundToCeil(fHealthToRestore / MAX_HEALTH_PER_RESTORE);
 	float fRestoreTimeEnd = RESTORE_TIME * float(iRestoreCount);
-#if debug
+	#if DEBUG
 	PrintToChatAll("restore count = %d (beginning in %.0f sec.)", iRestoreCount, fRestoreTimeEnd);
-#endif
+	#endif
 	CreateTimer(fRestoreTimeEnd, EF_t_StartRestoreTempHealth, client, TIMER_FLAG_NO_MAPCHANGE);
 	return Plugin_Stop;
 }
 
 Action EF_t_StartRestoreTempHealth(Handle timer, int client)
 {
-	if (g_iHealthToRestore[client] <= 0 || !IsSurvivor(client))
-	{	
+	if (g_iHealthToRestore[client] <= 0 || !IsSurvivor(client))	
 		return Plugin_Stop;
-	}
-#if debug
+	#if DEBUG
 	PrintToChatAll("restoring started");
-#endif
+	#endif
 	g_hRestoreTimer[client] = CreateTimer(RESTORE_TIME, EF_t_RestoreTempHealth, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	return Plugin_Stop;
 }
@@ -351,15 +302,13 @@ Action EF_t_RestoreTempHealth(Handle timer, int client)
 		int iTempToRestore = g_iHealthToRestore[client] >= MAX_HEALTH_PER_RESTORE ? MAX_HEALTH_PER_RESTORE : g_iHealthToRestore[client];
 		if (iTempToRestore > iLimit)
 		{
-#if debug
+			#if DEBUG
 			PrintToChatAll("temp health limit is exceeded");
-#endif
+			#endif
 			iTempToRestore = iLimit;
 			g_iHealthToRestore[client] = 0;
 			if (iTempToRestore <= 0)
-			{
 				return Plugin_Continue;
-			}
 		}
 		SetTempHealth(client, fTemp + iTempToRestore);
 		g_iHealthToRestore[client] -= MAX_HEALTH_PER_RESTORE;
@@ -370,12 +319,12 @@ Action EF_t_RestoreTempHealth(Handle timer, int client)
 
 void EF_ev_HealSuccess(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(event.GetInt(StrEqual(name, "player_incapacitated") ? "userid" : "subject"));
+	int client = GetClientOfUserId(GetEventInt(event, StrEqual(name, "player_incapacitated") ? "userid" : "subject"));
 	if (IsDrownPropNotEqual(client))
 	{
-#if debug
+		#if DEBUG
 		PrintToChatAll("reset drownrestored prop %N", client);
-#endif
+		#endif
 		EF_ClearVars(client);
 		ForceEqualDrownProp(client);
 	}
@@ -387,7 +336,7 @@ void EF_ev_PillsUsed(Event event, const char[] name, bool dontBroadcast)
 	if (IsDrownPropNotEqual(client))
 	{
 		EF_KillFixGlitchTimer(client);
-		g_hFixGlitchTimer[client] = CreateTimer(0.1, EF_t_FixTempHpGlitch, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+		g_hFixGlitchTimer[client] = CreateTimer(0.0, EF_t_FixTempHpGlitch, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
@@ -399,23 +348,21 @@ Action EF_t_FixTempHpGlitch(Handle timer, int client)
 		if (fTemp)
 		{
 			int iHealth = GetClientHealth(client);
-			if ((iHealth + RoundToFloor(fTemp)) > MAX_TEMP_HEALTH)
+			if ((iHealth + RoundToFloor(fTemp)) > MAX_TEMP_HEALTH)\
 			{
 				SetTempHealth(client, float(MAX_HEALTH - iHealth));
 				EF_GlitchWarnFunc(client);
-#if debug
+				#if DEBUG
 				PrintToChatAll("temp glitch fixed");
-#endif
+				#endif
 			}
 		}
 		if (IsDrownPropNotEqual(client))
-		{
 			return Plugin_Continue;
-		}
 	}
-#if debug
+	#if DEBUG
 	PrintToChatAll("stopped temp glich fix timer");
-#endif
+	#endif
 	g_hFixGlitchTimer[client] = null;
 	return Plugin_Stop;
 }
@@ -434,10 +381,10 @@ void EF_KillRestoreTimer(int client)
 {
 	if (g_hRestoreTimer[client] != null)
 	{
-#if debug
+		#if DEBUG
 		PrintToChatAll("restoring stopped");
-#endif
-		KillTimer(g_hRestoreTimer[client]);
+		#endif
+		delete g_hRestoreTimer[client];
 		g_hRestoreTimer[client] = null;
 	}
 }
@@ -446,7 +393,7 @@ void EF_KillFixGlitchTimer(int client)
 {
 	if (g_hFixGlitchTimer[client] != null)
 	{
-		KillTimer(g_hFixGlitchTimer[client]);
+		delete g_hFixGlitchTimer[client];
 		g_hFixGlitchTimer[client] = null;
 	}
 }
@@ -494,6 +441,7 @@ void SetTempHealth(int client, float health)
 	SetEntPropFloat(client, Prop_Send, "m_healthBufferTime", GetGameTime());
 	SetEntPropFloat(client, Prop_Send, "m_healthBuffer", health);
 }
+
 // Code by SilverShot aka Silvers (Healing Gnome plugin https://forums.alliedmods.net/showthread.php?p=1658852)
 float GetTempHealth(int client)
 {
@@ -506,40 +454,29 @@ void WarningsMsg(int client, int msg)
 {
 	char STEAM_ID[32];
 	GetClientAuthId(client, AuthId_Steam2, STEAM_ID, sizeof(STEAM_ID));
-
 	switch (msg)
 	{
-		case 1:
-		{	
+		case 1:	
 			PrintToChatAll("%N (%s) attempted to use a ladder speed glitch.", client, STEAM_ID);
-		}
 		case 2:
-		{	
 			PrintToChatAll("%N (%s) is suspected of using a no fall damage bug.", client, STEAM_ID);
-		}
 		case 3:
-		{	
 			PrintToChatAll("%N (%s) attempted to use a health boost glitch.", client, STEAM_ID);
-		}
 		case 4:
-		{	
 			PrintToChatAll("%N (%s) attempted to use a ladder reload glitch.", client, STEAM_ID);
-		}
 	}
-}
-
-bool IsValidClient(int client)
-{
-	if (client <= 0 || client > MaxClients || !IsClientConnected(client)) return false;
-	return IsClientInGame(client);
 }
 
 /*                                      +==========================================+
                                         |               Debug Stuff                |
                                         +==========================================+
 */
-#if debug
-Action CmdDebug(int client, int args)
+
+#if DEBUG
+bool g_bDebugEnabled[MAXPLAYERS+1];
+Handle g_hDebugTimer[MAXPLAYERS+1];
+
+Action CmdDebug(int client, int agrs)
 {
 	g_bDebugEnabled[client] = !g_bDebugEnabled[client];
 	if (g_bDebugEnabled[client])
@@ -567,19 +504,13 @@ Action EF_t_DebugMe(Handle timer, int client)
 	{
 		float speed = GetEntPropFloat(client, Prop_Data, "m_flGroundSpeed");
 		float fall = GetEntPropFloat(client, Prop_Send, "m_flFallVelocity");
-
 		PrintCenterText(client, "%d/%d", GetEntProp(client, Prop_Data, "m_idrownrestored"), GetEntProp(client, Prop_Data, "m_idrowndmg"));
-
 		if (GetEntityMoveType(client) == MOVETYPE_LADDER)
 		{
 			if (speed > 130)
-			{	
 				PrintHintText(client, "Ground Speed %f WARNING!!!!", speed);
-			}
 			else
-			{	
 				PrintHintText(client, "Ground Speed %f", speed);
-			}
 		}
 		else 
 		{
@@ -587,20 +518,14 @@ Action EF_t_DebugMe(Handle timer, int client)
 			{
 				PrintHintText(client, "Move type %d | Flags %d\n Fall Speed: %f\n Health %d(%f)", GetEntityMoveType(client), GetEntityFlags(client), fall, GetClientHealth(client), GetTempHealth(client));
 				if (fall > 500)
-				{
 					PrintCenterText(client, "FALL DMG!");
-				}
 			}
 			else
-			{
 				PrintHintText(client, "Move type %d | Flags %d\n Ground Speed %f\n Health %d(%f)", GetEntityMoveType(client), GetEntityFlags(client), speed, GetClientHealth(client), GetTempHealth(client));
-			}
 		}
 	}
 	else
-	{	
 		DisableDebug(client);
-	}
 	return Plugin_Stop;
 }
 
@@ -608,7 +533,7 @@ void DisableDebug(int client)
 {
 	if (g_hDebugTimer[client] != null)
 	{
-		KillTimer(g_hDebugTimer[client]);
+		delete g_hDebugTimer[client];
 		g_hDebugTimer[client] = null;
 	}
 }

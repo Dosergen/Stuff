@@ -78,20 +78,16 @@ void OnDifficultyChange(ConVar convar, const char[] oldValue, const char[] newVa
 void EvtPlayerActivate(Event event, const char[] name, bool dontBroadcast) 
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (g_bTooEasy) 
-	{
+	if (g_bTooEasy)
 		PrintToChat(client, "\x04[DGT] \x03Difficulty level has been changed to advanced.");
-	}
 }
 
 bool AnyHumanPlayers() 
 {
 	for (int i = 1; i <= MaxClients; i++) 
 	{
-		if (IsClientInGame(i) && !IsFakeClient(i)) 
-		{
+		if (IsClientInGame(i) && !IsFakeClient(i))
 			return true;
-		}
 	}
 	return false;
 }
@@ -111,10 +107,8 @@ void UpdateDifficulty()
 public void OnMapStart()
 {
 	g_bTooEasy = IsTooEasy();
-	if (g_bTooEasy) 
-	{
+	if (g_bTooEasy)
 		UpdateDifficulty();
-	}
 	char g_sGameMode[32], g_sGameTypes[1024], g_sGameType[32][32];
 	g_hCvarMPGameMode.GetString(g_sGameMode, sizeof(g_sGameMode));
 	g_hCvarSVGameTypes.GetString(g_sGameTypes, sizeof(g_sGameTypes));
