@@ -236,6 +236,8 @@ void EvtOnTankDeath(Event event, const char[] name, bool dontBroadcast)
 		delete g_hInRockThrow_Timer[tank];
 		delete g_hRecentlyHurtSurvivors_Timer[tank];
 		g_bisTankActive[tank] = false;
+		g_brecentlyHurtSurvivors[tank] = false;
+		g_binRockThrow[tank] = false;
 	}
 }
 
@@ -390,19 +392,24 @@ stock int GetInfectedAttacker(int client)
 	{
 		/* Charger */
 		attacker = GetEntPropEnt(client, Prop_Send, "m_pummelAttacker");
-		if (attacker > 0) return attacker;
+		if (attacker > 0)
+			return attacker;
 		attacker = GetEntPropEnt(client, Prop_Send, "m_carryAttacker");
-		if (attacker > 0) return attacker;
+		if (attacker > 0)
+			return attacker;
 		/* Jockey */
 		attacker = GetEntPropEnt(client, Prop_Send, "m_jockeyAttacker");
-		if (attacker > 0) return attacker;
+		if (attacker > 0)
+			return attacker;
 	}
 	/* Hunter */
 	attacker = GetEntPropEnt(client, Prop_Send, "m_pounceAttacker");
-	if (attacker > 0) return attacker;
+	if (attacker > 0)
+		return attacker;
 	/* Smoker */
 	attacker = GetEntPropEnt(client, Prop_Send, "m_tongueOwner");
-	if (attacker > 0) return attacker;
+	if (attacker > 0)
+		return attacker;
 	return -1;
 }
 
