@@ -60,7 +60,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
-	CreateConVar("engine_fix_version", PLUGIN_VERSION, "Engine Fix plugin version", FCVAR_REPLICATED|FCVAR_NOTIFY);
+	CreateConVar("engine_fix_version", PLUGIN_VERSION, "Engine Fix plugin version", FCVAR_NOTIFY | FCVAR_DONTRECORD);
 
 	hCvarWarnEnabled = CreateConVar("engine_warning", "0", "Display a warning message saying that player using expolit: 1=enable, 0=disable.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	hCvarEngineFlags = CreateConVar("engine_fix_flags", "14", "Enables what kind of exploit should be fixed/blocked. Flags (add together): 0=disable, 2=ladder speed glitch, 4=no fall damage bug, 8=health boost glitch.", FCVAR_NOTIFY, true, 0.0, true, 14.0);
@@ -348,7 +348,7 @@ Action EF_t_FixTempHpGlitch(Handle timer, int client)
 		if (fTemp)
 		{
 			int iHealth = GetClientHealth(client);
-			if ((iHealth + RoundToFloor(fTemp)) > MAX_TEMP_HEALTH)\
+			if ((iHealth + RoundToFloor(fTemp)) > MAX_TEMP_HEALTH)
 			{
 				SetTempHealth(client, float(MAX_HEALTH - iHealth));
 				EF_GlitchWarnFunc(client);
