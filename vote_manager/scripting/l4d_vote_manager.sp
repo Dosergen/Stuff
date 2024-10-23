@@ -410,42 +410,42 @@ void CreateVote(DataPack hPack)
 {
 	hPack.Reset();
 	int client = hPack.ReadCell();
-	char sOption[64], sCmd[64];
-	hPack.ReadString(sOption, sizeof(sOption));
-	hPack.ReadString(sCmd, sizeof(sCmd));
-	int iCustomTeam = hPack.ReadCell();
+	hPack.ReadString(g_sOption, sizeof(g_sOption));
+	hPack.ReadString(g_sCmd, sizeof(g_sCmd));
+	g_iCustomTeam = hPack.ReadCell();
 	delete hPack;
-	if (iCustomTeam == 0)
-		iCustomTeam = 255;
+	if (g_iCustomTeam == 0)
+		g_iCustomTeam = 255;
 	g_bCustom = true;
 	float voteDuration = float(FindConVar("sv_vote_timer_duration").IntValue);
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (!IsClientInGame(i) || IsFakeClient(i))
-			continue;
-		if (iCustomTeam != 255 && GetClientTeam(i) != iCustomTeam)
-			continue;
-		if (g_bLeft4Dead2)
+		if (IsClientInGame(i) && !IsFakeClient(i))
 		{
-			BfWrite bf = UserMessageToBfWrite(StartMessageOne("VoteStart", i, USERMSG_RELIABLE));
-			bf.WriteByte(iCustomTeam);
-			bf.WriteByte(client);
-			bf.WriteString(CUSTOM_ISSUE);
-			bf.WriteString(sOption);
-			bf.WriteString(g_sCaller);
-			EndMessage();
+			if (g_iCustomTeam != 255 && GetClientTeam(i) != g_iCustomTeam)
+				continue;
+			if (g_bLeft4Dead2)
+			{
+				BfWrite bf = UserMessageToBfWrite(StartMessageOne("VoteStart", i, USERMSG_RELIABLE));
+				bf.WriteByte(g_iCustomTeam);
+				bf.WriteByte(client);
+				bf.WriteString(CUSTOM_ISSUE);
+				bf.WriteString(g_sOption);
+				bf.WriteString(g_sCaller);
+				EndMessage();
+			}
+			else
+			{
+				Event event = CreateEvent("vote_started");
+				event.SetString("issue", CUSTOM_ISSUE);
+				event.SetString("param1", g_sOption);
+				event.SetString("param2", g_sCaller);
+				event.SetInt("team", g_iCustomTeam);
+				event.SetInt("initiator", client);
+				event.Fire();
+			}
+			CreateTimer(voteDuration, CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
 		}
-		else
-		{
-			Event event = CreateEvent("vote_started");
-			event.SetString("issue", CUSTOM_ISSUE);
-			event.SetString("param1", sOption);
-			event.SetString("param2", g_sCaller);
-			event.SetInt("team", iCustomTeam);
-			event.SetInt("initiator", client);
-			event.Fire();
-		}
-		CreateTimer(voteDuration, CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
 	VoteManagerSetVoted(client, Voted_Yes);
 	VoteManagerUpdateVote();
@@ -706,7 +706,7 @@ void VoteManagerUpdateVote()
 	event.SetInt("potentialVotes", total);
 	event.Fire();
 	if (no == total || yes == total || yes + no == total)
-		CreateTimer(1.0, CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.1, CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
 void VoteManagerSetVoted(int client, VoteManager_Vote vote)
