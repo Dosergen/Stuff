@@ -236,7 +236,6 @@ Action VoteStart(int client, const char[] command, int argc)
 	{
 		if (flEngineTime - g_fLastVote <= 5.5) //minimum time that is required by the voting system itself before another vote can be called
 			return Plugin_Handled;
-
 		if (ClientHasAccess(client, g_sIssue))
 		{
 			if (StrEqual(g_sIssue, "custom", false))
