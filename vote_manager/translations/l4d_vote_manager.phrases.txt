@@ -1,0 +1,194 @@
+"Phrases"
+{
+	"Vetoed"
+	{
+		"#format"	"{1:N}"
+		"en"		"{olive}{1}{default} has force-vetoed current vote!"
+		"de"		"{olive}{1}{default} hat ein Veto gegen die aktuelle Umfrage eingelegt!"
+		"ru"		"{olive}{1}{default} заканчивает голосование!"
+	}
+	
+	"Passed"
+	{
+		"#format"	"{1:N}"
+		"en"		"{olive}{1}{default} has force-passed current vote!"
+		"de"		"{olive}{1}{default} hat die aktuelle Umfrage passieren lassen!"
+		"ru"		"{olive}{1}{default} пропускает голосование!"
+	}
+	
+	"Cant Pass"
+	{
+		"en"		"Not enough undecided players to force-pass this vote!"
+		"de"		"Zu wenige Enthaltungen, um die Umfrage passieren zu lassen!"
+		"ru"		"Недостаточно неопределившихся игроков, чтобы пропустить голосование!"
+	}
+	
+	"Cant Veto"
+	{
+		"en"		"Not enough undecided players to force-veto this vote!"
+		"de"		"Zu wenige Enthaltungen, um ein Veto gegen die Umfrage einzulegen!"
+		"ru"		"Недостаточно неопределившихся игроков, чтобы закончить голосование!"
+	}	
+	
+	"No Vote"
+	{
+		"en"		"No vote is currently in progress!"
+		"de"		"Es lдuft gerade keine Umfrage!"
+		"ru"		"Сейчас другое голосование не идёт!"
+	}
+	
+	"Log Error"
+	{
+		"en"		"Vote Manager failed to log an action to its own file!"
+		"de"		"Vote Manager konnte eine Aktion nicht in seiner eigenen Datei aufzeichnen!"
+		"ru"		"Vote Manager не смог записать действие в свой собственный файл!"
+	}
+	
+	"Conflict"
+	{
+		"en"		"A vote is active right now! Wait until that vote is over!"
+		"de"		"Es lдuft gerade eine Umfrage! Warte bis diese Umfrage vorbei ist!"
+		"ru"		"Голосование уже идёт! Подождите, пока голосование не закончится!"
+	}
+	
+	"Wait"
+	{
+		"#format"	"{1:d}"
+		"en"		"You must wait {green}{1}{default} seconds before calling a vote!"
+		"de"		"Du musst {green}{1}{default} Sekunden warten bevor du eine neue Umfrage starten kannst!"
+		"ru"		"Вы должны подождать {green}{1}{default} сек., прежде чем начать голосование!"
+	}
+	
+	"No Vote Access"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"{olive}{1}{default} was prevented from starting a {green}{2}{default} vote! Reason: no access!"
+		"de"		"{olive}{1}{default} darf keine {green}{2}{default} Umfrage starten!"
+		"ru"		"{olive}{1}{default} нельзя начать голосование ({green}{2}{default})! Причина: нет доступа!"
+	}	
+	
+	"Vote Called"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"{olive}{1}{default} started a {green}{2}{default} vote!"
+		"de"		"{olive}{1}{default} startet eine {green}{2}{default} Umfrage!"
+		"ru"		"{olive}{1}{default} начинает голосование ({green}{2}{default})!"
+	}
+	
+	"Custom Vote"
+	{
+		"#format"	"{1:N},{2:s},{3:s},{4:s}"
+		"en"		"{olive}{1}{default} started custom vote: {green}{3}{default} for team {green}{2}{default} with command: {green}{4}{default}!"
+		"de"		"{olive}{1}{default} startet eine selbst erstellte Umfrage: {green}{3}{default} fьr Team {green}{2}{default} mit dem Befehl: {green}{4}{default}"
+		"ru"		"{olive}{1}{default} запустил голосование: {green}{3}{default} для команды {green}{2}{default} с командой {green}{4}{default}!"
+	}
+	
+	"Custom Vote Passed"
+	{
+		"en"		"Custom vote has passed..."
+		"de"		"Der selbst erstellten Umfrage wurde zugestimmt..."
+		"ru"		"Решение принято..."
+	}
+	
+	"Use sm_customvote"
+	{
+		"en"		"Please use sm_customvote to call custom votes!"
+		"de"		"Bitte benutze sm_customvote, um eine Umfrage selbst zu erstellen!"
+		"ru"		"Используйте sm_customvote чтобы запускать собственные голосования!"
+	}
+	
+	"Custom Passed"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"Custom vote called by {olive}{1}{default} has passed! Issue was: {green}{2}{default}"
+		"de"		"Der selbst erstellten Umfrage von {olive}{1}{default} wurde zugestimmt! Frage war: {olive}{2}{default}"
+		"ru"		"Собственное голосование игрока {olive}{1}{default} пройдено! Вопрос: {green}{2}{default}"
+	}
+	
+	"Custom Failed"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"Custom vote called by {olive}{1}{default} has failed! Issue was: {green}{2}{default}"
+		"de"		"Der selbst erstellten Umfrage von {olive}{1}{default} wurde nicht zugestimmt! Frage war: {green}{2}{default}"
+		"ru"		"Собственное голосование игрока {olive}{1}{default} провалилось! Вопрос: {green}{2}{default}"
+	}	
+
+	"Vote Failed"
+	{
+		"en"		"Called vote has failed!"
+		"de"		"Der Umfrage wurde nicht zugestimmt!"
+		"ru"		"Не удалось начать голосование!"
+	}
+	
+	"Vote Called 2 Arguments"
+	{
+		"#format"	"{1:s},{2:s},{3:s}"
+		"en"		"{olive}{1}{default} started a {green}{2}{default} vote with option {green}{3}{default}!"
+		"de"		"{olive}{1}{default} hat eine {green}{2}{default} Umfrage mit der Option {green}{3}{default} gestartet!"
+		"ru"		"{olive}{1}{default} начинает голосование ({green}{2}{default}) с вариантом {green}{3}{default}!"
+	}
+	
+	"Vote Passed"
+	{
+		"en"		"Called vote has passed!"
+		"de"		"Der Umfrage wurde zugestimmt!"
+		"ru"		"Голосование пропущено!"
+	}
+
+	"Kick Vote"
+	{
+		"#format"	"{1:N},{2:N}"
+		"en"		"{olive}{1}{default} has started a Kick vote against {green}{2}{default}!"
+		"de"		"{olive}{1}{default} hat eine Spieler rauswerfen Umfrage gegen {green}{2}{default} gestartet!"
+		"ru"		"{olive}{1}{default} начинает голосование за изгнание {green}{2}{default}!"
+	}
+
+	"Kick Vote Call Failed"
+	{
+		"#format"	"{1:N},{2:N}"
+		"en"		"{olive}{1}{default} was prevented from starting a Kick vote against {green}{2}{default}! Reason: {green}can't target player!"
+		"de"		"{olive}{1}{default} wurde abgehalten eine Spieler rauswerfen Umfrage gegen {green}{2}{default} zu starten!"
+		"ru"		"{olive}{1}{default} не удалось начать голосование за изгнание {green}{2}{default}! Причина: {green}невозможно выбрать!"
+	}
+	
+	"Kick Immunity"
+	{
+		"#format"	"{1:N},{2:N}"
+		"en"		"{olive}{1}{default} was prevented from starting a Kick vote against {green}{2}{default}! Reason: {green}player is immune to kick votes!"
+		"de"		"{olive}{1}{default} wurde abgehalten eine Spieler rauswerfen Umfrage gegen {green}{2}{default} zu starten!"
+		"ru"		"{olive}{1}{default} не удалось начать голосование за изгнание {green}{2}{default}! Причина: {green}игрок имеет иммунитет!"
+	}	
+	
+	"Invalid Kick Userid"
+	{
+		"#format"	"{1:N},{2:s}"
+		"en"		"{olive}{1}{default} was prevented from starting a Kick vote against userid {green}{2}{default} ! Reason: {green}invalid player!"
+		"de"		"{olive}{1}{default} wurde abgehalten eine Spieler rauswerfen Umfrage gegen Benutzer ID {green}{2}{default} zu starten!"
+		"ru"		"{olive}{1}{default} не удалось начать голосование за изгнание IDпольз. {green}{2}{default}! Причина: {green}недействительный игрок!"
+	}
+	
+	"Tank Immune Response"
+	{
+		"#format"	"{1:N},{2:N}"
+		"en"		"{olive}{1}{default} was prevented from starting a Kick vote against {green}{2}{default}! Reason: {green}tanks are immune!"
+		"de"		"{olive}{1}{default} wurde abgehalten eine Spieler rauswerfen Umfrage gegen {green}{2}{default} zu starten!"
+		"ru"		"{olive}{1}{default} не удалось начать голосование за изгнание {green}{2}{default}! Причина: {green}танки имеют иммунитет!"
+	}
+	
+	"Spectator Response"
+	{
+		"#format"	"{1:N},{2:N}"
+		"en"		"{olive}{1}{default} was prevented from starting a Kick vote against {green}{2}{default}! Reason: {green}spectators can't call kick votes!"
+		"de"		"{olive}{1}{default} wurde abgehalten eine Spieler rauswerfen Umfrage gegen {green}{2}{default} zu starten!"
+		"ru"		"{olive}{1}{default} не удалось начать голосование за изгнание {green}{2}{default}}! Причина: {green}наблюдатели не могут выгонять!"
+	
+	}
+	
+	"Client Exploit Attempt"
+	{
+		"#format"	"{1:N},{2:s},{3:s}"
+		"en"		"{olive}{1}{default} (Steam ID: {green}{2}{default}) tried to start a fake vote type: {green}{3}{default}!"
+		"de"		"{olive}{1}{default} (Steam ID: {green}{2}{default}) hat versucht, einen gefälschten Abstimmungstyp zu starten: {green}{3}{default}!"
+		"ru"		"{olive}{1}{default} (Steam ID: {green}{2}{default}) попытался начать ложное голосование типа: {green}{3}{default}!"
+	}
+}
