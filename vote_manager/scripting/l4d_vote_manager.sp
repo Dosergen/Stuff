@@ -388,55 +388,60 @@ Action Command_CustomVote(int client, int args)
 		GetCmdArg(2, g_sOption, sizeof(g_sOption));
 		if (args == 3)
 			GetCmdArg(3, g_sCmd, sizeof(g_sCmd));
+		DataPack hPack = new DataPack();
+		hPack.WriteCell(client);
+		hPack.WriteString(g_sOption);
+		hPack.WriteString(g_sCmd);
+		hPack.WriteCell(StringToInt(arg1));
 		Format(g_sCaller, sizeof(g_sCaller), "%N", client);
 		LogVoteManager("%T", "Custom Vote", LANG_SERVER, client, arg1, g_sOption, g_sCmd);
 		VoteManagerNotify(client, "%s %t", MSGTAG, "Custom Vote", client, arg1, g_sOption, g_sCmd);
 		VoteLogAction(client, -1, "'%L' callvote custom started for team: %s (issue: '%s' cmd: '%s')", client, arg1, g_sOption, g_sCmd);
-		g_iCustomTeam = StringToInt(arg1);
-		VoteManagerPrepareVoters(g_iCustomTeam);
-		VoteManagerHandleCooldown(client);
-		g_iVoteStatus = VOTE_POLLING;
 		g_fLastVote = flEngineTime;
-		CreateTimer(0.1, CreateVote, client, TIMER_FLAG_NO_MAPCHANGE);
+		g_iVoteStatus = VOTE_POLLING;
+		VoteManagerHandleCooldown(client);
+		RequestFrame(CreateVote, hPack);
 		return Plugin_Handled;
 	}
 	return Plugin_Handled;
 }
 
-Action CreateVote(Handle Timer, any client)
+void CreateVote(DataPack hPack)
 {
-	if (g_iCustomTeam == 0)
-		g_iCustomTeam = 255;
+	hPack.Reset();
+	int client = hPack.ReadCell();
+	char sOption[64], sCmd[64];
+	hPack.ReadString(sOption, sizeof(sOption));
+	hPack.ReadString(sCmd, sizeof(sCmd));
+	int iCustomTeam = hPack.ReadCell();
+	delete hPack;
+	if (iCustomTeam == 0)
+		iCustomTeam = 255;
 	g_bCustom = true;
-	// Fetch vote timer duration once
 	float voteDuration = float(FindConVar("sv_vote_timer_duration").IntValue);
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (!IsClientInGame(i) || IsFakeClient(i))
-			continue; // Skip if not a real player
-		if (g_iCustomTeam != 255)
-		{
-			int pteam = GetClientTeam(i);
-			if (pteam != g_iCustomTeam)
-				continue; // Skip if not on the desired team
-		}
+			continue;
+		if (iCustomTeam != 255 && GetClientTeam(i) != iCustomTeam)
+			continue;
 		if (g_bLeft4Dead2)
 		{
 			BfWrite bf = UserMessageToBfWrite(StartMessageOne("VoteStart", i, USERMSG_RELIABLE));
-			bf.WriteByte(g_iCustomTeam);
+			bf.WriteByte(iCustomTeam);
 			bf.WriteByte(client);
 			bf.WriteString(CUSTOM_ISSUE);
-			bf.WriteString(g_sOption);
+			bf.WriteString(sOption);
 			bf.WriteString(g_sCaller);
 			EndMessage();
 		}
 		else
-		{   
+		{
 			Event event = CreateEvent("vote_started");
 			event.SetString("issue", CUSTOM_ISSUE);
-			event.SetString("param1", g_sOption);
+			event.SetString("param1", sOption);
 			event.SetString("param2", g_sCaller);
-			event.SetInt("team", g_iCustomTeam);
+			event.SetInt("team", iCustomTeam);
 			event.SetInt("initiator", client);
 			event.Fire();
 		}
@@ -444,7 +449,6 @@ Action CreateVote(Handle Timer, any client)
 	}
 	VoteManagerSetVoted(client, Voted_Yes);
 	VoteManagerUpdateVote();
-	return Plugin_Stop;
 }
 
 Action CustomVerdict(Handle Timer)
@@ -702,7 +706,7 @@ void VoteManagerUpdateVote()
 	event.SetInt("potentialVotes", total);
 	event.Fire();
 	if (no == total || yes == total || yes + no == total)
-		CreateTimer(3.0, CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(1.0, CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
 void VoteManagerSetVoted(int client, VoteManager_Vote vote)
