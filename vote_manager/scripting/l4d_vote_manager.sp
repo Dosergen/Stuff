@@ -533,10 +533,13 @@ Action CustomVerdict(Handle Timer)
 		BfWrite bf = UserMessageToBfWrite(message);
 		bf.WriteByte(g_iCustomTeam);
 		g_iCustomTeam = 0;
-		bf.WriteString(CUSTOM_ISSUE);
-		char votepassed[128];
-		Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
-		bf.WriteString(votepassed);
+		if (votePassed)
+		{
+			bf.WriteString(CUSTOM_ISSUE);
+			char votepassed[128];
+			Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
+			bf.WriteString(votepassed);
+		}
 		EndMessage();
 	}
 	else
@@ -544,10 +547,13 @@ Action CustomVerdict(Handle Timer)
 		Event event = CreateEvent(votePassed ? "vote_passed" : "vote_failed");
 		event.SetInt("team", g_iCustomTeam);
 		g_iCustomTeam = 0;
-		event.SetString("issue", CUSTOM_ISSUE);
-		char votepassed[128];
-		Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
-		event.SetString("param1", votepassed);
+		if (votePassed)
+		{
+			event.SetString("issue", CUSTOM_ISSUE);
+			char votepassed[128];
+			Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
+			event.SetString("param1", votepassed);
+		}
 		event.Fire();
 	}
 	return Plugin_Stop;
