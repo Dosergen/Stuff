@@ -196,6 +196,7 @@ public void OnClientDisconnect(int client)
 	int userid = GetClientUserId(client);
 	CreateTimer(5.0, TransitionCheck, userid);
 	iVote[client] = Voted_CantVote;
+	VoteManagerUpdateVote();
 }
 
 Action VoteAction(int client, const char[] command, int argc)
@@ -209,11 +210,13 @@ Action VoteAction(int client, const char[] command, int argc)
 		if (StrEqual(vote, "yes", false))
 		{
 			iVote[client] = Voted_Yes;
+			VoteManagerUpdateVote();
 			return Plugin_Continue;
 		}
 		else if (StrEqual(vote, "no", false))
 		{
 			iVote[client] = Voted_No;
+			VoteManagerUpdateVote();
 			return Plugin_Continue;
 		}
 	}
@@ -223,7 +226,7 @@ Action VoteAction(int client, const char[] command, int argc)
 Action VoteStart(int client, const char[] command, int argc)
 {
 	if (GetServerClientCount(true) == 0 || client == 0 || IsFakeClient(client))
-		return Plugin_Continue; //prevent votes while server is empty or if server tries calling vote
+		return Plugin_Handled; //prevent votes while server is empty or if server tries calling vote
 	if (argc <= 0)
 		return Plugin_Continue;
 	float flEngineTime = GetEngineTime();
@@ -281,6 +284,32 @@ Action VoteStart(int client, const char[] command, int argc)
 	}
 }
 
+void NextFrame_CallVote(DataPack hPack)
+{
+	hPack.Reset();
+	int argc = hPack.ReadCell();
+	int client = GetClientOfUserId(hPack.ReadCell());
+	delete hPack;
+	if (!client || !IsClientInGame(client))
+		return;
+	if (argc == 2)
+	{
+		LogVoteManager("%T", "Vote Called 2 Arguments", LANG_SERVER, g_sCaller, g_sIssue, g_sOption);
+		VoteManagerNotify(client, "%s %t", MSGTAG, "Vote Called 2 Arguments", g_sCaller, g_sIssue, g_sOption);
+		VoteLogAction(client, -1, "'%L' callvote (issue '%s') (option '%s')", client, g_sIssue, g_sOption);
+	}
+	else
+	{
+		LogVoteManager("%T", "Vote Called", LANG_SERVER, g_sCaller, g_sIssue);
+		VoteManagerNotify(client, "%s %t", MSGTAG, "Vote Called", g_sCaller, g_sIssue);
+		VoteLogAction(client, -1, "'%L' callvote (issue '%s')", client, g_sIssue);
+	}
+	VoteManagerPrepareVoters(0);
+	VoteManagerHandleCooldown(client);
+	g_iVoteStatus = VOTE_POLLING;
+	g_fLastVote = GetEngineTime();
+}
+
 Action VoteResult(UserMsg msg_id, BfRead bf, const int[] players, int playersNum, bool reliable, bool init)
 {
 	bool votePassed = (msg_id == GetUserMessageId("VotePass"));
@@ -302,9 +331,9 @@ void vote_result(Event event, const char[] name, bool dontBroadcast)
 
 Action Command_VoteVeto(int client, int args)
 {
-	if (client == 0 || !ClientHasAccess(client, "veto"))
+	if (client == 0)
 		return Plugin_Handled;
-	if (g_iVoteStatus == VOTE_POLLING)
+	if (g_iVoteStatus == VOTE_POLLING && ClientHasAccess(client, "veto"))
 	{
 		int yesvoters = VoteManagerGetVotedAll(Voted_Yes);
 		int undecided = VoteManagerGetVotedAll(Voted_CanVote);
@@ -340,9 +369,9 @@ Action Command_VoteVeto(int client, int args)
 
 Action Command_VotePassvote(int client, int args)
 {
-	if (client == 0 || !ClientHasAccess(client, "pass"))
+	if (client == 0)
 		return Plugin_Handled;
-	if (g_iVoteStatus == VOTE_POLLING)
+	if (g_iVoteStatus == VOTE_POLLING && ClientHasAccess(client, "pass"))
 	{
 		int novoters = VoteManagerGetVotedAll(Voted_No);
 		int undecided = VoteManagerGetVotedAll(Voted_CanVote);
@@ -379,9 +408,12 @@ Action Command_VotePassvote(int client, int args)
 Action Command_CustomVote(int client, int args)
 {
 	if (GetServerClientCount(true) == 0)
-		return Plugin_Continue;
+		return Plugin_Handled;
 	float flEngineTime = GetEngineTime();
-	if ((ClientHasAccess(client, "cooldown_immunity") || g_fNextVote[client] <= flEngineTime) && g_iVoteStatus == VOTE_NONE && args >= 2 && ClientHasAccess(client, "custom"))
+	if ((ClientHasAccess(client, "cooldown_immunity") || g_fNextVote[client] <= flEngineTime) 
+						&& g_iVoteStatus == VOTE_NONE 
+						&& args >= 2 
+						&& ClientHasAccess(client, "custom"))
 	{
 		char arg1[5];
 		GetCmdArg(1, arg1, sizeof(arg1));
@@ -399,14 +431,16 @@ Action Command_CustomVote(int client, int args)
 		VoteLogAction(client, -1, "'%L' callvote custom started for team: %s (issue: '%s' cmd: '%s')", client, arg1, g_sOption, g_sCmd);
 		g_fLastVote = flEngineTime;
 		g_iVoteStatus = VOTE_POLLING;
+		g_iCustomTeam = StringToInt(arg1);
+		VoteManagerPrepareVoters(g_iCustomTeam); 
 		VoteManagerHandleCooldown(client);
-		RequestFrame(CreateVote, hPack);
+		RequestFrame(NextFrame_CreateVote, hPack);
 		return Plugin_Handled;
 	}
 	return Plugin_Handled;
 }
 
-void CreateVote(DataPack hPack)
+void NextFrame_CreateVote(DataPack hPack)
 {
 	hPack.Reset();
 	int client = hPack.ReadCell();
@@ -417,13 +451,12 @@ void CreateVote(DataPack hPack)
 	if (g_iCustomTeam == 0)
 		g_iCustomTeam = 255;
 	g_bCustom = true;
-	float voteDuration = float(FindConVar("sv_vote_timer_duration").IntValue);
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (IsClientInGame(i) && !IsFakeClient(i))
 		{
 			if (g_iCustomTeam != 255 && GetClientTeam(i) != g_iCustomTeam)
-				continue;
+					continue;
 			if (g_bLeft4Dead2)
 			{
 				BfWrite bf = UserMessageToBfWrite(StartMessageOne("VoteStart", i, USERMSG_RELIABLE));
@@ -444,7 +477,7 @@ void CreateVote(DataPack hPack)
 				event.SetInt("initiator", client);
 				event.Fire();
 			}
-			CreateTimer(voteDuration, CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
+			CreateTimer(float(FindConVar("sv_vote_timer_duration").IntValue), CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
 	VoteManagerSetVoted(client, Voted_Yes);
@@ -482,19 +515,15 @@ Action CustomVerdict(Handle Timer)
 		else if (client == 0)
 			ServerCommand(g_sCmd);
 	}
-	Handle bf;
 	if (g_bLeft4Dead2)
 	{
-		bf = StartMessage(votePassed ? "VotePass" : "VoteFail", players, numPlayers, USERMSG_RELIABLE);
+		Handle bf = StartMessage(votePassed ? "VotePass" : "VoteFail", players, numPlayers, USERMSG_RELIABLE);
 		BfWriteByte(bf, g_iCustomTeam);
 		g_iCustomTeam = 0;
-		if (votePassed)
-		{
-			BfWriteString(bf, CUSTOM_ISSUE);
-			char votepassed[128];
-			Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
-			BfWriteString(bf, votepassed);
-		}
+		BfWriteString(bf, CUSTOM_ISSUE);
+		char votepassed[128];
+		Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
+		BfWriteString(bf, votepassed);
 		EndMessage();
 	}
 	else
@@ -502,13 +531,10 @@ Action CustomVerdict(Handle Timer)
 		Event event = CreateEvent(votePassed ? "vote_passed" : "vote_failed");
 		event.SetInt("team", g_iCustomTeam);
 		g_iCustomTeam = 0;
-		if (votePassed)
-		{
-			event.SetString("issue", CUSTOM_ISSUE);
-			char votepassed[128];
-			Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
-			event.SetString("param1", votepassed);
-		}
+		event.SetString("issue", CUSTOM_ISSUE);
+		char votepassed[128];
+		Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
+		event.SetString("param1", votepassed);
 		event.Fire();
 	}
 	return Plugin_Stop;
@@ -539,51 +565,6 @@ Action TransitionCheck(Handle Timer, any userid)
 		g_fNextVote[client] == 0.0;
 	return Plugin_Stop;
 }
-
-void NextFrame_KickVote(DataPack hPack)
-{
-	hPack.Reset();
-	int client = GetClientOfUserId(hPack.ReadCell());
-	int target = GetClientOfUserId(hPack.ReadCell());
-	int cTeam = hPack.ReadCell();
-	delete hPack;
-	if ((!client || !IsClientInGame(client)) || (!target || !IsClientInGame(target)))
-		return;
-	LogVoteManager("%T", "Kick Vote", LANG_SERVER, client, target);
-	VoteManagerNotify(client, "%s %t", MSGTAG, "Kick Vote", client, target);
-	VoteLogAction(client, -1, "'%L' callvote kick started (kickee: '%L')", client, target);
-	VoteManagerPrepareVoters(cTeam);
-	VoteManagerHandleCooldown(client);
-	g_iVoteStatus = VOTE_POLLING;
-	g_fLastVote = GetEngineTime();
-}
-
-void NextFrame_CallVote(DataPack hPack)
-{
-	hPack.Reset();
-	int argc = hPack.ReadCell();
-	int client = GetClientOfUserId(hPack.ReadCell());
-	delete hPack;
-	if (!client || !IsClientInGame(client))
-		return;
-	if (argc == 2)
-	{
-		LogVoteManager("%T", "Vote Called 2 Arguments", LANG_SERVER, g_sCaller, g_sIssue, g_sOption);
-		VoteManagerNotify(client, "%s %t", MSGTAG, "Vote Called 2 Arguments", g_sCaller, g_sIssue, g_sOption);
-		VoteLogAction(client, -1, "'%L' callvote (issue '%s') (option '%s')", client, g_sIssue, g_sOption);
-	}
-	else
-	{
-		LogVoteManager("%T", "Vote Called", LANG_SERVER, g_sCaller, g_sIssue);
-		VoteManagerNotify(client, "%s %t", MSGTAG, "Vote Called", g_sCaller, g_sIssue);
-		VoteLogAction(client, -1, "'%L' callvote (issue '%s')", client, g_sIssue);
-	}
-	VoteManagerPrepareVoters(0);
-	VoteManagerHandleCooldown(client);
-	g_iVoteStatus = VOTE_POLLING;
-	g_fLastVote = GetEngineTime();
-}
-
 
 bool ClientHasAccess(int client, const char[] issuee)
 {
@@ -669,6 +650,24 @@ Action ClientCanKick(int client, const char[] userid)
 	return Plugin_Continue;
 }
 
+void NextFrame_KickVote(DataPack hPack)
+{
+	hPack.Reset();
+	int client = GetClientOfUserId(hPack.ReadCell());
+	int target = GetClientOfUserId(hPack.ReadCell());
+	int cTeam = hPack.ReadCell();
+	delete hPack;
+	if ((!client || !IsClientInGame(client)) || (!target || !IsClientInGame(target)))
+		return;
+	LogVoteManager("%T", "Kick Vote", LANG_SERVER, client, target);
+	VoteManagerNotify(client, "%s %t", MSGTAG, "Kick Vote", client, target);
+	VoteLogAction(client, -1, "'%L' callvote kick started (kickee: '%L')", client, target);
+	VoteManagerPrepareVoters(cTeam);
+	VoteManagerHandleCooldown(client);
+	g_iVoteStatus = VOTE_POLLING;
+	g_fLastVote = GetEngineTime();
+}
+
 bool TankClass(int client)
 {
 	return GetEntProp(client, Prop_Send, "m_zombieClass") == (g_bLeft4Dead2 ? 8 : 5);
@@ -676,8 +675,6 @@ bool TankClass(int client)
 
 void VoteManagerHandleCooldown(int client)
 {
-	if (client <= 0 || client > MaxClients || !IsClientInGame(client))
-		return;
 	float time = GetEngineTime();
 	float cooldownTime = time + g_fCvarVoteCooldown;
 	if (g_iCvarCooldownMode == 0)
@@ -733,7 +730,7 @@ VoteManager_Vote VoteManagerGetVoted(int client)
 
 int VoteManagerGetVotedAll(VoteManager_Vote vote)
 {
-	int total;
+	int total = 0;
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (VoteManagerGetVoted(i) == vote)
@@ -746,13 +743,13 @@ void VoteManagerPrepareVoters(int team)
 {
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (IsClientInGame(i) && !IsFakeClient(i))
+		if (!IsClientInGame(i) || IsFakeClient(i))
 		{
-			if (team == 0)
-				iVote[i] = Voted_CanVote;
-			else if (GetClientTeam(i) == team)
-				iVote[i] = Voted_CanVote;
+			iVote[i] = Voted_CantVote;
+			continue;
 		}
+		if (team == 0 || GetClientTeam(i) == team)
+			iVote[i] = Voted_CanVote;
 		else
 			iVote[i] = Voted_CantVote;
 	}
