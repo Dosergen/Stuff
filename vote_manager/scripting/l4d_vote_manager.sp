@@ -490,22 +490,9 @@ Action CustomVerdict(Handle Timer)
 		return Plugin_Stop;
 	int yes = VoteManagerGetVotedAll(Voted_Yes);
 	int no = VoteManagerGetVotedAll(Voted_No);
-	bool votePassed = (yes > no);
-	g_bCustom = false;
-	char logMessage[64];
-	Format(logMessage, sizeof(logMessage), "%T", votePassed ? "Custom Passed" : "Custom Failed", LANG_SERVER, g_sCaller, g_sOption);
-	LogVoteManager("%s", logMessage);
-	VoteLogAction(-1, -1, votePassed ? "sm_customvote (verdict: 'passed')" : "sm_customvote (verdict: 'failed')");
-	if (votePassed && strlen(g_sCmd) > 0)
-	{
-		int client = GetClientByName(g_sCaller);
-		if (client > 0)
-			FakeClientCommand(client, g_sCmd);
-		else if (client == 0)
-			ServerCommand(g_sCmd);
-	}
 	int numPlayers;
 	int players[MAXPLAYERS + 1];
+	g_bCustom = false;
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (IsClientInGame(i) && !IsFakeClient(i) && VoteManagerGetVoted(i) != Voted_CantVote)
@@ -515,14 +502,31 @@ Action CustomVerdict(Handle Timer)
 			players[numPlayers++] = i;
 		}
 	}
-	char votepassed[128];
-	Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
+	bool votePassed = (yes > no);
+	if (votePassed)
+	{
+		if (strlen(g_sCmd) > 0)
+		{
+			int client = GetClientByName(g_sCaller);
+			if (client > 0)
+				FakeClientCommand(client, g_sCmd);
+			else if (client == 0)
+				ServerCommand(g_sCmd);
+		}
+	}
+	char logMessage[64];
+	Format(logMessage, sizeof(logMessage), "%T", votePassed ? "Custom Passed" : "Custom Failed", LANG_SERVER, g_sCaller, g_sOption);
+	LogVoteManager("%s", logMessage);
+	VoteLogAction(-1, -1, votePassed ? "sm_customvote (verdict: 'passed')" : "sm_customvote (verdict: 'failed')");
 	if (g_bLeft4Dead2)
 	{
 		Handle message = StartMessage(votePassed ? "VotePass" : "VoteFail", players, numPlayers, USERMSG_RELIABLE);
 		BfWrite bf = UserMessageToBfWrite(message);
 		bf.WriteByte(g_iCustomTeam);
+		g_iCustomTeam = 0;
 		bf.WriteString(CUSTOM_ISSUE);
+		char votepassed[128];
+		Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
 		bf.WriteString(votepassed);
 		EndMessage();
 	}
@@ -530,14 +534,15 @@ Action CustomVerdict(Handle Timer)
 	{
 		Event event = CreateEvent(votePassed ? "vote_passed" : "vote_failed");
 		event.SetInt("team", g_iCustomTeam);
+		g_iCustomTeam = 0;
 		event.SetString("issue", CUSTOM_ISSUE);
+		char votepassed[128];
+		Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
 		event.SetString("param1", votepassed);
 		event.Fire();
 	}
-	g_iCustomTeam = 0;
 	return Plugin_Stop;
 }
-
 
 stock int GetClientByName(const char[] name)
 {
@@ -702,7 +707,7 @@ void VoteManagerUpdateVote()
 	event.SetInt("potentialVotes", total);
 	event.Fire();
 	if (no == total || yes == total || yes + no == total)
-		CreateTimer(1.0, CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.1, CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
 void VoteManagerSetVoted(int client, VoteManager_Vote vote)
