@@ -490,7 +490,7 @@ Action CustomVerdict(Handle Timer)
 		return Plugin_Stop;
 	int yes = VoteManagerGetVotedAll(Voted_Yes);
 	int no = VoteManagerGetVotedAll(Voted_No);
-	int numPlayers = 0;
+	int numPlayers;
 	int players[MAXPLAYERS + 1];
 	g_bCustom = false;
 	for (int i = 1; i <= MaxClients; i++)
@@ -503,18 +503,21 @@ Action CustomVerdict(Handle Timer)
 		}
 	}
 	bool votePassed = (yes > no);
+	if (votePassed)
+	{
+		if (strlen(g_sCmd) > 0)
+		{
+			int client = GetClientByName(g_sCaller);
+			if (client > 0)
+				FakeClientCommand(client, g_sCmd);
+			else if (client == 0)
+				ServerCommand(g_sCmd);
+		}
+	}
 	char logMessage[64];
 	Format(logMessage, sizeof(logMessage), "%T", votePassed ? "Custom Passed" : "Custom Failed", LANG_SERVER, g_sCaller, g_sOption);
 	LogVoteManager("%s", logMessage);
 	VoteLogAction(-1, -1, votePassed ? "sm_customvote (verdict: 'passed')" : "sm_customvote (verdict: 'failed')");
-	if (strlen(g_sCmd) > 0)
-	{
-		int client = GetClientByName(g_sCaller);
-		if (client > 0)
-			FakeClientCommand(client, g_sCmd);
-		else if (client == 0)
-			ServerCommand(g_sCmd);
-	}
 	if (g_bLeft4Dead2)
 	{
 		Handle message = StartMessage(votePassed ? "VotePass" : "VoteFail", players, numPlayers, USERMSG_RELIABLE);
@@ -731,7 +734,7 @@ VoteManager_Vote VoteManagerGetVoted(int client)
 
 int VoteManagerGetVotedAll(VoteManager_Vote vote)
 {
-	int total = 0;
+	int total;
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (VoteManagerGetVoted(i) == vote)
@@ -744,13 +747,13 @@ void VoteManagerPrepareVoters(int team)
 {
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (!IsClientInGame(i) || IsFakeClient(i))
+		if (IsClientInGame(i) && !IsFakeClient(i))
 		{
-			iVote[i] = Voted_CantVote;
-			continue;
+			if (team == 0)
+				iVote[i] = Voted_CanVote;
+			else if (GetClientTeam(i) == team)
+				iVote[i] = Voted_CanVote;
 		}
-		if (team == 0 || GetClientTeam(i) == team)
-			iVote[i] = Voted_CanVote;
 		else
 			iVote[i] = Voted_CantVote;
 	}
