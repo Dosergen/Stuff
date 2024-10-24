@@ -421,7 +421,7 @@ Action Command_CustomVote(int client, int args)
 		if (args == 3)
 			GetCmdArg(3, g_sCmd, sizeof(g_sCmd));
 		DataPack hPack = new DataPack();
-		hPack.WriteCell(client);
+		hPack.WriteCell(GetClientUserId(client));
 		hPack.WriteString(g_sOption);
 		hPack.WriteString(g_sCmd);
 		hPack.WriteCell(StringToInt(arg1));
@@ -443,7 +443,7 @@ Action Command_CustomVote(int client, int args)
 void NextFrame_CreateVote(DataPack hPack)
 {
 	hPack.Reset();
-	int client = hPack.ReadCell();
+	int client = GetClientOfUserId(hPack.ReadCell());
 	hPack.ReadString(g_sOption, sizeof(g_sOption));
 	hPack.ReadString(g_sCmd, sizeof(g_sCmd));
 	g_iCustomTeam = hPack.ReadCell();
