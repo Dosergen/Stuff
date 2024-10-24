@@ -97,7 +97,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
-	CreateConVar("l4d_votemanager_version", PLUGIN_VERSION, "Version of Vote Manager", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	CreateConVar("l4d_votemanager_version", PLUGIN_VERSION, "Version of Vote Manager", FCVAR_NOTIFY | FCVAR_DONTRECORD);
 
 	// Cooldown mode configuration:
 	// 0 - Shared cooldown for all players;
@@ -796,7 +796,7 @@ void StringToLower(char[] string, int stringlength)
 	for (int i; i <= stringlength; i++)
 	{
 		Format(sChar, maxlength, buffer[i]);
-		if (strlen(buffer[i+1]) > 0)
+		if (strlen(buffer[i + 1]) > 0)
 			ReplaceString(sChar, maxlength, buffer[i + 1], "");
 		if (IsCharUpper(sChar[0]))
 		{
