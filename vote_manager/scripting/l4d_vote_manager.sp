@@ -411,9 +411,9 @@ Action Command_CustomVote(int client, int args)
 		return Plugin_Handled;
 	float flEngineTime = GetEngineTime();
 	if ((ClientHasAccess(client, "cooldown_immunity") || g_fNextVote[client] <= flEngineTime) 
-						&& g_iVoteStatus == VOTE_NONE 
-						&& args >= 2 
-						&& ClientHasAccess(client, "custom"))
+		&& g_iVoteStatus == VOTE_NONE 
+			&& args >= 2 
+				&& ClientHasAccess(client, "custom"))
 	{
 		char arg1[5];
 		GetCmdArg(1, arg1, sizeof(arg1));
