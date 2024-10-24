@@ -420,11 +420,6 @@ Action Command_CustomVote(int client, int args)
 		GetCmdArg(2, g_sOption, sizeof(g_sOption));
 		if (args == 3)
 			GetCmdArg(3, g_sCmd, sizeof(g_sCmd));
-		DataPack hPack = new DataPack();
-		hPack.WriteCell(GetClientUserId(client));
-		hPack.WriteString(g_sOption);
-		hPack.WriteString(g_sCmd);
-		hPack.WriteCell(StringToInt(arg1));
 		Format(g_sCaller, sizeof(g_sCaller), "%N", client);
 		LogVoteManager("%T", "Custom Vote", LANG_SERVER, client, arg1, g_sOption, g_sCmd);
 		VoteManagerNotify(client, "%s %t", MSGTAG, "Custom Vote", client, arg1, g_sOption, g_sCmd);
@@ -434,6 +429,11 @@ Action Command_CustomVote(int client, int args)
 		g_iCustomTeam = StringToInt(arg1);
 		VoteManagerPrepareVoters(g_iCustomTeam); 
 		VoteManagerHandleCooldown(client);
+		DataPack hPack = new DataPack();
+		hPack.WriteCell(GetClientUserId(client));
+		hPack.WriteString(g_sOption);
+		hPack.WriteString(g_sCmd);
+		hPack.WriteCell(g_iCustomTeam);
 		RequestFrame(NextFrame_CreateVote, hPack);
 		return Plugin_Handled;
 	}
@@ -511,8 +511,8 @@ Action CustomVerdict(Handle Timer)
 			numPlayers++;
 		}
 	}
-	bool votePassed = (yes > no);
-	if (votePassed)
+	bool confirmed = (yes > no);
+	if (confirmed)
 	{
 		if (strlen(g_sCmd) > 0)
 		{
@@ -524,16 +524,16 @@ Action CustomVerdict(Handle Timer)
 		}
 	}
 	char logMessage[64];
-	Format(logMessage, sizeof(logMessage), "%T", votePassed ? "Custom Passed" : "Custom Failed", LANG_SERVER, g_sCaller, g_sOption);
+	Format(logMessage, sizeof(logMessage), "%T", confirmed ? "Custom Passed" : "Custom Failed", LANG_SERVER, g_sCaller, g_sOption);
 	LogVoteManager("%s", logMessage);
-	VoteLogAction(-1, -1, votePassed ? "sm_customvote (verdict: 'passed')" : "sm_customvote (verdict: 'failed')");
+	VoteLogAction(-1, -1, confirmed ? "sm_customvote (verdict: 'passed')" : "sm_customvote (verdict: 'failed')");
 	if (g_bLeft4Dead2)
 	{
-		Handle message = StartMessage(votePassed ? "VotePass" : "VoteFail", players, numPlayers, USERMSG_RELIABLE);
+		Handle message = StartMessage(confirmed ? "VotePass" : "VoteFail", players, numPlayers, USERMSG_RELIABLE);
 		BfWrite bf = UserMessageToBfWrite(message);
 		bf.WriteByte(g_iCustomTeam);
 		g_iCustomTeam = 0;
-		if (votePassed)
+		if (confirmed)
 		{
 			bf.WriteString(CUSTOM_ISSUE);
 			char votepassed[128];
@@ -544,10 +544,10 @@ Action CustomVerdict(Handle Timer)
 	}
 	else
 	{
-		Event event = CreateEvent(votePassed ? "vote_passed" : "vote_failed");
+		Event event = CreateEvent(confirmed ? "vote_passed" : "vote_failed");
 		event.SetInt("team", g_iCustomTeam);
 		g_iCustomTeam = 0;
-		if (votePassed)
+		if (confirmed)
 		{
 			event.SetString("issue", CUSTOM_ISSUE);
 			char votepassed[128];
