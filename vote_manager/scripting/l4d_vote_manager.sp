@@ -517,13 +517,14 @@ Action CustomVerdict(Handle Timer)
 	}
 	if (g_bLeft4Dead2)
 	{
-		Handle bf = StartMessage(votePassed ? "VotePass" : "VoteFail", players, numPlayers, USERMSG_RELIABLE);
-		BfWriteByte(bf, g_iCustomTeam);
+		Handle message = StartMessage(votePassed ? "VotePass" : "VoteFail", players, numPlayers, USERMSG_RELIABLE);
+		BfWrite bf = UserMessageToBfWrite(message);
+		bf.WriteByte(g_iCustomTeam);
 		g_iCustomTeam = 0;
-		BfWriteString(bf, CUSTOM_ISSUE);
+		bf.WriteString(CUSTOM_ISSUE);
 		char votepassed[128];
 		Format(votepassed, sizeof(votepassed), "%T", "Custom Vote Passed", LANG_SERVER);
-		BfWriteString(bf, votepassed);
+		bf.WriteString(votepassed);
 		EndMessage();
 	}
 	else
