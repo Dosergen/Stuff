@@ -455,8 +455,12 @@ void NextFrame_CreateVote(DataPack hPack)
 	{
 		if (IsClientInGame(i) && !IsFakeClient(i))
 		{
-			if (g_iCustomTeam != 255 && GetClientTeam(i) != g_iCustomTeam)
+			if (g_iCustomTeam != 255)
+			{
+				int pteam = GetClientTeam(i);
+				if (pteam != g_iCustomTeam)
 					continue;
+			}
 			if (g_bLeft4Dead2)
 			{
 				BfWrite bf = UserMessageToBfWrite(StartMessageOne("VoteStart", i, USERMSG_RELIABLE));
@@ -497,9 +501,14 @@ Action CustomVerdict(Handle Timer)
 	{
 		if (IsClientInGame(i) && !IsFakeClient(i) && VoteManagerGetVoted(i) != Voted_CantVote)
 		{
-			if (g_iCustomTeam != 255 && GetClientTeam(i) != g_iCustomTeam)
-				continue;
-			players[numPlayers++] = i;
+			if (g_iCustomTeam != 255)
+			{
+				int pteam = GetClientTeam(i);
+				if (pteam != g_iCustomTeam)
+					continue;
+			}	
+			players[numPlayers] = i;
+			numPlayers++;
 		}
 	}
 	bool votePassed = (yes > no);
@@ -707,7 +716,7 @@ void VoteManagerUpdateVote()
 	event.SetInt("potentialVotes", total);
 	event.Fire();
 	if (no == total || yes == total || yes + no == total)
-		CreateTimer(0.1, CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(1.0, CustomVerdict, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
 void VoteManagerSetVoted(int client, VoteManager_Vote vote)
