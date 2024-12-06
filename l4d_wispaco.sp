@@ -333,19 +333,10 @@ void End_Timer(const bool isClosedHandle)
 	if (!g_bRunTimer)
 		return;
 	if (!isClosedHandle)
-		DeleteTimer(g_hSpawnTimer);
+		delete g_hSpawnTimer;
 	g_bRunTimer = false;
 	g_bWitchExec = false;
 	LogCommand("#DEBUG: End_Timer; Handle closed; RunTimer = %d", g_bRunTimer);
-}
-
-void DeleteTimer(Handle &timer)
-{
-	if (timer != null)
-	{
-		delete timer;
-		timer = null;
-	}
 }
 
 Action SpawnAWitch(Handle timer)
@@ -404,7 +395,7 @@ int GetCountAliveWitches()
 			int iTooFar = 0;
 			for (int i = 1; i <= MaxClients; i++)
 			{
-				if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == 2)
+				if (IsValidSurvivor(i) && IsPlayerAlive(i))
 				{
 					iClients++;
 					GetClientAbsOrigin(i, fPlayerPos);
@@ -451,16 +442,9 @@ void SpawnCommand(int client)
 	if (!client)
 		return;
 	int iWitchIndex = -1;
-	// Get a random survivor index
-	int iRandom = GetRandomSurv();
-	if (iRandom == -1)
-	{
-		LogCommand("#DEBUG: No valid survivors found");
-		return;
-	}
 	float fSpawnPos[3], fSpawnAng[3];
 	// Try to find a random spawn position
-	if (L4D_GetRandomPZSpawnPosition(iRandom, 7, 30, fSpawnPos))
+	if (GetSpawnPosition(7, 15, fSpawnPos))
 	{
 		// Set random yaw angle for the witch
 		fSpawnAng[1] = GetRandomFloatEx(-179.0, 179.0);
@@ -523,16 +507,29 @@ void SpawnCommand(int client)
 	}
 }
 
-int GetRandomSurv()
+bool GetSpawnPosition(int zombieClass, int attempts, float spawnpos[3])
 {
-	int count = 0;
-	int[] clients = new int[MaxClients];
+	if (IsValidClient(L4D_GetHighestFlowSurvivor()))
+	{
+		if (L4D_GetRandomPZSpawnPosition(L4D_GetHighestFlowSurvivor(), zombieClass, attempts, spawnpos))
+			return true;
+	}
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == 2)
-			clients[count++] = i;
+		if (IsValidSurvivor(i) && L4D_GetRandomPZSpawnPosition(i, zombieClass, attempts, spawnpos))
+			return true;
 	}
-	return (count > 0) ? clients[GetRandomIntEx(0, count - 1)] : -1;
+	return false;
+}
+
+bool IsValidClient(int client)
+{
+	return client > 0 && client <= MaxClients && IsClientInGame(client);
+}
+
+bool IsValidSurvivor(int client)
+{
+	return IsValidClient(client) && GetClientTeam(client) == 2;
 }
 
 int GetRandomIntEx(int min, int max)
