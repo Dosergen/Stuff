@@ -38,7 +38,7 @@ public void OnPluginStart()
 
 public void OnClientPutInServer(int client)
 {
-	if (!g_hEnable.BoolValue || !IsClientInGame(client))
+	if (!g_hEnable.BoolValue || !IsValidClient(client))
 		return;
 	char SteamID[MAX_STEAM_ID_LENGTH], IP[MAX_IP_LENGTH];
 	GetClientIP(client, IP, sizeof(IP));
@@ -46,6 +46,8 @@ public void OnClientPutInServer(int client)
 	if (IsNotValidSteamID(SteamID))
 	{
 		LogToFile(LogFile, "Detected invalid SteamID for player %N during connection: %s | IP: %s", client, SteamID, IP);
+		if (AuthClientTimer[client] != null)
+			delete AuthClientTimer[client];
 		AuthClientTimer[client] = CreateTimer(20.0, AuthCheckTimer, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
@@ -58,7 +60,7 @@ public void OnClientDisconnect(int client)
 Action AuthCheckTimer(Handle timer, any data)
 {
 	int client = GetClientOfUserId(data);
-	if (!g_hEnable.BoolValue || !IsClientInGame(client))
+	if (!g_hEnable.BoolValue || !IsValidClient(client))
 		return Plugin_Continue;
 	char SteamID[MAX_STEAM_ID_LENGTH], IP[MAX_IP_LENGTH], Name[MAX_NAME_LENGTH];
 	GetClientIP(client, IP, sizeof(IP));
@@ -85,6 +87,11 @@ Action AuthCheckTimer(Handle timer, any data)
 		LogToFile(LogFile, "Player %N no longer flagged for invalid SteamID: %s | IP: %s", client, SteamID, IP);
 	AuthClientTimer[client] = null;
 	return Plugin_Stop;
+}
+
+bool IsValidClient(int client)
+{
+	return client > 0 && client <= MaxClients && IsClientInGame(client) && !IsFakeClient(client);
 }
 
 bool IsNotValidSteamID(const char[] SteamID)
