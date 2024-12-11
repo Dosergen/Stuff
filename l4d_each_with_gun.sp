@@ -7,16 +7,28 @@
 
 #define DEBUG 0
 
-#define PLUGIN_VERSION "0.4"
-#define WEAPON_COUNT 4
+#define PLUGIN_VERSION "0.5"
+#define WEAPON_COUNT 16
 #define WEAPON_WAIT_TIME 1.0
 
 static const char g_sWeaponNames[WEAPON_COUNT][32] =
 {
+	"weapon_smg",
+	"weapon_smg_mp5",
+	"weapon_smg_silenced",
+	"weapon_rifle",
+	"weapon_rifle_ak47",
+	"weapon_rifle_sg552",
+	"weapon_rifle_desert",
 	"weapon_hunting_rifle",
 	"weapon_sniper_military",
 	"weapon_sniper_awp",
-	"weapon_sniper_scout"
+	"weapon_sniper_scout",
+	"weapon_pumpshotgun",
+	"weapon_autoshotgun",
+	"weapon_shotgun_chrome",
+	"weapon_shotgun_spas",
+	"weapon_pistol_magnum"
 };
 
 bool g_bPlayerWeaponTaken[MAXPLAYERS + 1][WEAPON_COUNT];
@@ -35,7 +47,7 @@ ConVar g_hChatMessages;
 
 public Plugin myinfo =
 {
-	name = "[L4D2] Each With Gun",
+	name = "[L4D/2] Each With Gun",
 	author = "Dosergen",
 	description = "The player is allowed to take only one type of weapon.",
 	version = PLUGIN_VERSION,
@@ -45,9 +57,9 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	EngineVersion test = GetEngineVersion();
-	if (test != Engine_Left4Dead2)
+	if (test != Engine_Left4Dead && test != Engine_Left4Dead2)
 	{
-		strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
+		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
 		return APLRes_SilentFailure;
 	}
 	g_bLateLoad = late;
