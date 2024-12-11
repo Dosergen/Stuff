@@ -37,6 +37,7 @@ float g_fWeaponAvailableTime[MAXPLAYERS + 1][WEAPON_COUNT];
 bool g_bWeaponTaken[WEAPON_COUNT] = { false };
 
 bool g_bLateLoad;
+bool g_bLeft4Dead2;
 bool g_bHookedEvents;
 bool g_bPluginEnable;
 bool g_bChatMessages;
@@ -57,9 +58,11 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	EngineVersion test = GetEngineVersion();
-	if (test != Engine_Left4Dead2)
+	if (test == Engine_Left4Dead) g_bLeft4Dead2 = false;
+	else if (test == Engine_Left4Dead2) g_bLeft4Dead2 = true;
+	else
 	{
-		strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
+		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
 		return APLRes_SilentFailure;
 	}
 	g_bLateLoad = late;
@@ -115,7 +118,8 @@ void IsAllowed()
 		HookEvent("round_start", evtRoundStart);
 		HookEvent("round_end", evtRoundEnd);
 		HookEvent("player_spawn", evtPlayerSpawn);
-		HookEvent("weapon_drop", evtWeaponDrop);
+		if (g_bLeft4Dead2)
+			HookEvent("weapon_drop", evtWeaponDrop);
 		g_bHookedEvents = true;
 	}
 	else if (!g_bPluginEnable && g_bHookedEvents)
@@ -123,7 +127,8 @@ void IsAllowed()
 		UnhookEvent("round_start", evtRoundStart);
 		UnhookEvent("round_end", evtRoundEnd);
 		UnhookEvent("player_spawn", evtPlayerSpawn);
-		UnhookEvent("weapon_drop", evtWeaponDrop);
+		if (g_bLeft4Dead2)
+			UnhookEvent("weapon_drop", evtWeaponDrop);
 		g_bHookedEvents = false;
 	}
 }
@@ -200,11 +205,15 @@ void evtPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 public void OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_WeaponEquip, OnWeaponEquip);
+	if (!g_bLeft4Dead2)
+		SDKHook(client, SDKHook_WeaponDropPost, OnWeaponDrop);
 }
 
 public void OnClientDisconnect(int client)
 {
 	SDKUnhook(client, SDKHook_WeaponEquip, OnWeaponEquip);
+	if (!g_bLeft4Dead2)
+		SDKUnhook(client, SDKHook_WeaponDropPost, OnWeaponDrop);
 }
 
 Action OnWeaponEquip(int client, int weapon)
@@ -265,19 +274,30 @@ bool CanPickUpWeapon(int client, int weaponIndex, float currentTime)
 	return true;
 }
 
-Action evtWeaponDrop(Event event, const char[] name, bool dontBroadcast)
+void evtWeaponDrop(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	int weapon = event.GetInt("propid");
 	if (!g_bPluginEnable || !IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(weapon))
-		return Plugin_Continue;
+		return;
+	WeaponDrop(client, weapon);
+}
+
+void OnWeaponDrop(int client, int weapon)
+{
+	if (!g_bPluginEnable || !IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(weapon))
+		return;
+	WeaponDrop(client, weapon);
+}
+
+void WeaponDrop(int client, int weapon)
+{
 	char weaponName[64];
 	GetEdictClassname(weapon, weaponName, sizeof(weaponName));
 	int weaponIndex = GetWeaponIndex(weaponName);
 	if (weaponIndex == -1)
-		return Plugin_Continue;
+		return;
 	float currentTime = GetEngineTime();
-	// Drop handling
 	if (g_bPlayerWeaponTaken[client][weaponIndex])
 	{
 		g_bPlayerWeaponTaken[client][weaponIndex] = false;
@@ -289,7 +309,6 @@ Action evtWeaponDrop(Event event, const char[] name, bool dontBroadcast)
 		PrintToChatAll("[DEBUG] Player %s dropped %s.", clientName, weaponName);
 		#endif
 	}
-	return Plugin_Continue;
 }
 
 int GetWeaponIndex(const char[] weaponName)
