@@ -47,7 +47,7 @@ ConVar g_hChatMessages;
 
 public Plugin myinfo =
 {
-	name = "[L4D/2] Each With Gun",
+	name = "[L4D2] Each With Gun",
 	author = "Dosergen",
 	description = "The player is allowed to take only one type of weapon.",
 	version = PLUGIN_VERSION,
@@ -57,9 +57,9 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	EngineVersion test = GetEngineVersion();
-	if (test != Engine_Left4Dead && test != Engine_Left4Dead2)
+	if (test != Engine_Left4Dead2)
 	{
-		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
+		strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
 		return APLRes_SilentFailure;
 	}
 	g_bLateLoad = late;
