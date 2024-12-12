@@ -47,8 +47,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 {
 	EngineVersion test = GetEngineVersion();
 	g_bLeft4Dead2 = (test == Engine_Left4Dead2);
-	if (test == Engine_Left4Dead)
-		g_bLeft4Dead2 = false;
+	if (test == Engine_Left4Dead) g_bLeft4Dead2 = false;
 	else if (test != Engine_Left4Dead2)
 	{
 		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
