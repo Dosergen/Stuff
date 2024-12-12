@@ -92,6 +92,7 @@ public void OnConfigsExecuted()
 void ConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
 {
 	GetCvars();
+	ParseWeaponList();
 }
 
 void GetCvars()
