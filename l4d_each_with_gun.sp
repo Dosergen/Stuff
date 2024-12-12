@@ -17,6 +17,7 @@
 #define PLUGIN_VERSION "0.7"
 #define WEAPON_WAIT_TIME 1.0
 #define MAX_WEAPONS 32
+#define SOUND_DENY "ui/helpful_event_1.wav"
 
 WeaponData g_WeaponData[MAXPLAYERS + 1];
 bool g_bWeaponTaken[MAX_WEAPONS] = { false };
@@ -207,6 +208,11 @@ void Reset()
 	#endif
 }
 
+public void OnMapStart()
+{
+	PrecacheSound(SOUND_DENY);
+}
+
 void evtPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
@@ -278,6 +284,7 @@ bool IsCanPickUpWeapon(int client, int weaponIndex, float currentTime)
 				GetClientName(i, weaponOwner, sizeof(weaponOwner));
 				if (g_bChatMessages)
 					PrintToChat(client, "\x04[Weapon Limit]\x01 This weapon is still in use by \x04%s\x01!", weaponOwner);
+				EmitSoundToClient(client, "ui/helpful_event_1.wav");
 				return false;
 			}
 		}
