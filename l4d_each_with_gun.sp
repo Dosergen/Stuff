@@ -7,44 +7,31 @@
 
 #define DEBUG 0
 
-#define PLUGIN_VERSION "0.5"
+#define PLUGIN_VERSION "0.6"
 #define WEAPON_COUNT 16
 #define WEAPON_WAIT_TIME 1.0
 
 static const char g_sWeaponNames[WEAPON_COUNT][32] =
 {
-	"weapon_smg",
-	"weapon_smg_mp5",
-	"weapon_smg_silenced",
-	"weapon_rifle",
-	"weapon_rifle_ak47",
-	"weapon_rifle_sg552",
-	"weapon_rifle_desert",
-	"weapon_hunting_rifle",
-	"weapon_sniper_military",
-	"weapon_sniper_awp",
-	"weapon_sniper_scout",
-	"weapon_pumpshotgun",
-	"weapon_autoshotgun",
-	"weapon_shotgun_chrome",
-	"weapon_shotgun_spas",
-	"weapon_pistol_magnum"
+	"weapon_smg", "weapon_smg_mp5", "weapon_smg_silenced", "weapon_rifle", 
+	"weapon_rifle_ak47", "weapon_rifle_sg552", "weapon_rifle_desert", "weapon_hunting_rifle", 
+	"weapon_sniper_military", "weapon_sniper_awp", "weapon_sniper_scout", "weapon_pumpshotgun", 
+	"weapon_autoshotgun", "weapon_shotgun_chrome", "weapon_shotgun_spas", "weapon_pistol_magnum"
 };
 
-bool g_bPlayerWeaponTaken[MAXPLAYERS + 1][WEAPON_COUNT];
-int g_iPlayerWeaponCount[MAXPLAYERS + 1];
-float g_fWeaponAvailableTime[MAXPLAYERS + 1][WEAPON_COUNT];
+enum struct WeaponData
+{
+	bool taken[WEAPON_COUNT];
+	int count;
+	float availableTime[WEAPON_COUNT];
+}
+
+WeaponData g_WeaponData[MAXPLAYERS + 1];
 bool g_bWeaponTaken[WEAPON_COUNT] = { false };
 
-bool g_bLateLoad;
-bool g_bLeft4Dead2;
-bool g_bHookedEvents;
-bool g_bPluginEnable;
-bool g_bChatMessages;
+bool g_bLateLoad, g_bLeft4Dead2, g_bHookedEvents, g_bPluginEnable, g_bChatMessages;
+ConVar g_hPluginEnable, g_hWeaponLimit, g_hChatMessages;
 int g_iWeaponLimit;
-ConVar g_hPluginEnable;
-ConVar g_hWeaponLimit;
-ConVar g_hChatMessages;
 
 public Plugin myinfo =
 {
@@ -58,9 +45,10 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	EngineVersion test = GetEngineVersion();
-	if (test == Engine_Left4Dead) g_bLeft4Dead2 = false;
-	else if (test == Engine_Left4Dead2) g_bLeft4Dead2 = true;
-	else
+	g_bLeft4Dead2 = (test == Engine_Left4Dead2);
+	if (test == Engine_Left4Dead)
+		g_bLeft4Dead2 = false;
+	else if (test != Engine_Left4Dead2)
 	{
 		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
 		return APLRes_SilentFailure;
@@ -140,27 +128,30 @@ Action Command_WeaponStatus(int client, int args)
 	char clientName[64];
 	GetClientName(client, clientName, sizeof(clientName));
 	for (int i = 0; i < WEAPON_COUNT; i++)
-	{
-		if (g_bWeaponTaken[i])
-		{
-			bool found = false;
-			for (int j = 1; j <= MaxClients; j++)
-			{
-				if (IsValidClient(j) && g_bPlayerWeaponTaken[j][i])
-				{
-					char playerName[64];
-					GetClientName(j, playerName, sizeof(playerName));
-					PrintToChat(client, "\x04[Weapon Limit]\x01 Weapon %s is taken by \x04%s\x01.", g_sWeaponNames[i], playerName);
-					found = true;
-				}
-			}
-			if (!found)
-				PrintToChat(client, "\x04[Weapon Limit]\x01 Weapon %s is taken but unknown.", g_sWeaponNames[i]);
-		}
-		else
-			PrintToChat(client, "\x02[Weapon Limit]\x01 Weapon %s is available.", g_sWeaponNames[i]);
-	}
+		WeaponStatus(client, i);
 	return Plugin_Handled;
+}
+
+void WeaponStatus(int client, int weaponIndex)
+{
+	if (g_bWeaponTaken[weaponIndex])
+	{
+		bool found = false;
+		for (int j = 1; j <= MaxClients; j++)
+		{
+			if (IsValidClient(j) && g_WeaponData[j].taken[weaponIndex])
+			{
+				char playerName[64];
+				GetClientName(j, playerName, sizeof(playerName));
+				PrintToChat(client, "\x04[Weapon Limit]\x01 Weapon %s is taken by \x04%s\x01.", g_sWeaponNames[weaponIndex], playerName);
+				found = true;
+			}
+		}
+		if (!found)
+			PrintToChat(client, "\x04[Weapon Limit]\x01 Weapon %s is taken but unknown.", g_sWeaponNames[weaponIndex]);
+	}
+	else
+		PrintToChat(client, "\x02[Weapon Limit]\x01 Weapon %s is available.", g_sWeaponNames[weaponIndex]);
 }
 
 void evtRoundStart(Event event, const char[] name, bool dontBroadcast)
@@ -226,13 +217,12 @@ Action OnWeaponEquip(int client, int weapon)
 	if (weaponIndex == -1)
 		return Plugin_Continue;
 	float currentTime = GetEngineTime();
-	// Consolidated checks for weapon availability
 	if (!CanPickUpWeapon(client, weaponIndex, currentTime))
 		return Plugin_Handled;
-	g_bPlayerWeaponTaken[client][weaponIndex] = true;
-	g_iPlayerWeaponCount[client]++;
+	g_WeaponData[client].taken[weaponIndex] = true;
+	g_WeaponData[client].count++;
 	g_bWeaponTaken[weaponIndex] = true;
-	g_fWeaponAvailableTime[client][weaponIndex] = currentTime + WEAPON_WAIT_TIME;
+	g_WeaponData[client].availableTime[weaponIndex] = currentTime + WEAPON_WAIT_TIME;
 	#if DEBUG
 	char clientName[64];
 	GetClientName(client, clientName, sizeof(clientName));
@@ -243,10 +233,9 @@ Action OnWeaponEquip(int client, int weapon)
 
 bool CanPickUpWeapon(int client, int weaponIndex, float currentTime)
 {
-	// Check if the player is waiting on a weapon or has reached their limit
-	if (g_fWeaponAvailableTime[client][weaponIndex] > currentTime)
+	if (g_WeaponData[client].availableTime[weaponIndex] > currentTime)
 	{
-		float remainingTime = g_fWeaponAvailableTime[client][weaponIndex] - currentTime;
+		float remainingTime = g_WeaponData[client].availableTime[weaponIndex] - currentTime;
 		if (g_bChatMessages)
 			PrintToChat(client, "\x04[Weapon Limit]\x01 You must wait \x04%.2f\x01 seconds before picking up this weapon.", remainingTime);
 		return false;
@@ -255,7 +244,7 @@ bool CanPickUpWeapon(int client, int weaponIndex, float currentTime)
 	{
 		for (int i = 1; i <= MaxClients; i++)
 		{
-			if (IsValidClient(i) && g_bPlayerWeaponTaken[i][weaponIndex])
+			if (IsValidClient(i) && g_WeaponData[i].taken[weaponIndex])
 			{
 				char weaponOwner[64];
 				GetClientName(i, weaponOwner, sizeof(weaponOwner));
@@ -265,7 +254,7 @@ bool CanPickUpWeapon(int client, int weaponIndex, float currentTime)
 			}
 		}
 	}
-	if (g_iWeaponLimit > 0 && g_iPlayerWeaponCount[client] >= g_iWeaponLimit)
+	if (g_iWeaponLimit > 0 && g_WeaponData[client].count >= g_iWeaponLimit)
 	{
 		if (g_bChatMessages)
 			PrintToChat(client, "\x04[Weapon Limit]\x01 You are limited to \x04%d\x01 weapon(s) per round.", g_iWeaponLimit);
@@ -298,11 +287,11 @@ void WeaponDrop(int client, int weapon)
 	if (weaponIndex == -1)
 		return;
 	float currentTime = GetEngineTime();
-	if (g_bPlayerWeaponTaken[client][weaponIndex])
+	if (g_WeaponData[client].taken[weaponIndex])
 	{
-		g_bPlayerWeaponTaken[client][weaponIndex] = false;
+		g_WeaponData[client].taken[weaponIndex] = false;
 		g_bWeaponTaken[weaponIndex] = false;
-		g_fWeaponAvailableTime[client][weaponIndex] = currentTime + WEAPON_WAIT_TIME;
+		g_WeaponData[client].availableTime[weaponIndex] = currentTime + WEAPON_WAIT_TIME;
 		#if DEBUG
 		char clientName[64];
 		GetClientName(client, clientName, sizeof(clientName));
@@ -325,10 +314,10 @@ void ResetPlayerWeaponState(int client)
 {
 	for (int i = 0; i < WEAPON_COUNT; i++)
 	{
-		g_bPlayerWeaponTaken[client][i] = false;
-		g_fWeaponAvailableTime[client][i] = 0.0;
+		g_WeaponData[client].taken[i] = false;
+		g_WeaponData[client].availableTime[i] = 0.0;
 	}
-	g_iPlayerWeaponCount[client] = 0;
+	g_WeaponData[client].count = 0;
 }
 
 bool IsValidClient(int client)
