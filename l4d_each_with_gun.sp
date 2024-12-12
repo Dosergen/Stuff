@@ -60,10 +60,10 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
-	g_hPluginEnable = CreateConVar("l4d_weapon_limit_enable", "1", "Enable or disable the plugin functionality.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	g_hWeaponLimit = CreateConVar("l4d_weapon_limit_per_round", "1", "Maximum number of weapons a player can take per round. 0: Disable", FCVAR_NOTIFY, true, 0.0, true, 4.0);
-	g_hChatMessages = CreateConVar("l4d_weapon_limit_chat_messages", "1", "Enable or disable chat messages for player.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	g_hWeaponList = CreateConVar("l4d_weapon_limit_list", "weapon_hunting_rifle,weapon_sniper_military,weapon_sniper_awp,weapon_sniper_scout", "Comma-separated list of weapons.", FCVAR_NOTIFY);
+	g_hPluginEnable = CreateConVar("l4d_each_with_gun_enable", "1", "Enable or disable the plugin functionality.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hWeaponLimit = CreateConVar("l4d_each_with_gun_per_round", "1", "Maximum number of weapons a player can take per round. 0: Disable", FCVAR_NOTIFY, true, 0.0, true, 4.0);
+	g_hChatMessages = CreateConVar("l4d_each_with_gun_chat_messages", "1", "Enable or disable chat messages for player.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hWeaponList = CreateConVar("l4d_each_with_gun_list", "weapon_hunting_rifle,weapon_sniper_military,weapon_sniper_awp,weapon_sniper_scout", "Comma-separated list of weapons.", FCVAR_NOTIFY);
 
 	g_hPluginEnable.AddChangeHook(ConVarChanged);
 	g_hWeaponLimit.AddChangeHook(ConVarChanged);
