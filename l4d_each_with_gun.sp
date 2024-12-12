@@ -35,9 +35,9 @@ int g_iWeaponLimit;
 
 public Plugin myinfo =
 {
-	name = "[L4D2] Each With Gun",
+	name = "[L4D/2] Each With Gun",
 	author = "Dosergen",
-	description = "The player is allowed to take only one type of weapon.",
+	description = "Players can choose only one weapon type.",
 	version = PLUGIN_VERSION,
 	url = "https://github.com/Dosergen/Stuff"
 }
