@@ -209,7 +209,7 @@ public void OnClientDisconnect(int client)
 
 Action OnWeaponEquip(int client, int weapon)
 {
-	if (!g_bPluginEnable || !IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(weapon))
+	if (!IsCheckConditions(client, weapon))
 		return Plugin_Continue;
 	char weaponName[64];
 	GetEdictClassname(weapon, weaponName, sizeof(weaponName));
@@ -217,7 +217,7 @@ Action OnWeaponEquip(int client, int weapon)
 	if (weaponIndex == -1)
 		return Plugin_Continue;
 	float currentTime = GetEngineTime();
-	if (!CanPickUpWeapon(client, weaponIndex, currentTime))
+	if (!IsCanPickUpWeapon(client, weaponIndex, currentTime))
 		return Plugin_Handled;
 	g_WeaponData[client].taken[weaponIndex] = true;
 	g_WeaponData[client].count++;
@@ -231,7 +231,7 @@ Action OnWeaponEquip(int client, int weapon)
 	return Plugin_Continue;
 }
 
-bool CanPickUpWeapon(int client, int weaponIndex, float currentTime)
+bool IsCanPickUpWeapon(int client, int weaponIndex, float currentTime)
 {
 	if (g_WeaponData[client].availableTime[weaponIndex] > currentTime)
 	{
@@ -267,14 +267,14 @@ void evtWeaponDrop(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	int weapon = event.GetInt("propid");
-	if (!g_bPluginEnable || !IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(weapon))
+	if (!IsCheckConditions(client, weapon))
 		return;
 	WeaponDrop(client, weapon);
 }
 
 void OnWeaponDrop(int client, int weapon)
 {
-	if (!g_bPluginEnable || !IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(weapon))
+	if (!IsCheckConditions(client, weapon))
 		return;
 	WeaponDrop(client, weapon);
 }
@@ -318,6 +318,11 @@ void ResetPlayerWeaponState(int client)
 		g_WeaponData[client].availableTime[i] = 0.0;
 	}
 	g_WeaponData[client].count = 0;
+}
+
+bool IsCheckConditions(int client, int weapon)
+{
+	return g_bPluginEnable && IsValidClient(client) && IsPlayerAlive(client) && IsValidEntity(weapon);
 }
 
 bool IsValidClient(int client)
