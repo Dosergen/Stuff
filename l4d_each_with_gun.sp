@@ -132,7 +132,7 @@ Action Command_WeaponStatus(int client, int args)
 		return Plugin_Handled;
 	char clientName[64];
 	GetClientName(client, clientName, sizeof(clientName));
-	for (int i = 0; i < MAX_WEAPONS; i++)
+	for (int i = 0; i < g_iWeaponCount; i++)
 		WeaponStatus(client, i);
 	return Plugin_Handled;
 }
