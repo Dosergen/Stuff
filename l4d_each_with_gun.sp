@@ -1,3 +1,10 @@
+/*
+ *	"weapon_smg", "weapon_smg_mp5", "weapon_smg_silenced", "weapon_rifle", 
+ *	"weapon_rifle_ak47", "weapon_rifle_sg552", "weapon_rifle_desert", "weapon_hunting_rifle", 
+ *	"weapon_sniper_military", "weapon_sniper_awp", "weapon_sniper_scout", "weapon_pumpshotgun", 
+ *	"weapon_autoshotgun", "weapon_shotgun_chrome", "weapon_shotgun_spas", "weapon_pistol_magnum"
+ */
+
 #pragma semicolon 1
 #pragma newdecls required
 
@@ -7,30 +14,24 @@
 
 #define DEBUG 0
 
-#define PLUGIN_VERSION "0.6"
-#define WEAPON_COUNT 16
+#define PLUGIN_VERSION "0.7"
 #define WEAPON_WAIT_TIME 1.0
+#define MAX_WEAPONS 32
 
-static const char g_sWeaponNames[WEAPON_COUNT][32] =
-{
-	"weapon_smg", "weapon_smg_mp5", "weapon_smg_silenced", "weapon_rifle", 
-	"weapon_rifle_ak47", "weapon_rifle_sg552", "weapon_rifle_desert", "weapon_hunting_rifle", 
-	"weapon_sniper_military", "weapon_sniper_awp", "weapon_sniper_scout", "weapon_pumpshotgun", 
-	"weapon_autoshotgun", "weapon_shotgun_chrome", "weapon_shotgun_spas", "weapon_pistol_magnum"
-};
+WeaponData g_WeaponData[MAXPLAYERS + 1];
+bool g_bWeaponTaken[MAX_WEAPONS] = { false };
+char g_sWeaponNames[MAX_WEAPONS][32];
+int g_iWeaponCount = 0;
 
 enum struct WeaponData
 {
-	bool taken[WEAPON_COUNT];
+	bool taken[MAX_WEAPONS];
 	int count;
-	float availableTime[WEAPON_COUNT];
+	float availableTime[MAX_WEAPONS];
 }
 
-WeaponData g_WeaponData[MAXPLAYERS + 1];
-bool g_bWeaponTaken[WEAPON_COUNT] = { false };
-
 bool g_bLateLoad, g_bLeft4Dead2, g_bHookedEvents, g_bPluginEnable, g_bChatMessages;
-ConVar g_hPluginEnable, g_hWeaponLimit, g_hChatMessages;
+ConVar g_hPluginEnable, g_hWeaponLimit, g_hChatMessages, g_hWeaponList;
 int g_iWeaponLimit;
 
 public Plugin myinfo =
@@ -61,11 +62,13 @@ public void OnPluginStart()
 {
 	g_hPluginEnable = CreateConVar("l4d_weapon_limit_enable", "1", "Enable or disable the plugin functionality.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_hWeaponLimit = CreateConVar("l4d_weapon_limit_per_round", "1", "Maximum number of weapons a player can take per round. 0: Disable", FCVAR_NOTIFY, true, 0.0, true, 4.0);
-	g_hChatMessages = CreateConVar("l4d_weapon_chat_messages", "0", "Enable or disable chat messages for player.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	
+	g_hChatMessages = CreateConVar("l4d_weapon_limit_chat_messages", "1", "Enable or disable chat messages for player.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hWeaponList = CreateConVar("l4d_weapon_limit_list", "weapon_hunting_rifle,weapon_sniper_military,weapon_sniper_awp,weapon_sniper_scout", "Comma-separated list of weapons.", FCVAR_NOTIFY);
+
 	g_hPluginEnable.AddChangeHook(ConVarChanged);
 	g_hWeaponLimit.AddChangeHook(ConVarChanged);
 	g_hChatMessages.AddChangeHook(ConVarChanged);
+	g_hWeaponList.AddChangeHook(ConVarChanged);
 
 	if (g_bLateLoad) 
 	{
@@ -103,6 +106,7 @@ void IsAllowed()
 	GetCvars();
 	if (g_bPluginEnable && !g_bHookedEvents)
 	{
+		ParseWeaponList();
 		HookEvent("round_start", evtRoundStart);
 		HookEvent("round_end", evtRoundEnd);
 		HookEvent("player_spawn", evtPlayerSpawn);
@@ -127,7 +131,7 @@ Action Command_WeaponStatus(int client, int args)
 		return Plugin_Handled;
 	char clientName[64];
 	GetClientName(client, clientName, sizeof(clientName));
-	for (int i = 0; i < WEAPON_COUNT; i++)
+	for (int i = 0; i < MAX_WEAPONS; i++)
 		WeaponStatus(client, i);
 	return Plugin_Handled;
 }
@@ -154,6 +158,29 @@ void WeaponStatus(int client, int weaponIndex)
 		PrintToChat(client, "\x02[Weapon Limit]\x01 Weapon %s is available.", g_sWeaponNames[weaponIndex]);
 }
 
+void ParseWeaponList()
+{
+	char weaponList[512];
+	g_hWeaponList.GetString(weaponList, sizeof(weaponList));
+	g_iWeaponCount = 0;
+	char weaponArray[MAX_WEAPONS][32];
+	int count = ExplodeString(weaponList, ",", weaponArray, sizeof(weaponArray), sizeof(weaponArray[]));
+	for (int i = 0; i < count && g_iWeaponCount < MAX_WEAPONS; i++)
+	{
+		TrimString(weaponArray[i]);
+		if (strlen(weaponArray[i]) > 0)
+		{
+			strcopy(g_sWeaponNames[g_iWeaponCount], 32, weaponArray[i]);
+			g_iWeaponCount++;
+		}
+	}
+	#if DEBUG
+	LogMessage("Parsed weapon list: %d weapons loaded.", g_iWeaponCount);
+	for (int j = 0; j < g_iWeaponCount; j++)
+		LogMessage("Weapon %d: %s", j + 1, g_sWeaponNames[j]);
+	#endif
+}
+
 void evtRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	Reset();
@@ -172,7 +199,7 @@ void Reset()
 			ResetPlayerWeaponState(i);
 	}
 	// Reset global weapon availability
-	for (int i = 0; i < WEAPON_COUNT; i++)
+	for (int i = 0; i < MAX_WEAPONS; i++)
 		g_bWeaponTaken[i] = false;
 	#if DEBUG
 	PrintToChatAll("[DEBUG] All weapon states have been reset.");
@@ -302,7 +329,7 @@ void WeaponDrop(int client, int weapon)
 
 int GetWeaponIndex(const char[] weaponName)
 {
-	for (int i = 0; i < WEAPON_COUNT; i++)
+	for (int i = 0; i < g_iWeaponCount; i++)
 	{
 		if (strcmp(weaponName, g_sWeaponNames[i], true) == 0)
 			return i;
@@ -312,7 +339,7 @@ int GetWeaponIndex(const char[] weaponName)
 
 void ResetPlayerWeaponState(int client)
 {
-	for (int i = 0; i < WEAPON_COUNT; i++)
+	for (int i = 0; i < MAX_WEAPONS; i++)
 	{
 		g_WeaponData[client].taken[i] = false;
 		g_WeaponData[client].availableTime[i] = 0.0;
