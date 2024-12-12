@@ -60,6 +60,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+	CreateConVar("l4d_each_with_gun_version", PLUGIN_VERSION, "[L4D/2] Each With Gun plugin version.", FCVAR_NOTIFY | FCVAR_DONTRECORD);
+
 	g_hPluginEnable = CreateConVar("l4d_each_with_gun_enable", "1", "Enable or disable the plugin functionality.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_hWeaponLimit = CreateConVar("l4d_each_with_gun_per_round", "1", "Maximum number of weapons a player can take per round. 0: Disable", FCVAR_NOTIFY, true, 0.0, true, 4.0);
 	g_hChatMessages = CreateConVar("l4d_each_with_gun_chat_messages", "1", "Enable or disable chat messages for player.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
