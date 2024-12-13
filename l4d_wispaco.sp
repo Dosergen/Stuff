@@ -444,7 +444,7 @@ void SpawnCommand(int client)
 	int iWitchIndex = -1;
 	float fSpawnPos[3], fSpawnAng[3];
 	// Try to find a random spawn position
-	if (GetSpawnPosition(7, 15, fSpawnPos))
+	if (GetSpawnPosition(7, 10, fSpawnPos))
 	{
 		// Set random yaw angle for the witch
 		fSpawnAng[1] = GetRandomFloatEx(-179.0, 179.0);
@@ -501,23 +501,41 @@ void SpawnCommand(int client)
 		}
 	}
 	else
-	{
-		// Log an error if no valid spawn position is found
 		LogCommand("#DEBUG: Failed to find a valid spawn position");
-	}
 }
 
 bool GetSpawnPosition(int zombieClass, int attempts, float spawnpos[3])
 {
-	if (IsValidClient(L4D_GetHighestFlowSurvivor()))
+	int tryCount = 0;
+	int failureCount = 0;
+	bool foundPosition = false;
+	if (attempts < 1)
+		return false;
+	while (tryCount < attempts)
 	{
-		if (L4D_GetRandomPZSpawnPosition(L4D_GetHighestFlowSurvivor(), zombieClass, attempts, spawnpos))
+		if (IsValidClient(L4D_GetHighestFlowSurvivor()))
+		{
+			if (L4D_GetRandomPZSpawnPosition(L4D_GetHighestFlowSurvivor(), zombieClass, attempts, spawnpos))
+				foundPosition = true;
+		}
+		if (!foundPosition)
+		{
+			for (int i = 1; i <= MaxClients; i++)
+			{
+				if (IsValidSurvivor(i) && L4D_GetRandomPZSpawnPosition(i, zombieClass, attempts, spawnpos))
+					foundPosition = true;
+			}
+		}
+		if (foundPosition)
+		{
+			failureCount = 0;
 			return true;
-	}
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsValidSurvivor(i) && L4D_GetRandomPZSpawnPosition(i, zombieClass, attempts, spawnpos))
-			return true;
+		}
+		else
+			failureCount++;
+		if (failureCount >= attempts)
+			return false;
+		tryCount++;
 	}
 	return false;
 }
