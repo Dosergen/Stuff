@@ -444,99 +444,90 @@ void SpawnCommand(int client)
 	int iWitchIndex = -1;
 	float fSpawnPos[3], fSpawnAng[3];
 	// Try to find a random spawn position
-	if (GetSpawnPosition(7, 10, fSpawnPos))
+	if (!GetSpawnPosition(8, 10, fSpawnPos))
 	{
-		// Set random yaw angle for the witch
-		fSpawnAng[1] = GetRandomFloatEx(-179.0, 179.0);
-		if (g_bLeft4Dead2)
+		LogCommand("#DEBUG: Failed to find a valid spawn position");
+		return;
+	}
+	// Set random yaw angle for the witch
+	fSpawnAng[1] = GetRandomFloatEx(-179.0, 179.0);
+	if (g_bLeft4Dead2)
+	{
+		// Calculate total weight for witch spawn probability
+		int totalWeight = g_iWitchWeight + g_iWitchBrideWeight;
+		if (totalWeight <= 0)
 		{
-			// Calculate total weight for witch spawn probability
-			int totalWeight = g_iWitchWeight + g_iWitchBrideWeight;
-			if (totalWeight <= 0)
+			LogCommand("#DEBUG: Total weight for witch spawning is zero or negative");
+			return;
+		}
+		// Generate a random number to select witch type based on weight
+		int randomWeight = GetRandomIntEx(1, totalWeight);
+		if (randomWeight <= g_iWitchWeight)
+		{
+			// Spawn a regular witch
+			iWitchIndex = L4D2_SpawnWitch(fSpawnPos, fSpawnAng);
+			if (!IsValidEntity(iWitchIndex))
 			{
-				LogCommand("#DEBUG: Total weight for witch spawning is zero or negative");
+				LogCommand("#DEBUG: Failed to spawn a regular witch in L4D2");
 				return;
 			}
-			// Generate a random number to select witch type based on weight
-			int randomWeight = GetRandomIntEx(1, totalWeight);
-			if (randomWeight <= g_iWitchWeight)
-			{
-				// Spawn a regular witch
-				iWitchIndex = L4D2_SpawnWitch(fSpawnPos, fSpawnAng);
-				if (!IsValidEntity(iWitchIndex))
-				{
-					LogCommand("#DEBUG: Failed to spawn a regular witch in L4D2");
-					return;
-				}
-			}
-			else
-			{
-				// Spawn a witch bride if the random value falls within the bride weight range
-				iWitchIndex = L4D2_SpawnWitchBride(fSpawnPos, fSpawnAng);
-				if (!IsValidEntity(iWitchIndex))
-				{
-					LogCommand("#DEBUG: Failed to spawn a witch bride in L4D2");
-					return;
-				}
-			}
 		}
-		else // If the game is not L4D2, create a standard witch entity
+		else
 		{
-			iWitchIndex = CreateEntityByName("witch");
-			if (IsValidEntity(iWitchIndex))
+			// Spawn a witch bride
+			iWitchIndex = L4D2_SpawnWitchBride(fSpawnPos, fSpawnAng);
+			if (!IsValidEntity(iWitchIndex))
 			{
-				// Set the witch's position and angles
-				SetAbsOrigin(iWitchIndex, fSpawnPos);
-				SetAbsAngles(iWitchIndex, fSpawnAng);
-				// Finalize the spawn process
-				DispatchSpawn(iWitchIndex);
-				// Activate the entity
-				ActivateEntity(iWitchIndex);
-			}
-			else
-			{
-				LogCommand("#DEBUG: Failed to spawn a witch in L4D");
+				LogCommand("#DEBUG: Failed to spawn a witch bride in L4D2");
 				return;
 			}
 		}
 	}
-	else
-		LogCommand("#DEBUG: Failed to find a valid spawn position");
+	else // If the game is not L4D2, create a standard witch entity
+	{
+		iWitchIndex = CreateEntityByName("witch");
+		if (IsValidEntity(iWitchIndex))
+		{
+			// Set the witch's position and angles
+			SetAbsOrigin(iWitchIndex, fSpawnPos);
+			SetAbsAngles(iWitchIndex, fSpawnAng);
+			// Finalize the spawn process
+			DispatchSpawn(iWitchIndex);
+			// Activate the entity
+			ActivateEntity(iWitchIndex);
+		}
+		else
+		{
+			LogCommand("#DEBUG: Failed to spawn a witch in L4D");
+			return;
+		}
+	}
 }
 
 bool GetSpawnPosition(int zombieClass, int attempts, float spawnpos[3])
 {
-	int tryCount = 0;
-	int failureCount = 0;
-	bool foundPosition = false;
 	if (attempts < 1)
 		return false;
-	while (tryCount < attempts)
+	// Try to find a spawn position with less redundant calls
+	for (int tryCount = 0; tryCount < attempts; tryCount++)
 	{
+		// Try to get the spawn position from the highest flow survivor first
 		if (IsValidClient(L4D_GetHighestFlowSurvivor()))
 		{
 			if (L4D_GetRandomPZSpawnPosition(L4D_GetHighestFlowSurvivor(), zombieClass, attempts, spawnpos))
-				foundPosition = true;
+				return true;
 		}
-		if (!foundPosition)
+		// If failed, try each survivor until a valid position is found
+		for (int i = 1; i <= MaxClients; i++)
 		{
-			for (int i = 1; i <= MaxClients; i++)
+			if (IsValidSurvivor(i))
 			{
-				if (IsValidSurvivor(i) && L4D_GetRandomPZSpawnPosition(i, zombieClass, attempts, spawnpos))
-					foundPosition = true;
+				if (L4D_GetRandomPZSpawnPosition(i, zombieClass, attempts, spawnpos))
+					return true;
 			}
 		}
-		if (foundPosition)
-		{
-			failureCount = 0;
-			return true;
-		}
-		else
-			failureCount++;
-		if (failureCount >= attempts)
-			return false;
-		tryCount++;
 	}
+	// If no valid position was found after all attempts
 	return false;
 }
 
