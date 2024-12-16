@@ -14,7 +14,7 @@
 
 #define DEBUG 0
 
-#define PLUGIN_VERSION "0.7"
+#define PLUGIN_VERSION "0.8"
 #define WEAPON_WAIT_TIME 1.0
 #define MAX_WEAPONS 32
 #define SOUND_DENY "ui/helpful_event_1.wav"
@@ -94,6 +94,7 @@ public void OnConfigsExecuted()
 void ConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
 {
 	GetCvars();
+	ParseWeaponList();
 }
 
 void GetCvars()
