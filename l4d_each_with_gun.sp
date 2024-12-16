@@ -230,7 +230,7 @@ void evtPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
-public void evtPlayerDeath(Event event, const char[] name, bool dontBroadcast)
+void evtPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (IsValidClient(client))
