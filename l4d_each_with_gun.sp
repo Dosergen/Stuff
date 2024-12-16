@@ -113,6 +113,7 @@ void IsAllowed()
 		HookEvent("round_start", evtRoundStart);
 		HookEvent("round_end", evtRoundEnd);
 		HookEvent("player_spawn", evtPlayerSpawn);
+		HookEvent("player_death", evtPlayerDeath);
 		if (g_bLeft4Dead2)
 			HookEvent("weapon_drop", evtWeaponDrop);
 		g_bHookedEvents = true;
@@ -122,6 +123,7 @@ void IsAllowed()
 		UnhookEvent("round_start", evtRoundStart);
 		UnhookEvent("round_end", evtRoundEnd);
 		UnhookEvent("player_spawn", evtPlayerSpawn);
+		UnhookEvent("player_death", evtPlayerDeath);
 		if (g_bLeft4Dead2)
 			UnhookEvent("weapon_drop", evtWeaponDrop);
 		g_bHookedEvents = false;
@@ -224,6 +226,20 @@ void evtPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		char clientName[64];
 		GetClientName(client, clientName, sizeof(clientName));
 		PrintToChatAll("[DEBUG] Player %s spawned, weapon state initialized.", clientName);
+		#endif
+	}
+}
+
+public void evtPlayerDeath(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (IsValidClient(client))
+	{
+		ResetPlayerWeaponState(client);
+		#if DEBUG
+		char clientName[64];
+		GetClientName(client, clientName, sizeof(clientName));
+		PrintToChatAll("[DEBUG] Player %s died, weapon state reset.", clientName);
 		#endif
 	}
 }
