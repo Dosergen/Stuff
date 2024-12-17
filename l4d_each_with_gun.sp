@@ -200,7 +200,7 @@ void Reset()
 {
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (IsValidClient(i))
+		if (IsValidClient(i) && g_WeaponData[i].count == 0)
 			ResetPlayerWeaponState(i);
 	}
 	// Reset global weapon availability
@@ -317,6 +317,8 @@ bool IsCanPickUpWeapon(int client, int weaponIndex, float currentTime)
 
 void evtWeaponDrop(Event event, const char[] name, bool dontBroadcast)
 {
+	if (!g_bLeft4Dead2)
+		return;
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	int weapon = event.GetInt("propid");
 	if (!IsCheckConditions(client, weapon))
@@ -366,10 +368,16 @@ void ResetPlayerWeaponState(int client)
 {
 	for (int i = 0; i < MAX_WEAPONS; i++)
 	{
-		g_WeaponData[client].taken[i] = false;
+		if (g_WeaponData[client].taken[i])
+		{
+			g_WeaponData[client].taken[i] = false;
+			g_bWeaponTaken[i] = false;
+			#if DEBUG
+			PrintToChatAll("[DEBUG] Weapon %s is now available after reset.", g_sWeaponNames[i]);
+			#endif
+		}
 		g_WeaponData[client].availableTime[i] = 0.0;
 	}
-	g_WeaponData[client].count = 0;
 }
 
 bool IsCheckConditions(int client, int weapon)
