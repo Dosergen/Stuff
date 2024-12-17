@@ -152,15 +152,15 @@ void WeaponStatus(int client, int weaponIndex)
 			{
 				char playerName[64];
 				GetClientName(j, playerName, sizeof(playerName));
-				PrintToChat(client, "\x04[Weapon Limit]\x01 Weapon %s is taken by \x04%s\x01.", g_sWeaponNames[weaponIndex], playerName);
+				PrintToChat(client, "\x04[INFO]\x01 Weapon %s is taken by \x04%s\x01.", g_sWeaponNames[weaponIndex], playerName);
 				found = true;
 			}
 		}
 		if (!found)
-			PrintToChat(client, "\x04[Weapon Limit]\x01 Weapon %s is taken but unknown.", g_sWeaponNames[weaponIndex]);
+			PrintToChat(client, "\x04[INFO]\x01 Weapon %s is taken but unknown.", g_sWeaponNames[weaponIndex]);
 	}
 	else
-		PrintToChat(client, "\x02[Weapon Limit]\x01 Weapon %s is available.", g_sWeaponNames[weaponIndex]);
+		PrintToChat(client, "\x02[INFO]\x01 Weapon %s is available.", g_sWeaponNames[weaponIndex]);
 }
 
 void ParseWeaponList()
@@ -203,12 +203,20 @@ void Reset()
 		if (IsValidClient(i) && g_WeaponData[i].count == 0)
 			ResetPlayerWeaponState(i);
 	}
-	// Reset global weapon availability
-	for (int i = 0; i < MAX_WEAPONS; i++)
-		g_bWeaponTaken[i] = false;
-	#if DEBUG
-	PrintToChatAll("[DEBUG] All weapon states have been reset.");
-	#endif
+	for (int i = 0; i < g_iWeaponCount; i++)
+	{
+		bool weaponInUse = false;
+		for (int j = 1; j <= MaxClients; j++)
+		{
+			if (IsValidClient(j) && g_WeaponData[j].taken[i])
+				weaponInUse = true;
+		}
+		if (!weaponInUse)
+			g_bWeaponTaken[i] = false;
+		#if DEBUG
+		PrintToChatAll("[DEBUG] Weapon %d is not currently equipped by any player. Marking it as available.", i);
+		#endif
+	}
 }
 
 public void OnMapStart()
@@ -288,7 +296,7 @@ bool IsCanPickUpWeapon(int client, int weaponIndex, float currentTime)
 	{
 		float remainingTime = g_WeaponData[client].availableTime[weaponIndex] - currentTime;
 		if (g_bChatMessages)
-			PrintToChat(client, "\x04[Weapon Limit]\x01 You must wait \x04%.2f\x01 seconds before picking up this weapon.", remainingTime);
+			PrintToChat(client, "\x04[INFO]\x01 You must wait \x04%.2f\x01 seconds before picking up this weapon.", remainingTime);
 		return false;
 	}
 	if (g_bWeaponTaken[weaponIndex])
@@ -300,7 +308,7 @@ bool IsCanPickUpWeapon(int client, int weaponIndex, float currentTime)
 				char weaponOwner[64];
 				GetClientName(i, weaponOwner, sizeof(weaponOwner));
 				if (g_bChatMessages)
-					PrintToChat(client, "\x04[Weapon Limit]\x01 This weapon is still in use by \x04%s\x01!", weaponOwner);
+					PrintToChat(client, "\x04[INFO]\x01 This weapon is still in use by \x04%s\x01!", weaponOwner);
 				EmitSoundToClient(client, "ui/helpful_event_1.wav");
 				return false;
 			}
@@ -309,7 +317,7 @@ bool IsCanPickUpWeapon(int client, int weaponIndex, float currentTime)
 	if (g_iWeaponLimit > 0 && g_WeaponData[client].count >= g_iWeaponLimit)
 	{
 		if (g_bChatMessages)
-			PrintToChat(client, "\x04[Weapon Limit]\x01 You are limited to \x04%d\x01 weapon(s) per round.", g_iWeaponLimit);
+			PrintToChat(client, "\x04[INFO]\x01 You are limited to \x04%d\x01 weapon(s) per round.", g_iWeaponLimit);
 		return false;
 	}
 	return true;
@@ -366,7 +374,7 @@ int GetWeaponIndex(const char[] weaponName)
 
 void ResetPlayerWeaponState(int client)
 {
-	for (int i = 0; i < MAX_WEAPONS; i++)
+	for (int i = 0; i < g_iWeaponCount; i++)
 	{
 		if (g_WeaponData[client].taken[i])
 		{
