@@ -310,6 +310,13 @@ bool IsCanPickUpWeapon(int client, int weaponIndex, float currentTime)
 			PrintToChat(client, "\x04[INFO]\x01 You must wait \x04%.2f\x01 seconds before picking up this weapon.", remainingTime);
 		return false;
 	}
+	if (g_WeaponData[client].taken[weaponIndex])
+	{
+		if (g_bChatMessages)
+			PrintToChat(client, "\x04[INFO]\x01 You already have this weapon.");
+		GivePlayerAmmo(client, 50, weaponIndex, false);
+		return false;
+	}
 	if (g_bWeaponTaken[weaponIndex])
 	{
 		for (int i = 1; i <= MaxClients; i++)
@@ -320,7 +327,7 @@ bool IsCanPickUpWeapon(int client, int weaponIndex, float currentTime)
 				GetClientName(i, weaponOwner, sizeof(weaponOwner));
 				if (g_bChatMessages)
 					PrintToChat(client, "\x04[INFO]\x01 This weapon is still in use by \x04%s\x01!", weaponOwner);
-				EmitSoundToClient(client, "ui/helpful_event_1.wav");
+				EmitSoundToClient(client, SOUND_DENY);
 				return false;
 			}
 		}
