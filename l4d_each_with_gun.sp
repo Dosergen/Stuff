@@ -76,7 +76,7 @@ public void OnPluginStart()
 	{
 		for (int i = 1; i <= MaxClients; i++) 
 		{
-			if (IsValidClient(i))
+			if (IsClientInGame(i))
 				OnClientPutInServer(i);
 		}
 	}
@@ -86,15 +86,20 @@ public void OnPluginStart()
 	AutoExecConfig(true, "l4d_each_with_gun");
 }
 
+public void OnPluginEnd()
+{
+	Reset();
+}
+
 public void OnConfigsExecuted()
 {
 	IsAllowed();
+	ParseWeaponList();
 }
 
 void ConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
 {
 	GetCvars();
-	ParseWeaponList();
 }
 
 void GetCvars()
@@ -109,7 +114,6 @@ void IsAllowed()
 	GetCvars();
 	if (g_bPluginEnable && !g_bHookedEvents)
 	{
-		ParseWeaponList();
 		HookEvent("round_start", evtRoundStart);
 		HookEvent("round_end", evtRoundEnd);
 		HookEvent("player_spawn", evtPlayerSpawn);
@@ -170,14 +174,13 @@ void ParseWeaponList()
 	g_iWeaponCount = 0;
 	char weaponArray[MAX_WEAPONS][32];
 	int count = ExplodeString(weaponList, ",", weaponArray, sizeof(weaponArray), sizeof(weaponArray[]));
-	for (int i = 0; i < count && g_iWeaponCount < MAX_WEAPONS; i++)
+	for (int i = 0; i < count; i++)
 	{
 		TrimString(weaponArray[i]);
-		if (strlen(weaponArray[i]) > 0)
-		{
-			strcopy(g_sWeaponNames[g_iWeaponCount], 32, weaponArray[i]);
-			g_iWeaponCount++;
-		}
+		if (strlen(weaponArray[i]) == 0)
+			continue;			
+		strcopy(g_sWeaponNames[g_iWeaponCount], 32, weaponArray[i]);
+		g_iWeaponCount++;
 	}
 	#if DEBUG
 	LogMessage("Parsed weapon list: %d weapons loaded.", g_iWeaponCount);
@@ -200,23 +203,15 @@ void Reset()
 {
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (IsValidClient(i) && g_WeaponData[i].count == 0)
+		if (IsValidClient(i))
 			ResetPlayerWeaponState(i);
 	}
-	for (int i = 0; i < g_iWeaponCount; i++)
-	{
-		bool weaponInUse = false;
-		for (int j = 1; j <= MaxClients; j++)
-		{
-			if (IsValidClient(j) && g_WeaponData[j].taken[i])
-				weaponInUse = true;
-		}
-		if (!weaponInUse)
-			g_bWeaponTaken[i] = false;
-		#if DEBUG
-		PrintToChatAll("[DEBUG] Weapon %d is not currently equipped by any player. Marking it as available.", i);
-		#endif
-	}
+	// Reset global weapon availability
+	for (int i = 0; i < MAX_WEAPONS; i++)
+		g_bWeaponTaken[i] = false;
+	#if DEBUG
+	PrintToChatAll("[DEBUG] All weapon states have been reset.");
+	#endif
 }
 
 public void OnMapStart()
@@ -233,7 +228,7 @@ void evtPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		#if DEBUG
 		char clientName[64];
 		GetClientName(client, clientName, sizeof(clientName));
-		PrintToChatAll("[DEBUG] Player %s spawned, weapon state initialized.", clientName);
+		PrintToChatAll("[DEBUG] Player %s spawned, weapon state reset.", clientName);
 		#endif
 	}
 }
@@ -249,6 +244,22 @@ void evtPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		GetClientName(client, clientName, sizeof(clientName));
 		PrintToChatAll("[DEBUG] Player %s died, weapon state reset.", clientName);
 		#endif
+	}
+}
+
+void ResetPlayerWeaponState(int client)
+{
+	for (int i = 0; i < MAX_WEAPONS; i++)
+	{
+		if (IsValidClient(i) && g_WeaponData[client].taken[i])
+		{
+			g_WeaponData[client].taken[i] = false;
+			g_bWeaponTaken[i] = false;
+			g_WeaponData[client].availableTime[i] = 0.0;
+			#if DEBUG
+			PrintToChatAll("[DEBUG] Weapon %s is now available after reset.", g_sWeaponNames[i]);
+			#endif
+		}
 	}
 }
 
@@ -370,22 +381,6 @@ int GetWeaponIndex(const char[] weaponName)
 			return i;
 	}
 	return -1;
-}
-
-void ResetPlayerWeaponState(int client)
-{
-	for (int i = 0; i < g_iWeaponCount; i++)
-	{
-		if (g_WeaponData[client].taken[i])
-		{
-			g_WeaponData[client].taken[i] = false;
-			g_bWeaponTaken[i] = false;
-			#if DEBUG
-			PrintToChatAll("[DEBUG] Weapon %s is now available after reset.", g_sWeaponNames[i]);
-			#endif
-		}
-		g_WeaponData[client].availableTime[i] = 0.0;
-	}
 }
 
 bool IsCheckConditions(int client, int weapon)
