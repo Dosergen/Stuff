@@ -251,7 +251,7 @@ void ResetPlayerWeaponState(int client)
 {
 	for (int i = 0; i < MAX_WEAPONS; i++)
 	{
-		if (IsValidClient(i) && g_WeaponData[client].taken[i])
+		if (g_WeaponData[client].taken[i])
 		{
 			g_WeaponData[client].taken[i] = false;
 			g_bWeaponTaken[i] = false;
