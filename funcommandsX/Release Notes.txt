@@ -1,0 +1,145 @@
+RELEASE NOTES FOR SOURCEMOD PLUGIN - FuncommandsX 
+by Spazman0 and Arg!
+
+Version 0.1:
+
+-Commands:
+sm_alpha          	sm_alpha <name or #userid> <0-255> - sets player alpha
+sm_colorize       	sm_colorize <name or #userid> color - sets player color (normal to revert)
+sm_colorize_colors  	displays colors available to sm_colorize
+sm_ff            	toggles friendly fire
+sm_happy          	sm_happy <#userid|name> <1|0> - replaces clients text chat with strings from happy_phrases.ini
+sm_invis          	sm_invis <name or #userid> <1|0> - toggles or sets player invisibility
+sm_tele           	Teleports player to where admin is looking
+sm_explode        	sm_explode <#userid|name> - Explodes player(s) if alive
+sm_disco		sm_disc [1|0] - changes all players colors randomly every x seconds.
+
+-Cvars:
+sm_discointerval	0.1 to 10.0 - Time in seconds to change players color in disco mode.
+sm_autodisco 		<1|0> - If enabled, discomode is enabled on map change.
+sm_autodiscotime	Time in seconds to run auto disco mode for, default 60.0
+
+-Modify the file funcommandsX.phrases.txt in translations to change the message displayed to users when disco mode is enabled.
+
+-Full admin menu integration
+
+Version 0.2:
+-Fixed normal not showing up in colorize admin menu
+-Fixed clients not being able to connect
+
+Version 0.3
+-Alpha and color settings now get remembered when players spawn always
+-Fixed bug where changing a players color would reset their alpha
+
+Version 0.4
+-DOD:S now can have weapons/alpha/invis weapons
+-Fixed issue with FakeClient detection on plugin unload
+
+Version 0.5
+-Colorize now gets applied to dead players
+-Minor bug fixes/improved error handling
+-Improved package usability
+
+Version 0.6
+-Removed unnecesary error logging
+-Added usage pattern to teleport command
+-Added sm_explode command
+
+Version 0.7
+-Added disco mode
+
+Version 0.8
+-Now compiled with sourcemod 1.0.4
+-ShowActivity now fires when enabling disco mode from admin menu
+-ShowActivity now fires when toggling friendly fire with sm_ff
+-Added game detection routine
+-Teleport particle effects now only fire in TF2 (and no errors generated if not in tf2)
+-Disco mode now has center text to inform players when its activated
+
+Version 0.9
+-Bots are now affected by disco mode
+-Added sm_autodisco and sm_autodiscotime cvars
+-Fixed potential issues on player spawn
+
+Version 1.0
+-Major code cleanup and restructure
+-Fixed bug where disco mode would not disable for all players
+-Bots are now affected by disco mode, colorize and alpha
+-New algorithm for teleport command
+
+Version 1.1
+-Added lasers to disco mode
+
+Version 1.2
+-Removed redundant code
+-Built on Sourcemod 1.1
+-Added translation file
+-Provided compromise workaround for TF2 'spy check' radio command bug
+
+Version 1.3
+-Compiled with sourcemod 1.2
+-Added sm_me console command, with corresponding translation file entry
+-Added cvar sm_sa_me to enable sm_me (defaults to enabled)
+
+Version 1.4
+-sm_me now uses team colors
+-Added translation support for some phrases
+
+Version 1.5
+-Added Russian translation courtesy of Snake60 (https://forums.alliedmods.net/member.php?u=40248)
+-Added colors to translation file
+-Increased max happy phrases to 64
+
+Version 1.6
+-IMPORTANT UPGRADE NOTE: Backup and delete the file 'cfg\sourcemod\funcommandsX.cfg' before loading this plugin. Once loaded, check the newly created 'cfg\sourcemod\funcommandsX.cfg' against your backup for modified settings. After this, the server may need a restart to allow new functionality to work.
+-Compiled with sourcemod 1.2.1
+-Changed command 'sm_colorize_colors' to a console command.
+-Added console command 'sm_colorme' to allow players to self colorize.
+-Added cvar 'sm_selfcolorize' to enable the use of 'sm_colorme' by players.
+
+Version 1.7
+-Added more colors to colorize functions
+
+Version 1.8
+-Added command sm_invisplayer to keep weapons visible.
+-Added code to include wearables (TF2) when setting rgba properties.
+-Added code to set weapons and wearables on change class and respawn (TF2).
+
+Version 1.9
+-Compiled with Sourcemod 1.3.2
+-Added plugin URL to plugin info sections
+-Updated russian translation from Snake60
+-Added check for weapons RGBA setting - from SM forums member Naris - https://forums.alliedmods.net/showpost.php?p=1391689&postcount=352
+
+Version 2.0
+-Added rgba fix from Sourcemod forum user Tylerst (https://forums.alliedmods.net/member.php?u=94325)
+
+Version 2.1
+-Fixed rgba fix from Sourcemod forum user Tylerst
+-Made sm command sm_fakesay ROOT admin only (override to give other admin levels access) due to an issue picked up by SM forum user DarthNinja (https://forums.alliedmods.net/showpost.php?p=1481477&postcount=377)
+
+Version 2.2
+-Added sm_addhappy admin command (ROOT flag) courtesy of DarthNinja and his crew - see this forum post https://forums.alliedmods.net/showpost.php?p=1509623&postcount=383
+-Merged sm_fakesay vulnerability fix from user Mitch (http://forums.alliedmods.net/member.php?u=150232)
+-Pushed sm_fakesay back to BAN access
+-Now requries colors.inc to compile (http://forums.alliedmods.net/showthread.php?t=96831)
+
+Version 2.3
+-Compiled with sourcemod 1.4.6
+-Now checks if player is gagged before allowing sm_me command
+
+Version 2.4
+-Compiled with Sourcemod 1.6.2
+-Fixed messages for CS:GO - plugin should now work for CS:GO
+-Fixed a bug in rgba.sp - Thanks FlaminSarge! (https://forums.alliedmods.net/member.php?u=84304)
+-Made sm_colorme an admin command with no flags - should now be overrideable correctly.
+-Please note due to the way the CS:GO engine works the sm_invis and sm_alpha commands do not work in CS:GO.
+-Update colors.inc to morecolors.inc - currently doesn't do anything different though! 
+
+Version 2.5
+-Fix for "GetEntDataEnt2 - Line 261, temp\funcommandsX/rgba.sp::SetWeaponsRGBA" log spam raised by forum user deadbeat (https://forums.alliedmods.net/member.php?u=20567)
+-Added Turkish translations from forum user chalr (https://forums.alliedmods.net/member.php?u=267969)
+
+Version 2.8
+-Compiled with Sourcemod 1.8
+-Converted plugin source to the latest syntax utilizing methodmaps

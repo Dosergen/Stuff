@@ -1,0 +1,13 @@
+"CountryShow"
+{
+	"messages"
+	{
+		"playerjoin"		"{PLAYERTYPE} {green}{PLAYERNAME} {default}connected from {olive}( {PLAYERCOUNTRY} ) {green}| {PLAYERCITY} |"
+		"playerdisc"		"{PLAYERTYPE} {green}{PLAYERNAME} {default}left the game {green}< {DISC_REASON} >"
+	}
+	"messages_admin"
+	{
+		"playerjoin"		"{PLAYERTYPE} {green}{PLAYERNAME} {default}connected from {olive}( {PLAYERCOUNTRY} ) {green}| {PLAYERCITY} |"
+		"playerdisc"		"{PLAYERTYPE} {green}{PLAYERNAME} {default}left the game {green}< {DISC_REASON} >"
+	}
+}
