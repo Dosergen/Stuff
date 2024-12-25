@@ -4,14 +4,20 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.35.0"
+#define PLUGIN_VERSION "1.35.1"
 
 UserMsg g_umSayText2;
 
 ConVar g_hCvarPluginEnable, g_hCvarServerChange, g_hCvarNameChange, g_hCvarChatChange, g_hCvarVocalGuard, g_hCvarVocalDelay;
 bool g_bCvarPluginEnable, g_bCvarServerChange, g_bCvarNameChange, g_bCvarChatChange, g_bCvarVocalGuard;
-float g_fLastVocalTime[MAXPLAYERS + 1];
 int g_iVocalDelay;
+
+int g_iVocalSpamCount[MAXPLAYERS + 1];
+float g_fLastVocalTime[MAXPLAYERS + 1];
+float g_fVocalBlockTime[MAXPLAYERS + 1];
+
+#define MAX_VOCAL_SPAM_COUNT 10
+#define VOCAL_SPAM_TIME_WINDOW 60.0
 
 public Plugin myinfo = 
 {
@@ -56,6 +62,13 @@ public void OnPluginStart()
 
 	// Generate config file
 	AutoExecConfig(true, "bequiet");
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		g_iVocalSpamCount[i] = 0;
+		g_fLastVocalTime[i] = 0.0;
+		g_fVocalBlockTime[i] = 0.0;
+	}
 }
 
 public void ConVarChanged_Cvars(ConVar hCvar, const char[] sOldVal, const char[] sNewVal)
@@ -78,13 +91,17 @@ public void GetCvars()
 public void OnClientPutInServer(int client)
 {
 	// Reset vocal time for the new client
+	g_iVocalSpamCount[client] = 0;
 	g_fLastVocalTime[client] = 0.0;
+	g_fVocalBlockTime[client] = 0.0;
 }
 
 public void OnClientDisconnect(int client)
 {
 	// Clear vocalize time for the client who disconnected
+	g_iVocalSpamCount[client] = 0;
 	g_fLastVocalTime[client] = 0.0;
+	g_fVocalBlockTime[client] = 0.0;
 }
 
 Action Say_TeamSay_Callback(int client, const char[] command, int argc)
@@ -104,26 +121,30 @@ Action Vocal_Callback(int client, const char[] command, int args)
 {   
 	if (!g_bCvarPluginEnable || !g_bCvarVocalGuard)
 		return Plugin_Continue;
-	// Check if the argument matches "auto", allow it to proceed
-	char sArg[32];
-	GetCmdArg(2, sArg, sizeof(sArg));
-	if (!strcmp(sArg, "auto"))
-		return Plugin_Continue;
-	// Enforce vocal delay, if configured
-	if (g_iVocalDelay > 0)
+	if (g_fVocalBlockTime[client] > GetEngineTime())
 	{
-		float currentTime = GetEngineTime();
-		float timeSinceLastVocal = currentTime - g_fLastVocalTime[client];
-		// If the time since the last vocalization is less than the delay, block it
-		if (timeSinceLastVocal < g_iVocalDelay)
-		{
-			int iTimeLeft = RoundToNearest(g_iVocalDelay - timeSinceLastVocal);
-			PrintToChat(client, "\x04[SM] \x01Wait \x03%d\x01 seconds before vocalizing", iTimeLeft);
-			return Plugin_Handled;
-		}
-		// Update last vocal time for the client
-		g_fLastVocalTime[client] = currentTime;
+		float blockTimeLeft = g_fVocalBlockTime[client] - GetEngineTime();
+		PrintToChat(client, "\x04[SM] \x01You are temporarily blocked from using vocalize due to spamming. Please wait %.1f seconds.", blockTimeLeft);
+		return Plugin_Handled;
 	}
+	float currentTime = GetEngineTime();
+	float timeSinceLastVocal = currentTime - g_fLastVocalTime[client];
+	if (timeSinceLastVocal < g_iVocalDelay)
+	{
+		int iTimeLeft = RoundToNearest(g_iVocalDelay - timeSinceLastVocal);
+		PrintToChat(client, "\x04[SM] \x01Wait \x03%d\x01 seconds before vocalizing", iTimeLeft);
+		return Plugin_Handled;
+	}
+	g_fLastVocalTime[client] = currentTime;
+	if (timeSinceLastVocal > VOCAL_SPAM_TIME_WINDOW)
+		g_iVocalSpamCount[client] = 0;
+	if (g_iVocalSpamCount[client] >= MAX_VOCAL_SPAM_COUNT)
+	{
+		g_fVocalBlockTime[client] = currentTime + VOCAL_SPAM_TIME_WINDOW;
+		PrintToChat(client, "\x04[SM] \x01You have been blocked from vocalizing for %.1f seconds due to spamming.", VOCAL_SPAM_TIME_WINDOW);
+		return Plugin_Handled;
+	}
+	g_iVocalSpamCount[client]++;
 	return Plugin_Continue;
 }
 
