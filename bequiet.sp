@@ -16,8 +16,9 @@ int g_iVocalSpamCount[MAXPLAYERS + 1];
 float g_fLastVocalTime[MAXPLAYERS + 1];
 float g_fVocalBlockTime[MAXPLAYERS + 1];
 
-#define MAX_VOCAL_SPAM_COUNT 10
-#define VOCAL_SPAM_TIME_WINDOW 60.0
+#define MAX_VOCAL_SPAM_COUNT 20
+#define VOCAL_SPAM_BLOCK_DURATION 30.0
+#define VOCAL_SPAM_RESET_TIME 10.0
 
 public Plugin myinfo = 
 {
@@ -136,12 +137,12 @@ Action Vocal_Callback(int client, const char[] command, int args)
 		return Plugin_Handled;
 	}
 	g_fLastVocalTime[client] = currentTime;
-	if (timeSinceLastVocal > VOCAL_SPAM_TIME_WINDOW)
+	if (timeSinceLastVocal > VOCAL_SPAM_BLOCK_DURATION)
 		g_iVocalSpamCount[client] = 0;
 	if (g_iVocalSpamCount[client] >= MAX_VOCAL_SPAM_COUNT)
 	{
-		g_fVocalBlockTime[client] = currentTime + VOCAL_SPAM_TIME_WINDOW;
-		PrintToChat(client, "\x04[SM] \x01You have been blocked from vocalizing for %.1f seconds due to spamming.", VOCAL_SPAM_TIME_WINDOW);
+		g_fVocalBlockTime[client] = currentTime + VOCAL_SPAM_BLOCK_DURATION;
+		PrintToChat(client, "\x04[SM] \x01You have been blocked from vocalizing for %.1f seconds due to spamming.", VOCAL_SPAM_BLOCK_DURATION);
 		return Plugin_Handled;
 	}
 	g_iVocalSpamCount[client]++;
