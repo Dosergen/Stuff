@@ -16,9 +16,8 @@ int g_iVocalSpamCount[MAXPLAYERS + 1];
 float g_fLastVocalTime[MAXPLAYERS + 1];
 float g_fVocalBlockTime[MAXPLAYERS + 1];
 
-#define MAX_VOCAL_SPAM_COUNT 20
+#define MAX_VOCAL_SPAM_COUNT 10
 #define VOCAL_SPAM_BLOCK_DURATION 30.0
-#define VOCAL_SPAM_RESET_TIME 10.0
 
 public Plugin myinfo = 
 {
@@ -122,14 +121,15 @@ Action Vocal_Callback(int client, const char[] command, int args)
 {   
 	if (!g_bCvarPluginEnable || !g_bCvarVocalGuard)
 		return Plugin_Continue;
-	if (g_fVocalBlockTime[client] > GetEngineTime())
+	float currentTime = GetEngineTime();
+	if (g_fVocalBlockTime[client] > currentTime)
 	{
-		float blockTimeLeft = g_fVocalBlockTime[client] - GetEngineTime();
+		float blockTimeLeft = g_fVocalBlockTime[client] - currentTime;
 		PrintToChat(client, "\x04[SM] \x01You are temporarily blocked from using vocalize due to spamming. Please wait %.1f seconds.", blockTimeLeft);
 		return Plugin_Handled;
 	}
-	float currentTime = GetEngineTime();
 	float timeSinceLastVocal = currentTime - g_fLastVocalTime[client];
+	// Handle delay between vocalizations
 	if (timeSinceLastVocal < g_iVocalDelay)
 	{
 		int iTimeLeft = RoundToNearest(g_iVocalDelay - timeSinceLastVocal);
@@ -137,14 +137,17 @@ Action Vocal_Callback(int client, const char[] command, int args)
 		return Plugin_Handled;
 	}
 	g_fLastVocalTime[client] = currentTime;
+	// Reset the spam count after the block duration
 	if (timeSinceLastVocal > VOCAL_SPAM_BLOCK_DURATION)
 		g_iVocalSpamCount[client] = 0;
+	// Check if the player has exceeded the maximum allowed vocalizations
 	if (g_iVocalSpamCount[client] >= MAX_VOCAL_SPAM_COUNT)
 	{
 		g_fVocalBlockTime[client] = currentTime + VOCAL_SPAM_BLOCK_DURATION;
 		PrintToChat(client, "\x04[SM] \x01You have been blocked from vocalizing for %.1f seconds due to spamming.", VOCAL_SPAM_BLOCK_DURATION);
 		return Plugin_Handled;
 	}
+	// Increment the vocal spam count
 	g_iVocalSpamCount[client]++;
 	return Plugin_Continue;
 }
