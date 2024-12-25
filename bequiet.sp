@@ -9,7 +9,7 @@
 UserMsg g_umSayText2;
 
 ConVar g_hCvarPluginEnable, g_hCvarServerChange, g_hCvarNameChange, g_hCvarChatChange, g_hCvarVocalGuard, g_hCvarVocalDelay;
-bool g_bCvarPluginEnable, g_bCvarServerChange, g_bCvarNameChange, g_bCvarChatChange, g_bCvarVocalGuard;
+bool g_bCvarPluginEnable, g_bLateLoad, g_bCvarServerChange, g_bCvarNameChange, g_bCvarChatChange, g_bCvarVocalGuard;
 int g_iVocalDelay;
 
 int g_iVocalSpamCount[MAXPLAYERS + 1];
@@ -26,6 +26,18 @@ public Plugin myinfo =
 	description = "Please be Quiet! Block unnecessary chat/announcement/vocalize.",
 	version = PLUGIN_VERSION,
 	url = "https://github.com/SirPlease/L4D2-Competitive-Rework/blob/55bf7783ad22df54bc46f9fdf232fb08353afabc/addons/sourcemod/scripting/bequiet.sp"
+}
+
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+	EngineVersion test = GetEngineVersion();
+	if (test != Engine_Left4Dead && test != Engine_Left4Dead2)
+	{
+		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
+		return APLRes_SilentFailure;
+	}
+	g_bLateLoad = late;
+	return APLRes_Success;
 }
 
 public void OnPluginStart()
@@ -63,11 +75,13 @@ public void OnPluginStart()
 	// Generate config file
 	AutoExecConfig(true, "bequiet");
 
-	for (int i = 1; i <= MaxClients; i++)
+	if (g_bLateLoad) 
 	{
-		g_iVocalSpamCount[i] = 0;
-		g_fLastVocalTime[i] = 0.0;
-		g_fVocalBlockTime[i] = 0.0;
+		for (int i = 1; i <= MaxClients; i++) 
+		{
+			if (IsClientInGame(i))
+				OnClientPutInServer(i);
+		}
 	}
 }
 
