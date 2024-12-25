@@ -135,6 +135,11 @@ Action Vocal_Callback(int client, const char[] command, int args)
 {   
 	if (!g_bCvarPluginEnable || !g_bCvarVocalGuard)
 		return Plugin_Continue;
+	// Check if the argument matches "auto", allow it to proceed
+	char sArg[32];
+	GetCmdArg(2, sArg, sizeof(sArg));
+	if (!strcmp(sArg, "auto"))
+		return Plugin_Continue;
 	float currentTime = GetEngineTime();
 	if (g_fVocalBlockTime[client] > currentTime)
 	{

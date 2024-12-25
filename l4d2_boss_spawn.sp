@@ -327,8 +327,8 @@ Action StartCheckFlow(Handle timer)
 	// Get the maximum flow distance for the current map
 	g_fFlowMaxMap = L4D2Direct_GetMapMaxFlowDistance();
 	// Determine the maximum number of tanks and witches based on settings and randomization
-	g_iMaxTanks = g_iTotalTanksRandom ? GetRandomIntEx(g_iTotalTanks, g_iTotalTanksRandom) : g_iTotalTanks;
-	g_iMaxWitches = g_iTotalWitchesRandom ? GetRandomIntEx(g_iTotalWitches, g_iTotalWitchesRandom) : g_iTotalWitches;
+	g_iMaxTanks = (g_iTotalTanksRandom > 0) ? GetRandomIntEx(g_iTotalTanks, g_iTotalTanksRandom) : g_iTotalTanks;
+	g_iMaxWitches = (g_iTotalWitchesRandom > 0) ? GetRandomIntEx(g_iTotalWitches, g_iTotalWitchesRandom) : g_iTotalWitches;
 	// Calculate flow ranges for tank spawning
 	g_fFlowRangeMinTank = g_fFlowMaxMap * (g_fFlowPercentMinTank / 100.0);
 	g_fFlowRangeMaxTank = g_fFlowMaxMap * (g_fFlowPercentMaxTank / 100.0);
