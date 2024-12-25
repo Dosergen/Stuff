@@ -376,7 +376,6 @@ bool IsCanPickUpWeapon(int client, int weaponIndex, float currentTime)
 		if (g_bChatMessages)
 			PrintToChat(client, "\x04[INFO]\x01 You already have this weapon equipped.");
 		GiveAmmo(client);
-		EmitSoundToClient(client, ITEM_PICKUP);
 		return false;
 	}
 	if (g_bWeaponTaken[weaponIndex])
@@ -417,7 +416,11 @@ void GiveAmmo(int client)
 	if (currentAmmo + addAmmo > 100)
 		addAmmo = 100 - currentAmmo;
 	if (addAmmo > 0)
+	{
+		EmitSoundToClient(client, ITEM_PICKUP);
 		SetEntProp(client, Prop_Data, "m_iAmmo", currentAmmo + addAmmo, _, ammoType);
+	}
+		
 }
 
 void evtWeaponDrop(Event event, const char[] name, bool dontBroadcast)
