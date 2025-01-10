@@ -1,0 +1,210 @@
+"Phrases"
+{
+	"Disco on message"
+	{
+		"tr"			"Disko modu! Egilin ve raks edin!"
+	}
+	"Explode player"
+	{
+		"tr"			"Oyuncu Patlat"
+	}
+	"was exploded"
+	{
+		"#format"		"{1:s}"
+		"tr"			"'{1}' adli oyuncu patlatildi."
+	}
+	"Enabled friendly fire"
+	{
+		"tr"			"Dost atesini aktif etti."
+	}
+	"Disabled friendly fire"
+	{
+		"tr"			"Dost atesini deaktif etti."
+	}
+	"Friendly Fire Off"
+	{
+		"tr"			"Dost Atesi Kapali"
+	}
+	"Friendly Fire On"
+	{
+		"tr"			"Dost Atesi Acik"
+	}
+	"Toggled happy on target"
+	{
+		"#format"		"{1:s}"
+		"tr"			"'{1}' adli oyuncuda mutlu ozelligini acti."
+	}
+	"Happy player"
+	{
+		"tr"			"Oyuncuyu Mutlu Et"
+	}
+	"was Teleported"
+	{
+		"#format"		"{1:s}"
+		"tr"			"'{1}' adli oyuncu isinlandirildi."
+	}
+	"Teleport player"
+	{
+		"tr"			"Oyuncu Isınla"
+	}
+	"made the color"
+	{
+		"#format"		"{1:s},{2:s}"
+		"tr"			"'{1}' isimli oyuncuyu '{2}' rengi yapti."
+	}
+	"Color"
+	{
+		"tr"			"Renk"
+	}
+	"Colorize player"
+	{
+		"tr"			"Oyuncu Boya"
+	}
+	"Enabled disco mode"
+	{
+		"tr"			"Disko modunu aktif etti"
+	}
+	"Disabled disco mode"
+	{
+		"tr"			"Disko modunu deaktif etti"
+	}
+	"Disco Mode Off"
+	{
+		"tr"			"Disko Modu Kapali"
+	}
+	"Disco Mode On"
+	{
+		"tr"			"Disko Modu Acik"
+	}
+	"Toggled invisible on target"
+	{
+		"#format"		"{1:s}"
+		"tr"			"'{1}' adli oyuncu uzerinde gorunmezlik acti."
+	}
+	"Set alpha on target"
+	{
+		"#format"		"{1:s},{2:i}"
+		"tr"			"'{1}' adli oyuncunun seffafligini {2} olarak ayarladi."
+	}
+	"Invisible player"
+	{
+		"tr"			"Oyuncuyu Gorunmez Yap"
+	}
+	"Invisible player only"
+	{
+		"tr"			"Sadece Oyuncuyu Gorunmez Yap"
+	}
+	"Set player alpha"
+	{
+		"tr"			"Oyuncu Seffafligi Ayarla"
+	}
+	"was overlayed"
+	{
+		"#format"		"{1:s},{2:s}"
+		"tr"			"{2} arayuzunu  {1} adli hedefe acti."
+	}
+	"color_normal"
+	{
+		"tr"			"normal"
+	}
+	"color_black"
+	{
+		"tr"			"siyah"
+	}
+	"color_red"
+	{
+		"tr"			"kirmizi"
+	}
+	"color_green"
+	{
+		"tr"			"yesil"
+	}
+	"color_blue"
+	{
+		"tr"			"mavi"
+	}
+	"color_yellow"
+	{
+		"tr"			"sari"
+	}
+	"color_purple"
+	{
+		"tr"			"mor"
+	}
+	"color_cyan"
+	{
+		"tr"			"cam gobegi"
+	}
+	"color_orange"
+	{
+		"tr"			"turuncu"
+	}
+	"color_pink"
+	{
+		"tr"			"pembe"
+	}
+	"color_olive"
+	{
+		"tr"			"zeytin rengi"
+	}
+	"color_lime"
+	{
+		"tr"			"misket limonu"
+	}
+	"color_violet"
+	{
+		"tr"			"menekse"
+	}
+	"color_lightblue"
+	{
+		"tr"			"acik mavi"
+	}
+	"color_silver"
+	{
+		"tr"			"gumus"
+	}
+	"color_chocolate"
+	{
+		"tr"			"cikolata"
+	}
+	"color_saddlebrown"
+	{
+		"tr"			"eyer kahverengi"
+	}
+	"color_indigo"
+	{
+		"tr"			"civit"
+	}
+	"color_ghostwhite"
+	{
+		"tr"			"hayalet beyazi"
+	}
+	"color_thistle"
+	{
+		"tr"			"deve dikeni"
+	}
+	"color_aliceblue"
+	{
+		"tr"			"alice mavisi"
+	}
+	"color_steelblue"
+	{
+		"tr"			"gumus mavisi"
+	}
+	"color_teal"
+	{
+		"tr"			"camurcun"
+	}
+	"color_gold"
+	{
+		"tr"			"altin"
+	}
+	"color_tan"
+	{
+		"tr"			"bronz"
+	}
+	"color_tomato"
+	{
+		"tr"			"domates"
+	}
+}

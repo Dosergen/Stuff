@@ -1,0 +1,64 @@
+"Games"
+{
+	"#default"
+	{
+		"Addresses"
+		{
+			"UpdateTankAttack"
+			{
+				"signature" "TankAttack::Update"
+			}
+		}
+		
+		"Signatures"
+		{
+			"TankAttack::Update"
+			{
+				"library"	"server"
+				"linux"		"@_ZN10TankAttack6UpdateEP4Tankf"
+			}
+		}
+	}
+	"left4dead"
+	{
+		"Offsets"
+		{
+			"TAUpdate_MiniGunCondition"
+			{
+				"windows"	"1339"
+				"linux"		"3507"
+			}
+		}
+		
+		"Signatures"
+		{
+			"TankAttack::Update"
+			{
+				"library"	"server"
+				"windows"	"\x83\x2A\x2A\x53\x55\x8B\x2A\x2A\x2A\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x2A\x2A\x56"
+				/* 83 ? ? 53 55 8B ? ? ? ? ? ? 8B ? ? ? ? ? 8B ? ? ? ? ? 56 */
+			}
+		}
+	}
+	"left4dead2"
+	{
+		"Offsets"
+		{
+			"TAUpdate_MiniGunCondition"
+			{
+				"windows"	"1537"
+				"linux"		"979"
+			}
+		}
+		
+		"Signatures"
+		{
+			"TankAttack::Update"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\x2A\x81\x2A\x2A\x2A\x2A\x2A\x53\x56\x57\x8B\x2A\x2A\x8B\x2A\x2A\x2A\x2A\x2A\x8B"
+				/* 55 8B ? 81 ? ? ? ? ? 53 56 57 8B ? ? 8B ? ? ? ? ? 8B */
+			}
+		}
+	}
+}

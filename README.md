@@ -1,0 +1,1 @@
+This repository contains Sourcemod scripts for Left 4 Dead, edited by me and other members of the game community. In it you will find many plugins that fix known glitches, improve gameplay, add new features or change some aspects of the game. Enjoy gameplay and experiment with different scenarios to make the game more fun and interesting for yourself and other players :)

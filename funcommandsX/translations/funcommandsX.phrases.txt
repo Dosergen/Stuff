@@ -1,0 +1,210 @@
+"Phrases"
+{
+	"Disco on message"
+	{
+		"en"			"Disco mode! Get down and boogie!"
+	}
+	"Explode player"
+	{
+		"en"			"Explode player"
+	}
+	"was exploded"
+	{
+		"#format"		"{1:s}"
+		"en"			"'{1}' was exploded"
+	}
+	"Enabled friendly fire"
+	{
+		"en"			"Enabled friendly fire"
+	}
+	"Disabled friendly fire"
+	{
+		"en"			"Disabled friendly fire"
+	}
+	"Friendly Fire Off"
+	{
+		"en"			"Friendly Fire Off"
+	}
+	"Friendly Fire On"
+	{
+		"en"			"Friendly Fire On"
+	}
+	"Toggled happy on target"
+	{
+		"#format"		"{1:s}"
+		"en"			"Toggled happy on target '{1}'"
+	}
+	"Happy player"
+	{
+		"en"			"Happy player"
+	}
+	"was Teleported"
+	{
+		"#format"		"{1:s}"
+		"en"			"'{1}' was teleported"
+	}
+	"Teleport player"
+	{
+		"en"			"Teleport player"
+	}
+	"made the color"
+	{
+		"#format"		"{1:s},{2:s}"
+		"en"			"Made '{1}' the color '{2}'"
+	}
+	"Color"
+	{
+		"en"			"Color"
+	}
+	"Colorize player"
+	{
+		"en"			"Colorize player"
+	}
+	"Enabled disco mode"
+	{
+		"en"			"Enabled disco mode"
+	}
+	"Disabled disco mode"
+	{
+		"en"			"Disabled disco mode"
+	}
+	"Disco Mode Off"
+	{
+		"en"			"Disco Mode Off"
+	}
+	"Disco Mode On"
+	{
+		"en"			"Disco Mode On"
+	}
+	"Toggled invisible on target"
+	{
+		"#format"		"{1:s}"
+		"en"			"Toggled invisible on target '{1}'"
+	}
+	"Set alpha on target"
+	{
+		"#format"		"{1:s},{2:i}"
+		"en"			"Set alpha on target '{1}' to {2}"
+	}
+	"Invisible player"
+	{
+		"en"			"Invisible player"
+	}
+	"Invisible player only"
+	{
+		"en"			"Invisible player only"
+	}
+	"Set player alpha"
+	{
+		"en"			"Set player alpha"
+	}
+	"was overlayed"
+	{
+		"#format"		"{1:s},{2:s}"
+		"en"			"Toggled overlay {2} on target {1}"
+	}
+	"color_normal"
+	{
+		"en"			"normal"
+	}
+	"color_black"
+	{
+		"en"			"black"
+	}
+	"color_red"
+	{
+		"en"			"red"
+	}
+	"color_green"
+	{
+		"en"			"green"
+	}
+	"color_blue"
+	{
+		"en"			"blue"
+	}
+	"color_yellow"
+	{
+		"en"			"yellow"
+	}
+	"color_purple"
+	{
+		"en"			"purple"
+	}
+	"color_cyan"
+	{
+		"en"			"cyan"
+	}
+	"color_orange"
+	{
+		"en"			"orange"
+	}
+	"color_pink"
+	{
+		"en"			"pink"
+	}
+	"color_olive"
+	{
+		"en"			"olive"
+	}
+	"color_lime"
+	{
+		"en"			"lime"
+	}
+	"color_violet"
+	{
+		"en"			"violet"
+	}
+	"color_lightblue"
+	{
+		"en"			"lightblue"
+	}
+	"color_silver"
+	{
+		"en"			"silver"
+	}
+	"color_chocolate"
+	{
+		"en"			"chocolate"
+	}
+	"color_saddlebrown"
+	{
+		"en"			"saddlebrown"
+	}
+	"color_indigo"
+	{
+		"en"			"indigo"
+	}
+	"color_ghostwhite"
+	{
+		"en"			"ghostwhite"
+	}
+	"color_thistle"
+	{
+		"en"			"thistle"
+	}
+	"color_aliceblue"
+	{
+		"en"			"aliceblue"
+	}
+	"color_steelblue"
+	{
+		"en"			"steelblue"
+	}
+	"color_teal"
+	{
+		"en"			"teal"
+	}
+	"color_gold"
+	{
+		"en"			"gold"
+	}
+	"color_tan"
+	{
+		"en"			"tan"
+	}
+	"color_tomato"
+	{
+		"en"			"tomato"
+	}
+}
