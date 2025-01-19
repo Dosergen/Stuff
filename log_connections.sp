@@ -88,7 +88,6 @@ void LogMapChange(const char[] filepath, const char[] mapName)
 	logFile.WriteLine("");
 	logFile.WriteLine("%s - ===== Map change to %s =====", formatedTime, mapName);
 	logFile.WriteLine("");
-	logFile.Flush();
 	delete logFile;
 }
 
@@ -153,7 +152,6 @@ void LogClientAction(int client, bool isConnecting, Event event = null)
 			event.GetString("reason", reason, sizeof(reason));
 		logFile.WriteLine("%s - <%s> <%s> <%s> DISCONNECTED after %d minutes. <%s>", formatedTime, playerName, authId, ipAddress, connectionTime, reason);
 	}
-	logFile.Flush();
 	delete logFile;
 }
 
