@@ -19,9 +19,9 @@ bool g_bRestartMap = false;
 
 int g_iHibernationValue;
 float g_fTimeout;
-bool g_bMode;
+bool g_bMode, g_bImmuneCheck;
 
-ConVar g_hCvarSVSearchKey, g_hCvarMode, g_hCvarTimeout, g_hCvarImmuneFlag, g_hCvarGroupExclusive, g_hCvarSearchKey, g_hCvarHibernation;
+ConVar g_hCvarSVSearchKey, g_hCvarMode, g_hCvarTimeout, g_hCvarImmuneFlag, g_hCvarImmuneCheck, g_hCvarGroupExclusive, g_hCvarSearchKey, g_hCvarHibernation;
 
 public Plugin myinfo = 
 {
@@ -51,6 +51,7 @@ public void OnPluginStart()
 	g_hCvarSVSearchKey = CreateConVar("l4d_rts_searchkey", "", "sv_search_key will be set to this while server is reserved", FCVAR_NOTIFY);
 	g_hCvarTimeout = CreateConVar("l4d_rts_timeout", "30", "How long will the server stay disconnected from matchmaking? 0 - never restore matchmaking connection", FCVAR_NOTIFY, true, 0.0, true, 300.0);
 	g_hCvarImmuneFlag = CreateConVar("l4d_rts_immuneflag", "d", "If player with this flag is present on the server reservation request will be denied", FCVAR_NOTIFY);
+	g_hCvarImmuneCheck = CreateConVar("l4d_rts_immunecheck", "1", "Enable or disable immune flag check (1 = enabled, 0 = disabled)", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 
 	g_hCvarGroupExclusive = FindConVar("sv_steamgroup_exclusive");
 	g_hCvarSearchKey = FindConVar("sv_search_key");
@@ -63,6 +64,7 @@ public void OnPluginStart()
 	g_hCvarSVSearchKey.AddChangeHook(ConVarChanged_Cvars);
 	g_hCvarTimeout.AddChangeHook(ConVarChanged_Cvars);
 	g_hCvarImmuneFlag.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarImmuneCheck.AddChangeHook(ConVarChanged_Cvars);
 
 	RegAdminCmd("sm_rts", Command_MakeReservation, ADMFLAG_ROOT, "Free the server from all players, then reserve it.");
 	RegAdminCmd("sm_cr", Command_CancelReservation, ADMFLAG_ROOT, "Cancel reservation and make server public again.");
@@ -81,6 +83,7 @@ void GetCvars()
 	g_hCvarSVSearchKey.GetString(g_sSearchKeyString, sizeof(g_sSearchKeyString));
 	g_fTimeout = g_hCvarTimeout.FloatValue;
 	g_hCvarImmuneFlag.GetString(g_sImmuneFlagString, sizeof(g_sImmuneFlagString));
+	g_bImmuneCheck = g_hCvarImmuneCheck.BoolValue;
 	g_iHibernationValue = g_hCvarHibernation.IntValue;
 }
 
@@ -209,6 +212,8 @@ void ConnectToMatchmaking()
 
 bool IsAdminOnline()
 {
+	if (!g_bImmuneCheck || strlen(g_sImmuneFlagString) == 0)
+		return false;
 	for (int iClient = 1; iClient <= MaxClients; iClient++)
 	{
 		if (IsClientInGame(iClient) && (CheckCommandAccess(iClient, "", ReadFlagString(g_sImmuneFlagString), true) || GetUserFlagBits(iClient) & ADMFLAG_ROOT))
