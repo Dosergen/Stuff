@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.1.2"
+#define PLUGIN_VERSION "1.1.3"
 #define MAX_LINE_WIDTH 64
 
 #define MESSAGE_FOR_PLAYERS_LINE1 "\x04RECEIVED SERVER RESERVATION REQUEST"
@@ -51,7 +51,7 @@ public void OnPluginStart()
 	g_hCvarSVSearchKey = CreateConVar("l4d_rts_searchkey", "", "sv_search_key will be set to this while server is reserved", FCVAR_NOTIFY);
 	g_hCvarTimeout = CreateConVar("l4d_rts_timeout", "30", "How long will the server stay disconnected from matchmaking? 0 - never restore matchmaking connection", FCVAR_NOTIFY, true, 0.0, true, 300.0);
 	g_hCvarImmuneFlag = CreateConVar("l4d_rts_immuneflag", "d", "If player with this flag is present on the server reservation request will be denied", FCVAR_NOTIFY);
-	g_hCvarImmuneCheck = CreateConVar("l4d_rts_immunecheck", "1", "Enable or disable immune flag check (1 = enabled, 0 = disabled)", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hCvarImmuneCheck = CreateConVar("l4d_rts_immunecheck", "1", "Enable or disable immune flag check", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 
 	g_hCvarGroupExclusive = FindConVar("sv_steamgroup_exclusive");
 	g_hCvarSearchKey = FindConVar("sv_search_key");
