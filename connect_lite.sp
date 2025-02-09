@@ -23,7 +23,7 @@ public void OnPluginStart()
 
 public void OnClientPutInServer(int client)
 {
-	if (!IsValidPlayer(client))
+	if (!IsValidClient(client))
 		return;
 	char ip[16], country[46];
 	GetClientIP(client, ip, sizeof(ip));
@@ -38,7 +38,7 @@ void evtPlayerDisconnect(Event event, const char[] name, bool dontBroadcast)
 {
 	event.BroadcastDisabled = true;
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (!IsValidPlayer(client))
+	if (!IsValidClient(client))
 		return;
 	char reason[128];
 	if (!event.GetString("reason", reason, sizeof(reason)))
@@ -46,7 +46,7 @@ void evtPlayerDisconnect(Event event, const char[] name, bool dontBroadcast)
 	PrintToChatAll("\x01Comrade \x04%N \x01-> \x05%s", client, reason);
 }
 
-bool IsValidPlayer(int client)
+bool IsValidClient(int client)
 {
-	return client > 0 && client <= MaxClients && IsClientInGame(client) && !IsFakeClient(client);
+	return client > 0 && client <= MaxClients && !IsFakeClient(client);
 }
