@@ -4,12 +4,12 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.35.1"
+#define PLUGIN_VERSION "1.35.2"
 
 UserMsg g_umSayText2;
 
-ConVar g_hCvarPluginEnable, g_hCvarServerChange, g_hCvarNameChange, g_hCvarChatChange, g_hCvarVocalGuard, g_hCvarVocalDelay;
-bool g_bCvarPluginEnable, g_bLateLoad, g_bCvarServerChange, g_bCvarNameChange, g_bCvarChatChange, g_bCvarVocalGuard;
+ConVar g_hPluginEnable, g_hServerChange, g_hNameChange, g_hChatChange, g_hVocalGuard, g_hVocalDelay, g_hVocalMessages;
+bool g_bPluginEnable, g_bLateLoad, g_bServerChange, g_bNameChange, g_bChatChange, g_bVocalGuard, g_bVocalMessages;
 int g_iVocalDelay;
 
 int g_iVocalSpamCount[MAXPLAYERS + 1];
@@ -17,7 +17,7 @@ float g_fLastVocalTime[MAXPLAYERS + 1];
 float g_fVocalBlockTime[MAXPLAYERS + 1];
 
 #define MAX_VOCAL_SPAM_COUNT 10
-#define VOCAL_SPAM_BLOCK_DURATION 30.0
+#define VOCAL_SPAM_BLOCK_DURATION 15.0
 
 public Plugin myinfo = 
 {
@@ -43,22 +43,24 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnPluginStart()
 {
 	// ConVars initialization
-	g_hCvarPluginEnable = CreateConVar("bequiet_enable", "1", "Enable or disable the plugin functionality.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	g_hCvarServerChange = CreateConVar("bequiet_cvar_change_suppress", "1", "Control the suppression of server cvar change announcements.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	g_hCvarNameChange = CreateConVar("bequiet_name_change_player_suppress", "1", "Suppress announcements for player name changes, including spectators.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	g_hCvarChatChange = CreateConVar("bequiet_chatbox_cmd_suppress", "1", "Suppress chat commands starting with '!' or '/'.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	g_hCvarVocalGuard = CreateConVar("bequiet_vocalize_guard", "1", "Control the suppression of frequent vocalize commands.", FCVAR_NOTIFY, true, 0.0, true, 1.0);	
-	g_hCvarVocalDelay = CreateConVar("bequiet_vocalize_guard_delay", "3", "Delay before a player can issue another vocalize command.");
+	g_hPluginEnable = CreateConVar("bequiet_enable", "1", "Enable or disable the plugin functionality.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hServerChange = CreateConVar("bequiet_cvar_change_suppress", "1", "Control the suppression of server cvar change announcements.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hNameChange = CreateConVar("bequiet_name_change_player_suppress", "1", "Suppress announcements for player name changes, including spectators.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hChatChange = CreateConVar("bequiet_chatbox_cmd_suppress", "1", "Suppress chat commands starting with '!' or '/'.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hVocalGuard = CreateConVar("bequiet_vocalize_guard", "1", "Control the suppression of frequent vocalize commands.", FCVAR_NOTIFY, true, 0.0, true, 1.0);	
+	g_hVocalDelay = CreateConVar("bequiet_vocalize_guard_delay", "3", "Delay before a player can issue another vocalize command.");
+	g_hVocalMessages = CreateConVar("equiet_vocalize_messages", "1", "Enable or disable vocalize messages for player.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 
 	GetCvars();  // Retrieve ConVar values on startup
 
 	// Hook ConVar change events
-	g_hCvarPluginEnable.AddChangeHook(ConVarChanged_Cvars);
-	g_hCvarServerChange.AddChangeHook(ConVarChanged_Cvars);
-	g_hCvarNameChange.AddChangeHook(ConVarChanged_Cvars);
-	g_hCvarChatChange.AddChangeHook(ConVarChanged_Cvars);
-	g_hCvarVocalGuard.AddChangeHook(ConVarChanged_Cvars);
-	g_hCvarVocalDelay.AddChangeHook(ConVarChanged_Cvars);
+	g_hPluginEnable.AddChangeHook(ConVarChanged_Cvars);
+	g_hServerChange.AddChangeHook(ConVarChanged_Cvars);
+	g_hNameChange.AddChangeHook(ConVarChanged_Cvars);
+	g_hChatChange.AddChangeHook(ConVarChanged_Cvars);
+	g_hVocalGuard.AddChangeHook(ConVarChanged_Cvars);
+	g_hVocalDelay.AddChangeHook(ConVarChanged_Cvars);
+	g_hVocalMessages.AddChangeHook(ConVarChanged_Cvars);
 
 	// Command listeners
 	AddCommandListener(Say_TeamSay_Callback, "say");
@@ -94,12 +96,13 @@ public void ConVarChanged_Cvars(ConVar hCvar, const char[] sOldVal, const char[]
 public void GetCvars()
 {
 	// Store the values of ConVars into variables
-	g_bCvarPluginEnable = g_hCvarPluginEnable.BoolValue;
-	g_bCvarServerChange = g_hCvarServerChange.BoolValue;
-	g_bCvarNameChange = g_hCvarNameChange.BoolValue;
-	g_bCvarChatChange = g_hCvarChatChange.BoolValue;
-	g_bCvarVocalGuard = g_hCvarVocalGuard.BoolValue;
-	g_iVocalDelay = g_hCvarVocalDelay.IntValue;
+	g_bPluginEnable = g_hPluginEnable.BoolValue;
+	g_bServerChange = g_hServerChange.BoolValue;
+	g_bNameChange = g_hNameChange.BoolValue;
+	g_bChatChange = g_hChatChange.BoolValue;
+	g_bVocalGuard = g_hVocalGuard.BoolValue;
+	g_iVocalDelay = g_hVocalDelay.IntValue;
+	g_bVocalMessages = g_hVocalMessages.BoolValue;
 }
 
 public void OnClientPutInServer(int client)
@@ -120,7 +123,7 @@ public void OnClientDisconnect(int client)
 
 Action Say_TeamSay_Callback(int client, const char[] command, int argc)
 {
-	if (!g_bCvarPluginEnable || !g_bCvarChatChange)
+	if (!g_bPluginEnable || !g_bChatChange)
 		return Plugin_Continue;  // If plugin or chat suppression is disabled, continue normally
 	// Get the first argument of the command (the word being said)
 	char sayWord[MAX_NAME_LENGTH];
@@ -133,7 +136,7 @@ Action Say_TeamSay_Callback(int client, const char[] command, int argc)
 
 Action Vocal_Callback(int client, const char[] command, int args)
 {   
-	if (!g_bCvarPluginEnable || !g_bCvarVocalGuard)
+	if (!g_bPluginEnable || !g_bVocalGuard)
 		return Plugin_Continue;
 	// Check if the argument matches "auto", allow it to proceed
 	char sArg[32];
@@ -144,7 +147,8 @@ Action Vocal_Callback(int client, const char[] command, int args)
 	if (g_fVocalBlockTime[client] > currentTime)
 	{
 		float blockTimeLeft = g_fVocalBlockTime[client] - currentTime;
-		PrintToChat(client, "\x04[SM] \x01You are temporarily blocked from using vocalize due to spamming. Please wait %.1f seconds.", blockTimeLeft);
+		if (g_bVocalMessages)
+			PrintToChat(client, "\x04[SM] \x01You are temporarily blocked from using vocalize due to spamming. Please wait %.1f seconds.", blockTimeLeft);
 		return Plugin_Handled;
 	}
 	float timeSinceLastVocal = currentTime - g_fLastVocalTime[client];
@@ -152,7 +156,8 @@ Action Vocal_Callback(int client, const char[] command, int args)
 	if (timeSinceLastVocal < g_iVocalDelay)
 	{
 		int iTimeLeft = RoundToNearest(g_iVocalDelay - timeSinceLastVocal);
-		PrintToChat(client, "\x04[SM] \x01Wait \x03%d\x01 seconds before vocalizing", iTimeLeft);
+		if (g_bVocalMessages)
+			PrintToChat(client, "\x04[SM] \x01Wait \x03%d\x01 seconds before vocalizing", iTimeLeft);
 		return Plugin_Handled;
 	}
 	g_fLastVocalTime[client] = currentTime;
@@ -163,7 +168,8 @@ Action Vocal_Callback(int client, const char[] command, int args)
 	if (g_iVocalSpamCount[client] >= MAX_VOCAL_SPAM_COUNT)
 	{
 		g_fVocalBlockTime[client] = currentTime + VOCAL_SPAM_BLOCK_DURATION;
-		PrintToChat(client, "\x04[SM] \x01You have been blocked from vocalizing for %.1f seconds due to spamming.", VOCAL_SPAM_BLOCK_DURATION);
+		if (g_bVocalMessages)
+			PrintToChat(client, "\x04[SM] \x01You have been blocked from vocalizing for %.1f seconds due to spamming.", VOCAL_SPAM_BLOCK_DURATION);
 		return Plugin_Handled;
 	}
 	// Increment the vocal spam count
@@ -173,7 +179,7 @@ Action Vocal_Callback(int client, const char[] command, int args)
 
 Action evtServerConVar(Event event, const char[] name, bool dontBroadcast) 
 {
-	if (!g_bCvarPluginEnable || !g_bCvarServerChange)
+	if (!g_bPluginEnable || !g_bServerChange)
 		return Plugin_Continue;
 	// Block server cvar announcements if configured to do so
 	if (!dontBroadcast)
@@ -183,7 +189,7 @@ Action evtServerConVar(Event event, const char[] name, bool dontBroadcast)
 
 public Action UserMessageHook(UserMsg msg_hd, Handle bf, const int[] players, int playersNum, bool reliable, bool init)
 {
-	if (!g_bCvarPluginEnable || !g_bCvarNameChange)
+	if (!g_bPluginEnable || !g_bNameChange)
 		return Plugin_Continue;
 	// Read the message and check for "Cstrike_Name_Change"
 	char sMessage[96];
