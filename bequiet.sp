@@ -49,7 +49,7 @@ public void OnPluginStart()
 	g_hChatChange = CreateConVar("bequiet_chatbox_cmd_suppress", "1", "Suppress chat commands starting with '!' or '/'.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_hVocalGuard = CreateConVar("bequiet_vocalize_guard", "1", "Control the suppression of frequent vocalize commands.", FCVAR_NOTIFY, true, 0.0, true, 1.0);	
 	g_hVocalDelay = CreateConVar("bequiet_vocalize_guard_delay", "3", "Delay before a player can issue another vocalize command.");
-	g_hVocalMessages = CreateConVar("equiet_vocalize_messages", "1", "Enable or disable vocalize messages for player.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hVocalMessages = CreateConVar("bequiet_vocalize_messages", "1", "Enable or disable vocalize messages for player.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 
 	GetCvars();  // Retrieve ConVar values on startup
 
