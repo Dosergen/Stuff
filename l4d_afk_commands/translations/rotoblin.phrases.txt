@@ -1,0 +1,199 @@
+﻿"Phrases"
+{
+	// r2compmod.sp
+
+	"R2CompMod #1"
+	{
+		"#format"	"{1:t},{2:d}"
+		"en"		"{1} weapon group has reached its max of {2}"
+		"ru"		"Оружие типа {1} достигло своего лимита {2}"
+	}
+	"R2CompMod #2"
+	{
+		"#format"	"{1:t}"
+		"en"		"{1} is not allowed."
+		"ru"		"Оружие типа {1} запрещено."
+	}
+	"R2CompMod #3"
+	{
+		"#format"	"{1:t}"
+		"en"		"Tank HUD is now {1}."
+		"ru"		"Индикатор информации Танка сейчас {1}."
+	}
+	"R2CompMod #4"
+	{
+		"#format"	"{1:t}"
+		"en"		"Spec HUD is now {1}."
+		"ru"		"Индикатор информации зрителей сейчас {1}."
+	}
+	"R2CompMod #5"
+	{
+		"en"		"enabled"
+		"ru"		"включен"
+	}
+	"R2CompMod #6"
+	{
+		"en"		"disabled"
+		"ru"		"отключен"
+	}
+	"R2CompMod #7"
+	{
+		"en"		"Use !tankhud to toggle the tank HUD"
+		"ru"		"Используйте !tankhud для вкл/откл индикатора Танка"
+	}
+	"R2CompMod #8"
+	{
+		"en"		"Use !spechud to toggle the spectator HUD"
+		"ru"		"Используйте !spechud для вкл/откл индикатора зрителей"
+	}
+	"R2CompMod #9"
+	{
+		"#format"	"{1:t}"
+		"en"		"Survivor team has the reached {1} limit"
+		"ru"		"Команда Выживших исчерпала лимит {1}"
+	}
+	"R2CompMod #10"
+	{
+		"en"		"Usages: !forcematch <compmatch>"
+		"ru"		"Используйте: !forcematch <название матча>"
+	}
+	"R2CompMod #11"
+	{
+		"en"		"Required match is not found. Type !forcematch to see the available matches."
+		"ru"		"Запрашиваемый матч не найден. Для просмотра списка доступных матчей напишите !forcematch."
+	}
+	"R2CompMod #12"
+	{
+		"en"		"Match is loaded."
+		"ru"		"Матч загружен."
+	}
+	"R2CompMod #13"
+	{
+		"en"		"Match mode forced to unload!"
+		"ru"		"Режим матча выгружен!"
+	}
+	"R2CompMod #14"
+	{
+		"en"		"Command is deprecated, use !match command."
+		"ru"		"Команда не поддерживается. Запускайте матч, используя !match команду."
+	}
+	"R2CompMod #15"
+	{
+		"en"		"Match request is disabled by administrator."
+		"ru"		"Запрос на запуск матча запрещен администратором."
+	}
+	"R2CompMod #16"
+	{
+		"en"		"Usages: !match <compmatch>"
+		"ru"		"Используйте: !match <название матча>"
+	}
+	"R2CompMod #17"
+	{
+		"en"		"Required match is not found. Type !match to see the available matches."
+		"ru"		"Запрашиваемый матч не найден. Для просмотра списка доступных матчей напишите !match."
+	}
+	"R2CompMod #18"
+	{
+		"#format"	"{1:t},{2:s}"
+		"en"		"{1} team has accepted to load the '{2}' match."
+		"ru"		"Команда {1} одобрила предложение запустить '{2}' матч."
+	}
+	"R2CompMod #19"
+	{
+		"#format"	"{1:t},{2:s}"
+		"en"		"{1} team requested to load the '{2}' match.
+		"ru"		"Команда {1} запрашивает запустить '{2}' матч."
+	}
+	"R2CompMod #20"
+	{
+		"#format"	"{1:t}"
+		"en"		"{1} team has not accepted to change the current match."
+		"ru"		"Команда {1} отвергла предложение сменить текущий матч."
+	}
+	"R2CompMod #21"
+	{
+		"en"		"List of Matches"
+		"ru"		"Список матчей"
+	}
+	"R2CompMod #22"
+	{
+		"en"		"Compmatch"
+		"ru"		"Название матча"
+	}
+	"R2CompMod #23"
+	{
+		"en"		"Unscramble completed. Change of team is allowed."
+		"ru"		"Все игроки подключились. Смена команд разрешена."
+	}
+	"R2CompMod #24"
+	{
+		"en"		"Voting is not enabled until unscramble is completed"
+		"ru"		"Во время подключения игроков голосования не доступны"
+	}
+	"R2CompMod #25"
+	{
+		"#format"	"{1:L},{2:s},{3:.2f}"
+		"en"		"Kicking {1} for having an illegal value for {2} ({3})!"
+		"ru"		"{1} кикнут за недопустимые настройки {2} ({3})!"
+	}
+	"R2CompMod #26"
+	{
+		"en"		"Illegal Client Value for"
+		"ru"		"Недопустимые настройки"
+	}
+	"R2CompMod #27"
+	{
+		"en"		"You was moved to spectate for illegal value for"
+		"ru"		"Вы перемещены в наблюдатели за недопустимые настройки"
+	}
+	"Survivors"
+	{
+		"en"		"Survivors"
+		"ru"		"Выживших"
+	}
+	"Infected"
+	{
+		"en"		"Infected"
+		"ru"		"Зараженных"
+	}
+	"molotov"
+	{
+		"en"		"Molotov сocktail"
+		"ru"		"коктейлей Молотова"
+	}
+	"pipe bomb"
+	{
+		"en"		"pipe bomb"
+		"ru"		"бомб"
+	}
+	"pain pills"
+	{
+		"en"		"pain pills"
+		"ru"		"таблеток"
+	}
+	"SMG"
+	{
+		"en"		"SMG"
+		"ru"		"пистолет-пулемет"
+	}
+	"Pump Shotgun"
+	{
+		"en"		"Pump Shotgun"
+		"ru"		"помповый дробовик"
+	}
+	"Auto Shotgun"
+	{
+		"en"		"Auto Shotgun"
+		"ru"		"автоматический дробовик"
+	}
+	"Assault Rifle"
+	{
+		"en"		"Assault Rifle"
+		"ru"		"штурмовая винтовка"
+	}
+	"Hunting Rifle"
+	{
+		"en"		"Hunting Rifle"
+		"ru"		"охотничья винтовка"
+	}
+}
