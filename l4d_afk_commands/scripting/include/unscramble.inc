@@ -4,7 +4,7 @@
  *  File:			unscramble.inc
  *  Language:       SourcePawn
  *  Description:	r2comp_unscramble plugin natives & forwards API
- *  Version:        1.0
+ *  Version:        1.1
  *
  *  Copyright (C) 2020 raziEiL [disawar1] <mr.raz4291@gmail.com>
  *
@@ -27,7 +27,7 @@
 #if defined _r2comp_unscramble_included
  #endinput
 #endif
-#define _unscramble_included
+#define _r2comp_unscramble_included
 
 /**
  * @brief Called whenever unscramble process is completed.
