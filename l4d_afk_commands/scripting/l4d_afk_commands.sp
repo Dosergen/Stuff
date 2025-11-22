@@ -17,8 +17,8 @@
 * Players cannot switch teams while firing grenades. (Preventing friendly fire bugs and Witch losing targets)
 * Bile is poured on players. (Preventing skipping the green screen when sprayed)
 *
-* Admin Functions
-* 1.Administrator can force the player to change the team "sm_swapto <player> <team>"
+*
+* Administrator can force the player to change the team "sm_swapto <player> <team>"
 * 
 **Change team to Spectate
 	"sm_afk"
@@ -51,8 +51,8 @@
 #undef REQUIRE_PLUGIN
 #tryinclude <unscramble>
 
-#if !defined _r2comp_unscramble_included
-	native bool r2comp_unscramble_IsUnscrambled();
+#if !defined unscramble_included
+	native bool R2comp_IsUnscrambled();
 #endif
 
 public Plugin myinfo =
@@ -60,7 +60,7 @@ public Plugin myinfo =
 	name = "[L4D(2)] AFK and Join Team Commands Improved",
 	author = "MasterMe & HarryPotter",
 	description = "Adds commands to let the player spectate and join team. (!afk, !js, !ji, etc.), but no change team abuse",
-	version = "5.5",
+	version = "5.5.2",
 	url = "https://steamcommunity.com/profiles/76561198026784913"
 };
 
@@ -78,7 +78,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 		return APLRes_SilentFailure;
 	}
 
-	MarkNativeAsOptional("r2comp_unscramble_IsUnscrambled");
+	MarkNativeAsOptional("R2comp_IsUnscrambled");
 
 	g_bLateLoad = late;
 	return APLRes_Success;
