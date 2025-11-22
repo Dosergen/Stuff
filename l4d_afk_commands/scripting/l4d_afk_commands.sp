@@ -1,3 +1,41 @@
+/*
+* This plugin is designed to prevent players from abusing the team-switching bug. (only takes effect when leaving the safe zone)
+* During the restriction period, players cannot be idle, cannot use commands to switch teams, and cannot press M to switch teams.
+* Command team-switching is prohibited in the following situations, otherwise players will be forced to spectate:
+* Team-switching is prohibited when a Witch is startled or captured by a Witch. (to prevent the Witch from losing its target)
+* Team-switching is prohibited when a Special Infected player captures a player. (to prevent the abuse of Special Infected control without taking damage)
+* Team-switching is prohibited when a human player dies. (to prevent players from intentionally dying and then switching teams to show off)
+* After successfully switching teams, players must wait several seconds before switching teams again. (to prevent players from frequently switching teams and spamming the server)
+* Team-switching is prohibited after leaving the safe zone or after a period of time has passed since the survival mode timer started. (to prevent players from jumping to other teams)
+* Team-switching is prohibited when a player lights a fire bottle, gasoline, or oil drum. (to prevent friendly fire bugs and prevent the Witch from losing its target)
+* Team-switching is prohibited when a player throws a fire bottle, improvised explosive device, or bile. (Preventing friendly fire bugs and Witch losing targets)
+* Players cannot switch teams while reloading weapons. (Preventing quick team switching from skipping reload time)
+* Players cannot switch teams immediately after a Special Infected player respawns. (Preventing Special Infected switching)
+* Special Infected players grab Humans. (Preventing disputes over Jockey's teleportation and Ghost Charger)
+* In Versus/Scavenger modes, check the number of players on both teams; if teams are unbalanced, team switching is not allowed. (Preventing one side from having too many players)
+* Players cannot switch teams while standing up or in a stunned state. (Preventing skipping the stunned state)
+* Players cannot switch teams while firing grenades. (Preventing friendly fire bugs and Witch losing targets)
+* Bile is poured on players. (Preventing skipping the green screen when sprayed)
+*
+* Admin Functions
+* 1.Administrator can force the player to change the team "sm_swapto <player> <team>"
+* 
+**Change team to Spectate
+	"sm_afk"
+	
+**Change team to Survivor
+	"sm_js"
+	
+**Change team to Infected
+	"sm_ji"
+	
+**Switch team to fully an observer
+	"sm_ob"
+
+**Admin force player to change team
+	"sm_swapto", "sm_swapto <player1> [player2] ... [playerN] <teamnum> - swap all listed players to <teamnum> (1,2, or 3)"
+*/
+
 #pragma semicolon 1
 #pragma newdecls required
 
@@ -13,8 +51,8 @@
 #undef REQUIRE_PLUGIN
 #tryinclude <unscramble>
 
-#if !defined _l4d_team_unscramble_included
-	native bool l4d_team_unscramble_IsUnscrambled();
+#if !defined _r2comp_unscramble_included
+	native bool r2comp_unscramble_IsUnscrambled();
 #endif
 
 public Plugin myinfo =
@@ -40,7 +78,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 		return APLRes_SilentFailure;
 	}
 
-	MarkNativeAsOptional("l4d_team_unscramble_IsUnscrambled");
+	MarkNativeAsOptional("r2comp_unscramble_IsUnscrambled");
 
 	g_bLateLoad = late;
 	return APLRes_Success;
@@ -213,7 +251,7 @@ public void OnPluginStart()
 
 public void OnAllPluginsLoaded()
 {
-	g_bUnscramble = LibraryExists("l4d_team_unscramble");
+	g_bUnscramble = LibraryExists("r2comp_unscramble");
 }
 
 public void OnPluginEnd()
@@ -233,13 +271,13 @@ public void OnPluginEnd()
 
 public void OnLibraryAdded(const char[] name)
 {
-	if(StrEqual(name, "l4d_team_unscramble"))
+	if(StrEqual(name, "r2comp_unscramble"))
 		g_bUnscramble = true;
 }
 
 public void OnLibraryRemoved(const char[] name)
 {
-	if(StrEqual(name, "l4d_team_unscramble"))
+	if(StrEqual(name, "r2comp_unscramble"))
 		g_bUnscramble = false;
 }
 
@@ -1748,7 +1786,7 @@ bool IsPlayerGhost (int client)
 
 bool Is_AFK_COMMAND_Block()
 {
-	if(g_bUnscramble == true && l4d_team_unscramble_IsUnscrambled() == false) return true;
+	if(g_bUnscramble == true && R2comp_IsUnscrambled() == false) return true;
 	
 	return false;
 }

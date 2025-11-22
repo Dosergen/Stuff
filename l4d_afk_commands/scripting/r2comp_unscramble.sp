@@ -111,7 +111,7 @@ public void OnPluginStart()
 	UM_OnPluginEnabled();
 	HookConVarChange(cVar, OnCvarChange_Enabled);
 
-	AutoExecConfig(true, "unscramble");
+	AutoExecConfig(true, "r2comp_unscramble");
 	AddCommandListener(US_cmdh_JoinTeam, "jointeam");
 
 	RegAdminCmd("sm_keepteams", Command_KeepTeams, ADMFLAG_ROOT, "Force to store players team data.");
