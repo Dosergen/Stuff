@@ -320,30 +320,30 @@
 	}
 	"Too many survivors, unbalance"
 	{
-		"en" 	"Sorry. Team is unbalance, too many players in survivor team."
-		"es"	"Disculpa. El equipo esta desbalanceado, demasiados jugadores en el equipo de los supervivientes."
-		"ru" 	"Извините. Баланс команды нарушен, слишком много игроков в команде выживших."
-		"zho" 	"抱歉. 隊伍目前不平衡, 太多玩家在生還者隊伍."
-		"chi" 	"抱歉. 队伍目前不平衡, 太多玩家在生还者队伍."
-		"hu" 	"Sajnálom. A csapat kiegyensúlyozatlan, túl sok játékos van a fertőzött csapatban."
+		"en"			"Sorry. Team is unbalance, too many players in survivor team."
+		"es"			"Disculpa. El equipo esta desbalanceado, demasiados jugadores en el equipo de los supervivientes."
+		"ru"			"Извините. Баланс команды нарушен, слишком много игроков в команде выживших."
+		"zho"			"抱歉. 隊伍目前不平衡, 太多玩家在生還者隊伍."
+		"chi"			"抱歉. 队伍目前不平衡, 太多玩家在生还者队伍."
+		"hu"			"Sajnálom. A csapat kiegyensúlyozatlan, túl sok játékos van a fertőzött csapatban."
 	}
 	"Too many infected, unbalance"
 	{
-		"en" 	"Sorry. Team is unbalance, too many players in infected team."
-		"es" 	"Disculpa. El equipo esta desbalanceado, demasiados jugadores en el equipo de los infectados."
-		"ru" 	"Извините. Баланс команды нарушен, слишком много игроков в команде заражённых."
-		"zho" 	"抱歉. 隊伍目前不平衡, 太多玩家在特感隊伍."
-		"chi" 	"抱歉. 队伍目前不平衡, 太多玩家在特感队伍."
-		"hu" 	"Nem lehet csapatot váltani felállás vagy tántorgás közben."
+		"en"			"Sorry. Team is unbalance, too many players in infected team."
+		"es"			"Disculpa. El equipo esta desbalanceado, demasiados jugadores en el equipo de los infectados."
+		"ru"			"Извините. Баланс команды нарушен, слишком много игроков в команде заражённых."
+		"zho"			"抱歉. 隊伍目前不平衡, 太多玩家在特感隊伍."
+		"chi"			"抱歉. 队伍目前不平衡, 太多玩家在特感队伍."
+		"hu"			"Nem lehet csapatot váltani felállás vagy tántorgás közben."
 	}
 	"Get Up Stagger Block"
 	{
-		"en" 	"Can not change team while getting up or staggering."
-		"es" 	"No te puedes cambiar de equipo mientras te pones de pie o mientras te tambaleas."
-		"ru" 	"Нельзя сменить команду, вставая или пошатываясь."
-		"zho" 	"起身或硬直狀態中禁止換隊."
-		"chi" 	"起身或硬直状态中禁止换队."
-		"hu"	"Nem lehet csapatot váltani a gránátvető lövése után."
+		"en"			"Can not change team while getting up or staggering."
+		"es"			"No te puedes cambiar de equipo mientras te pones de pie o mientras te tambaleas."
+		"ru"			"Нельзя сменить команду, вставая или пошатываясь."
+		"zho"			"起身或硬直狀態中禁止換隊."
+		"chi"			"起身或硬直状态中禁止换队."
+		"hu"			"Nem lehet csapatot váltani a gránátvető lövése után."
 	}
 	"Can not change team after grenade"
 	{
@@ -366,9 +366,9 @@
 	}
 	"Bile Block"
 	{
-		"en" 	"Can not change team while covered in bile."
-		"zho" 	"被膽汁淋在身上時禁止換隊."
-		"chi" 	"被胆汁淋在身上时禁止换队."
-		"hu" 	"Nem tudsz csapatott váltani, miközben epével vagy borítva."
+		"en"			"Can not change team while covered in bile."
+		"zho"			"被膽汁淋在身上時禁止換隊."
+		"chi"			"被胆汁淋在身上时禁止换队."
+		"hu" 			"Nem tudsz csapatott váltani, miközben epével vagy borítva."
 	}
 }
