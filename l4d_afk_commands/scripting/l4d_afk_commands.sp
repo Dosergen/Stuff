@@ -939,7 +939,7 @@ int GetTeamMaxSlots(int team)
 		for (int i = 1; i < (MaxClients + 1); i++)
 		{
 			if (IsClientInGame(i) && GetClientTeam(i) == team)
-			teammaxslots++;
+				teammaxslots++;
 		}
 	}
 	else if (team == 3)
@@ -1330,7 +1330,7 @@ Action ClientReallyChangeTeam(Handle timer, int usrid)
 	{
 		case 1:
 		{
-			if(!bIdle) CleanUpStateAndMusic(client);
+			if (!bIdle) CleanUpStateAndMusic(client);
 		}
 		case 2:
 		{
