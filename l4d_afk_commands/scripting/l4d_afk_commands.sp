@@ -77,9 +77,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
 		return APLRes_SilentFailure;
 	}
-
+	
 	MarkNativeAsOptional("R2comp_IsUnscrambled");
-
+	
 	g_bLateLoad = late;
 	return APLRes_Success;
 }
@@ -186,6 +186,7 @@ public void OnPluginStart()
 	AutoExecConfig(true, "l4d_afk_commands");
 
 	GetCvars();
+	
 	g_hCoolTime.AddChangeHook(ConVarChanged_Cvars);
 	g_hDeadSurvivorBlock.AddChangeHook(ConVarChanged_Cvars);
 	g_hGameTimeBlock.AddChangeHook(ConVarChanged_Cvars);
@@ -214,7 +215,7 @@ public void OnPluginStart()
 	
 	HookEvent("witch_harasser_set", OnWitchWokeup);
 	HookEvent("round_start", Event_RoundStart);
-	if(g_bL4D2Version) HookEvent("survival_round_start", Event_SurvivalRoundStart, EventHookMode_PostNoCopy);
+	if (g_bL4D2Version) HookEvent("survival_round_start", Event_SurvivalRoundStart, EventHookMode_PostNoCopy);
 	else HookEvent("create_panic_event" , Event_SurvivalRoundStart, EventHookMode_PostNoCopy);
 	HookEvent("round_end", Event_RoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("map_transition", Event_RoundEnd);
@@ -424,7 +425,7 @@ void Event_BreakProp(Event event, const char[] name, bool dontBroadcast)
 void Event_Witchkilled(Event event, const char[] name, bool dontBroadcast)
 {
 	int iWitch = event.GetInt("witchid");
-	if (iWitch <= MaxClients ) return;
+	if (iWitch <= MaxClients) return;
 	RemoveWitchAttack(iWitch);
 }
 
@@ -787,7 +788,7 @@ Action TurnClientToSurvivors(int client, int args)
 	{
 		if (team <= 1)
 		{
-			if (survivorUsedSlots >= infectedUsedSlots + g_iVSUnBalanceLimit ) 
+			if (survivorUsedSlots >= infectedUsedSlots + g_iVSUnBalanceLimit) 
 			{
 				if (freeInfectedSlots > 0) 
 				{
@@ -795,7 +796,7 @@ Action TurnClientToSurvivors(int client, int args)
 					return Plugin_Handled;
 				}
 			}
-			else if(survivorUsedSlots + g_iVSUnBalanceLimit <= infectedUsedSlots) 
+			else if (survivorUsedSlots + g_iVSUnBalanceLimit <= infectedUsedSlots)
 			{
 			}
 			else 
@@ -804,7 +805,7 @@ Action TurnClientToSurvivors(int client, int args)
 		}
 		else
 		{
-			if (survivorUsedSlots >= infectedUsedSlots + g_iVSUnBalanceLimit ) 
+			if (survivorUsedSlots >= infectedUsedSlots + g_iVSUnBalanceLimit) 
 			{
 				PrintHintText(client, "%T", "Too many survivors, unbalance", client); 
 				return Plugin_Handled;
@@ -889,7 +890,7 @@ Action TurnClientToInfected(int client, int args)
 	{
 		if (team <= 1)
 		{
-			if (survivorUsedSlots >= infectedUsedSlots + g_iVSUnBalanceLimit )
+			if (survivorUsedSlots >= infectedUsedSlots + g_iVSUnBalanceLimit)
 			{
 			}
 			else if (survivorUsedSlots + g_iVSUnBalanceLimit <= infectedUsedSlots)
@@ -906,7 +907,7 @@ Action TurnClientToInfected(int client, int args)
 		}
 		else
 		{
-			if (survivorUsedSlots >= infectedUsedSlots + g_iVSUnBalanceLimit )
+			if (survivorUsedSlots >= infectedUsedSlots + g_iVSUnBalanceLimit)
 			{
 			}
 			else if (survivorUsedSlots + g_iVSUnBalanceLimit <= infectedUsedSlots)
@@ -960,7 +961,7 @@ int GetTeamHumanCount(int team)
 				if (IsClientIdle(i)) humans++;
 			}
 			else if (iTeam == team)
-			{	
+			{
 				humans++;
 			}
 		}
@@ -989,7 +990,7 @@ Action jointeam(int client, int args) //press m (jointeam)
 	}
 	if (!IsClientInGame(client) || IsFakeClient(client)) return Plugin_Continue;
 	if (Is_AFK_COMMAND_Block()) return Plugin_Handled;
-	if(args > 2) return Plugin_Handled;
+	if (args > 2) return Plugin_Handled;
 	bool bHaveAccess = HasAccessWithoutRoot(client, g_sImmuneAcclvl);
 	if (g_bPressMBlock == true && bHaveAccess == false) 
 	{
@@ -1014,8 +1015,8 @@ Action jointeam(int client, int args) //press m (jointeam)
 			)
 		)
 		{	
-			if(g_bHasLeftSafeRoom == false) return Plugin_Continue;
-			if(CanClientChangeTeam(client, 2, bHaveAccess)  == false) return Plugin_Handled;
+			if (g_bHasLeftSafeRoom == false) return Plugin_Continue;
+			if (CanClientChangeTeam(client, 2, bHaveAccess)  == false) return Plugin_Handled;
 			return Plugin_Continue;
 		}
 		ReplyToCommand(client, "Usage: jointeam 2 <character_name>");	
@@ -1159,7 +1160,7 @@ Action CommandListener_SpecNext(int client, char[] command, int argc)
 	{
 		if (IsClientIdle(client))
 		{
-			if (HasAccessWithoutRoot(client, g_sImmuneAcclvl))return Plugin_Continue;
+			if (HasAccessWithoutRoot(client, g_sImmuneAcclvl)) return Plugin_Continue;
 			if (g_hInCoolDownTimer[client] != null)
 			{
 				bClientJoinedTeam[client] = true;
@@ -1247,17 +1248,17 @@ bool CanClientChangeTeam(int client, int changeteam = 0, bool bIsAdm = false)
 			PrintHintText(client, "%T","Witch Attack Block",client);
 			return false;
 		}
-		if (g_fBreakPropCooldown > 0.0 && (fBreakPropTime[client] - GetEngineTime() > 0.0) )
+		if (g_fBreakPropCooldown > 0.0 && (fBreakPropTime[client] - GetEngineTime() > 0.0))
 		{
 			PrintHintText(client, "%T", "Can not change team after ignite",client);
 			return false;
 		}
-		if (g_bThrowableBlock && g_alClientThrowable[client].Length > 0 )
+		if (g_bThrowableBlock && g_alClientThrowable[client].Length > 0)
 		{
 			PrintHintText(client, "%T","Can not change team after throw",client);
 			return false;	
 		}
-		if (g_bL4D2Version && g_bGrenadeBlock && g_alClientGrenade[client].Length > 0 )
+		if (g_bL4D2Version && g_bGrenadeBlock && g_alClientGrenade[client].Length > 0)
 		{
 			PrintHintText(client, "%T","Can not change team after grenade",client);
 			return false;	
@@ -1279,7 +1280,7 @@ bool CanClientChangeTeam(int client, int changeteam = 0, bool bIsAdm = false)
 				}
 			}
 		}
-		if (g_bGetUpStaggerBlock && IsPlayerAlive(client) && (IsGettingUpOrStumble(client) || L4D_IsPlayerStaggering(client)) )
+		if (g_bGetUpStaggerBlock && IsPlayerAlive(client) && (IsGettingUpOrStumble(client) || L4D_IsPlayerStaggering(client)))
 		{
 			PrintHintText(client, "%T", "Get Up Stagger Block", client);
 			return false;
