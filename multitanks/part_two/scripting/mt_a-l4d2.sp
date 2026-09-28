@@ -507,11 +507,8 @@ Action SpawnMoreTank(Handle timer)
 		}
 	}
 	if (iCommandExecuter == 0)
-		return Plugin_Continue;
-	int iFlags = GetCommandFlags("z_spawn_old");
-	SetCommandFlags("z_spawn_old", iFlags & ~FCVAR_CHEAT);
-	FakeClientCommand(iCommandExecuter, "z_spawn_old tank auto");
-	SetCommandFlags("z_spawn_old", iFlags);
+		return Plugin_Stop;
+	CheatCommand(iCommandExecuter, "z_spawn_old", "tank auto");
 	return Plugin_Stop;
 }
 
@@ -670,6 +667,19 @@ void ChangeInfectedLimits(int iValue)
 		FindConVar("super_versus_infected_limit").SetInt(iValue);
 		FindConVar("super_versus_infected_limit").Flags = iFlags;
 	}
+}
+
+void CheatCommand(int client, char[] command, char[] arguments = "")
+{
+	if (client <= 0 || !IsClientInGame(client))
+		return;
+	int userflags = GetUserFlagBits(client);
+	SetUserFlagBits(client, ADMFLAG_ROOT);
+	int flags = GetCommandFlags(command);
+	SetCommandFlags(command, flags & ~FCVAR_CHEAT);
+	FakeClientCommand(client, "%s %s", command, arguments);
+	SetCommandFlags(command, flags);
+	SetUserFlagBits(client, userflags);
 }
 
 bool IsTank(int client)
