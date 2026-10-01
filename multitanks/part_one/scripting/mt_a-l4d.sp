@@ -574,8 +574,8 @@ void LaunchMTParameters()
 			{
 				case MS_REGULAR:
 				{
-					iTankHP = (IsFinale() || AreSpecialMaps()) ? iMTHealthCoop[1] : iMTHealthCoop[0];
-					iMaxTankCount = (IsFinale() || AreSpecialMaps()) ? iMTCountCoop[1] : iMTCountCoop[0];
+					iTankHP = (IsFinale()) ? iMTHealthCoop[1] : iMTHealthCoop[0];
+					iMaxTankCount = (IsFinale()) ? iMTCountCoop[1] : iMTCountCoop[0];
 				}
 				case MS_FINALE:
 				{
@@ -597,8 +597,8 @@ void LaunchMTParameters()
 			{
 				case MS_REGULAR:
 				{
-					iTankHP = (IsFinale() || AreSpecialMaps()) ? iMTHealthVersus[1] : iMTHealthVersus[0]; 	
-					iMaxTankCount = (IsFinale() || AreSpecialMaps()) ? iMTCountVersus[1] : iMTCountVersus[0];
+					iTankHP = (IsFinale()) ? iMTHealthVersus[1] : iMTHealthVersus[0]; 	
+					iMaxTankCount = (IsFinale()) ? iMTCountVersus[1] : iMTCountVersus[0];
 				}
 				case MS_FINALE:
 				{
@@ -627,41 +627,6 @@ void LaunchMTParameters()
 	}
 }
 
-bool IsFinale()
-{
-	char sMap[64];
-	GetCurrentMap(sMap, sizeof(sMap));
-	if (StrEqual(sMap, "c5m2_park", false) || StrEqual(sMap, "l4d_deathaboard01_prison", false))
-		return false;
-	for (int i = 1; i < 2049; i++)
-	{
-		if (!IsValidEntity(i) || !IsValidEdict(i))
-			continue;
-		char sEntityClass[64];
-		GetEdictClassname(i, sEntityClass, sizeof(sEntityClass));
-		if (StrEqual(sEntityClass, "trigger_finale", false))
-			return true;
-	}
-	return false;
-}
-
-bool AreSpecialMaps()
-{
-	char sMap[64];
-	GetCurrentMap(sMap, sizeof(sMap));
-	if (StrEqual(sMap, "l4d_hospital05_rooftop", false) || StrEqual(sMap, "l4d_vs_hospital05_rooftop", false) || StrEqual(sMap, "l4d_smalltown05_houseboat", false) || 
-		StrEqual(sMap, "l4d_vs_smalltown05_houseboat", false) || StrEqual(sMap, "l4d_farm05_cornfield", false) || StrEqual(sMap, "l4d_vs_farm05_cornfield", false) || 
-		StrEqual(sMap, "c4m5_milltown_escape", false) || StrEqual(sMap, "c5m5_bridge", false) || StrEqual(sMap, "l4d_stadium5_stadium", false) || 
-		StrEqual(sMap, "l4d_darkblood04_extraction", false) || StrEqual(sMap, "l4d_fairview05_rooftop", false) || StrEqual(sMap, "l4d_fairview07_lots", false) || 
-		StrEqual(sMap, "l4d_fairview12_boat", false) || StrEqual(sMap, "l4d_city17_05", false) || StrEqual(sMap, "l4d_vs_city17_05", false) || 
-		StrEqual(sMap, "l4d_mortuary03", false) || StrEqual(sMap, "l4d_ravenholmwar_4", false) || StrEqual(sMap, "l4d_dbd_new_dawn", false) || 
-		StrEqual(sMap, "l4d_auburn_finale", false))
-	{
-		return true;
-	}
-	return false;
-}
-
 void ChangeInfectedLimits(int iValue)
 {
 	if (FindConVar("super_versus_version") == null)
@@ -675,17 +640,18 @@ void ChangeInfectedLimits(int iValue)
 	}
 }
 
-void CheatCommand(int client, char[] command, char[] arguments = "")
+stock void CheatCommand(int client, char[] command, char[] arguments = "")
 {
-	if (client <= 0 || !IsClientInGame(client))
-		return;
-	int userFlags = GetUserFlagBits(client);
-	SetUserFlagBits(client, ADMFLAG_ROOT);
 	int flags = GetCommandFlags(command);
 	SetCommandFlags(command, flags & ~FCVAR_CHEAT);
 	FakeClientCommand(client, "%s %s", command, arguments);
 	SetCommandFlags(command, flags);
-	SetUserFlagBits(client, userFlags);
+}
+
+bool IsFinale()
+{
+	return (FindEntityByClassname(-1, "info_changelevel") == -1
+				&& FindEntityByClassname(-1, "trigger_changelevel") == -1);
 }
 
 bool IsTank(int client)

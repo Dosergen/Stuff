@@ -3,7 +3,6 @@
 
 #include <sourcemod>
 #include <sdktools>
-#include <left4dhooks>
 
 #define PLUGIN_VERSION "1.5"
 
@@ -40,7 +39,7 @@ int    iMaxZombies, iFrustration[MAXPLAYERS+1], iMTHealthCoop[5], iMTHealthVersu
        iMTHealthScavenge, iMTCountCoop[5], iMTCountVersus[5], iMTCountSurvival, iMTCountScavenge,
        iFinaleWave, iTankHP, iTankCount, iMaxTankCount;
 
-bool   bRoundBegan, bRoundFinished, bFinalMap, bFrustrated[MAXPLAYERS+1], bIsTank[MAXPLAYERS+1], bMTOn, bMTAnnounce,
+bool   bRoundBegan, bRoundFinished, bFrustrated[MAXPLAYERS+1], bIsTank[MAXPLAYERS+1], bMTOn, bMTAnnounce,
        bMTSameSpawn[3], bMTDisplay, bFirstSpawned;
 
 float  fTankPos[3], fMTSpawnDelay[2];
@@ -321,11 +320,6 @@ public void OnPluginEnd()
 	UnhookEvent("tank_spawn", OnTankSpawn);
 }
 
-public void OnMapStart()
-{	
-	bFinalMap = L4D_IsMissionFinalMap(true);
-}
-
 void OnRoundEvents(Event event, const char[] name, bool dontBroadcast)
 {
 	if (!bMTOn)
@@ -598,8 +592,8 @@ void LaunchMTParameters()
 			{
 				case MS_REGULAR:
 				{
-					iTankHP = (bFinalMap) ? iMTHealthCoop[1] : iMTHealthCoop[0];
-					iMaxTankCount = (bFinalMap) ? iMTCountCoop[1] : iMTCountCoop[0];
+					iTankHP = (IsFinale()) ? iMTHealthCoop[1] : iMTHealthCoop[0];
+					iMaxTankCount = (IsFinale()) ? iMTCountCoop[1] : iMTCountCoop[0];
 				}
 				case MS_FINALE:
 				{
@@ -621,8 +615,8 @@ void LaunchMTParameters()
 			{
 				case MS_REGULAR:
 				{
-					iTankHP = (bFinalMap) ? iMTHealthVersus[1] : iMTHealthVersus[0]; 	
-					iMaxTankCount = (bFinalMap) ? iMTCountVersus[1] : iMTCountVersus[0];
+					iTankHP = (IsFinale()) ? iMTHealthVersus[1] : iMTHealthVersus[0]; 	
+					iMaxTankCount = (IsFinale()) ? iMTCountVersus[1] : iMTCountVersus[0];
 				}
 				case MS_FINALE:
 				{
@@ -669,17 +663,18 @@ void ChangeInfectedLimits(int iValue)
 	}
 }
 
-void CheatCommand(int client, char[] command, char[] arguments = "")
+stock void CheatCommand(int client, char[] command, char[] arguments = "")
 {
-	if (client <= 0 || !IsClientInGame(client))
-		return;
-	int userflags = GetUserFlagBits(client);
-	SetUserFlagBits(client, ADMFLAG_ROOT);
 	int flags = GetCommandFlags(command);
 	SetCommandFlags(command, flags & ~FCVAR_CHEAT);
 	FakeClientCommand(client, "%s %s", command, arguments);
 	SetCommandFlags(command, flags);
-	SetUserFlagBits(client, userflags);
+}
+
+bool IsFinale()
+{
+	return (FindEntityByClassname(-1, "info_changelevel") == -1
+				&& FindEntityByClassname(-1, "trigger_changelevel") == -1);
 }
 
 bool IsTank(int client)
